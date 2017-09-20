@@ -5,7 +5,7 @@ module DhashVips
   extend self
 
   def hamming a, b
-    (a^b).to_s(2).count('1')
+    (a ^ b).to_s(2).count "1"
   end
 
   def calculate file, hash_size = 8

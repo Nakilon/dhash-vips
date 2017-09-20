@@ -14,7 +14,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency "vips"
 
   spec.add_development_dependency "dhash"
-  
+
   spec.add_development_dependency "rake"
-  spec.add_development_dependency "rspec"
+  spec.add_development_dependency "rspec-core"
+  spec.add_development_dependency "mll"
 end
