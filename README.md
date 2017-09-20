@@ -10,7 +10,14 @@ This implementation is powered by Vips and was forked from https://github.com/ma
 
 # Installation
 
+    brew install vips
+
+If you have troubles with above, see https://jcupitt.github.io/libvips/install.html  
+Then:
+
     gem install dhash-vips
+
+If you have troubles with the `gem vips` dependency, see https://github.com/jcupitt/ruby-vips  
 
 # Usage
 
