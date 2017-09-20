@@ -1,7 +1,7 @@
-require 'dhash/version'
+require_relative 'dhash-vips/version'
 require 'RMagick'
 
-module Dhash extend self
+module DhashVips extend self
   def hamming(a, b)
     (a^b).to_s(2).count('1')
   end
