@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'dhash'
+
+unless path = ARGV[0]
+  puts "Usage: dhash [path]"
+  exit
+end
+
+puts Dhash.calculate(File.expand_path(path))

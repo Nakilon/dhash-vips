@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'dhash'
+
+num1 = ARGV[0]
+num2 = ARGV[1]
+
+unless num1 && num2
+  puts "Usage: hamming [num1] [num2]"
+  exit
+end
+
+puts Dhash.hamming(num1.to_i, num2.to_i)
