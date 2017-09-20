@@ -1,24 +1,23 @@
-# Dhash
+# About
 
-Dhash's (or difference hashes) are a way of calculating similarity between images. If two images have a similar dhash, then the likelihood is that they both are depicting the same image (albeit slightly cropped compressed etc).
+dHash is for measuring the similarity of two images.
 
-For more information, check out the links below.
+Read "Kind of Like That" Monday, 21 January 2013: http://www.hackerfactor.com/blog/index.php?/archives/529-Kind-of-Like-That.html
 
-- http://hackerlabs.org/blog/2012/07/30/organizing-photos-with-duplicate-and-similarity-checking/
-- http://www.hackerfactor.com/blog/?/archives/529-Kind-of-Like-That.html
-- http://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html
-- http://blog.iconfinder.com/detecting-duplicate-images-using-python/
+It does not automatically detect very shifted crops and rotated images but you may make a wrapper that would call the comparison function iteratively.
 
-## Installation
+Forked from https://github.com/maccman/dhash by Alex MacCaw
 
-    gem 'dhash'
+# Installation
 
-## Usage
+    gem install dhash-vips
 
-    hash1 = Dhash.calculate('face-high.jpg')
-    hash2 = Dhash.calculate('face-low.jpg')
+# Usage
 
-    if Dhash.hamming(hash1, hash2) < 10
+    hash1 = DhashVips.calculate "face-high.jpg"
+    hash2 = DhashVips.calculate "face-low.jpg"
+
+    if 10 > DhashVips.hamming(hash1, hash2)
       puts "Images are very similar"
     else
       puts "No match"
