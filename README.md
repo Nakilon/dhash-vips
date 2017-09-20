@@ -6,7 +6,7 @@ Read "Kind of Like That" blog post (21 January 2013): http://www.hackerfactor.co
 
 It does not automatically detect very shifted crops and rotated images but you may make a wrapper that would call the comparison function iteratively.
 
-Forked from https://github.com/maccman/dhash by Alex MacCaw
+This implementation is powered by Vips and was forked from https://github.com/maccman/dhash (by Alex MacCaw) that was using ImageMagick.
 
 # Installation
 
