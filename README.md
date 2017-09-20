@@ -14,11 +14,15 @@ This implementation is powered by Vips and was forked from https://github.com/ma
 
 # Usage
 
-    hash1 = DhashVips.calculate "face-high.jpg"
-    hash2 = DhashVips.calculate "face-low.jpg"
+    hash1 = DhashVips.calculate "photo1.jpg"
+    hash2 = DhashVips.calculate "photo2.jpg"
 
     if 10 > DhashVips.hamming(hash1, hash2)
       puts "Images are very similar"
+    elsif 20 > DhashVips.hamming(hash1, hash2)
+      puts "Images are slightly similar"
     else
-      puts "No match"
+      puts "Images are different"
     end
+
+These `10` and `20` numbers are found empirically and just work enough well for 8-byte hashes.
