@@ -12,17 +12,18 @@ module DhashVips
     image = Vips::Image.new_from_file file
     image = image.resize((hash_size + 1).fdiv(image.width), vscale: hash_size.fdiv(image.height)).colourspace "b-w"
 
-    difference = []
+    difference = 0
 
     hash_size.times do |row|
       hash_size.times do |col|
         pixel_left  = image.getpoint(col, row).first
         pixel_right = image.getpoint(col + 1, row).first
-        difference << (pixel_left > pixel_right)
+        difference <<= 1
+        difference += 1 if pixel_left > pixel_right
       end
     end
 
-    difference.map{ |d| d ? 1 : 0 }.join("").to_i(2)
+    difference
   end
 
 end
