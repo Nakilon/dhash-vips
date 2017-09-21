@@ -17,10 +17,14 @@ describe DhashVips do
       df0a3b93e9412536ee8a11255f974141.jpg
       679634ff89a31279a39f03e278bc9a01.jpg
     }   # these images a consecutive pairs of slightly (but enough for nice asserts) silimar images
+    bw1, bw2 = %w{
+      71662d4d4029a3b41d47d5baf681ab9a.jpg
+      ad8a37f872956666c3077a3e9e737984.jpg
+    }   # these is the same photo but of different size and bw
 
     example.metadata[:extra_failure_lines] = []
     FileUtils.mkdir_p dir = "images"
-    images.each do |image|
+    [*images, bw1, bw2].each do |image|
       "#{dir}/#{image}".tap do |filename|
         unless File.exist?(filename) && Digest::MD5.file(filename) == File.basename(filename, ".jpg")
           example.metadata[:extra_failure_lines] << "copying image from web to #{filename}"
@@ -56,6 +60,9 @@ describe DhashVips do
           expect(table[i][j]).to be > 21
         end
       end
+
+      hashes = [bw1, bw2].map &DhashVips.method(:calculate)
+      expect(DhashVips.hamming(*hashes)).to eq 0
     end
 
   end
