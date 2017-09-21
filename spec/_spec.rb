@@ -24,7 +24,7 @@ describe DhashVips do
 
     example.metadata[:extra_failure_lines] = []
     FileUtils.mkdir_p dir = "images"
-    [*images, bw1, bw2].each do |image|
+    *images, bw1, bw2 = [*images, bw1, bw2].map do |image|
       "#{dir}/#{image}".tap do |filename|
         unless File.exist?(filename) && Digest::MD5.file(filename) == File.basename(filename, ".jpg")
           example.metadata[:extra_failure_lines] << "copying image from web to #{filename}"
