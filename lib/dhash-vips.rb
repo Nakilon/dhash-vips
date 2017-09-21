@@ -8,9 +8,17 @@ module DhashVips
     (a ^ b).to_s(2).count "1"
   end
 
-  def calculate file, hash_size = 8
+  def pixelate file, hash_size, kernel = nil
     image = Vips::Image.new_from_file file
-    image = image.resize((hash_size + 1).fdiv(image.width), vscale: hash_size.fdiv(image.height)).colourspace "b-w"
+    if kernel
+      image.resize((hash_size + 1).fdiv(image.width), vscale: hash_size.fdiv(image.height), kernel: kernel).colourspace("b-w")
+    else
+      image.resize((hash_size + 1).fdiv(image.width), vscale: hash_size.fdiv(image.height)                ).colourspace("b-w")
+    end
+  end
+
+  def calculate file, hash_size = 8, kernel = nil
+    image = pixelate file, hash_size, kernel
 
     difference = 0
 
