@@ -16,7 +16,7 @@ module DhashVips
 
     hash_size.times do |row|
       hash_size.times do |col|
-        pixel_left  = image.getpoint(col, row).first
+        pixel_left  = image.getpoint(col    , row).first
         pixel_right = image.getpoint(col + 1, row).first
         difference <<= 1
         difference += 1 if pixel_left > pixel_right

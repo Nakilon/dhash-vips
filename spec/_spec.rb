@@ -2,7 +2,7 @@ require "dhash-vips"
 
 describe DhashVips do
 
-  require "tmpdir"
+  # require "tmpdir"
   require "fileutils"
   require "open-uri"
   require "digest"
@@ -19,7 +19,7 @@ describe DhashVips do
     }   # these images a consecutive pairs of slightly (but enough for nice asserts) silimar images
 
     example.metadata[:extra_failure_lines] = []
-    FileUtils.mkdir_p dir = Dir.tmpdir + "/dhash-vips-spec"
+    FileUtils.mkdir_p dir = "images"
     images.each do |image|
       "#{dir}/#{image}".tap do |filename|
         unless File.exist?(filename) && Digest::MD5.file(filename) == File.basename(filename, ".jpg")
@@ -44,17 +44,20 @@ describe DhashVips do
     #  [22, 33, 39, 35, 0, 17],
     #  [29, 36, 30, 30, 17, 0]]
 
-    hashes.size.times.to_a.combination(2) do |i, j|
-      case
-      when i == j
-        expect(table[i][j]).to eq 0
-      when (j - i).abs == 1 && (i + j - 1) % 4 == 0
-        expect(table[i][j]).to be > 0
-        expect(table[i][j]).to be < 19
-      else
-        expect(table[i][j]).to be > 21
+    aggregate_failures do
+      hashes.size.times.to_a.combination(2) do |i, j|
+        case
+        when i == j
+          expect(table[i][j]).to eq 0
+        when (j - i).abs == 1 && (i + j - 1) % 4 == 0
+          expect(table[i][j]).to be > 0
+          expect(table[i][j]).to be < 19
+        else
+          expect(table[i][j]).to be > 21
+        end
       end
     end
+
   end
 
 end
