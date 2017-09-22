@@ -20,18 +20,7 @@ module DhashVips
   def calculate file, hash_size = 8, kernel = nil
     image = pixelate file, hash_size, kernel
 
-    difference = 0
-
-    hash_size.times do |row|
-      hash_size.times do |col|
-        pixel_left  = image.getpoint(col    , row).first
-        pixel_right = image.getpoint(col + 1, row).first
-        difference <<= 1
-        difference += 1 if pixel_left > pixel_right
-      end
-    end
-
-    difference
+    image.cast("int").conv([1, -1]).crop(1, 0, 8, 8).>(0).to_a.flatten.map{ |i| i[0] }.join.to_i(2)
   end
 
 end
