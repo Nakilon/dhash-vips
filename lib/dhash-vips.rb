@@ -20,7 +20,7 @@ module DhashVips
   def calculate file, hash_size = 8, kernel = nil
     image = pixelate file, hash_size, kernel
 
-    image.cast("int").conv([1, -1]).crop(1, 0, 8, 8).>(0).to_a.flatten.map{ |i| i[0] }.join.to_i(2)
+    image.cast("int").conv([1, -1]).crop(1, 0, 8, 8).>(0)./(255).cast("uchar").to_a.join.to_i(2)
   end
 
 end

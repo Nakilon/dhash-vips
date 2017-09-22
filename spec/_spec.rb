@@ -39,8 +39,10 @@ describe DhashVips do
 
     hashes = images.map &DhashVips.method(:calculate)
     table = MLL::table[DhashVips.method(:hamming), [hashes], [hashes]]
+    
     # require "pp"
     # pp table
+    # abort
     # [[0, 17, 29, 27, 22, 29],
     #  [17, 0, 30, 26, 33, 36],
     #  [29, 30, 0, 18, 39, 30],
