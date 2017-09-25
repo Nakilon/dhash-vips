@@ -76,7 +76,7 @@ describe lib do
         when (j - i).abs == 1 && (i + j - 1) % 4 == 0
           if [i, j] == [hashes.size - 2, hashes.size - 1]
             if described_class == DHashVips::DHash
-              expect(table[i][j]).to be > 0
+              expect(table[i][j]).to be == 5
             else
               expect(table[i][j]).to eq 0
             end
