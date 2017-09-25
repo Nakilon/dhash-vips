@@ -2,6 +2,8 @@ require_relative "dhash-vips/version"
 require "vips"
 
 module DHashVips
+  module DHash
+
   extend self
 
   def hamming a, b
@@ -21,6 +23,8 @@ module DHashVips
     image = pixelate file, hash_size, kernel
 
     image.cast("int").conv([1, -1]).crop(1, 0, 8, 8).>(0)./(255).cast("uchar").to_a.join.to_i(2)
+  end
+
   end
 
 end

@@ -1,6 +1,16 @@
 require "dhash-vips"
 
-describe DHashVips do
+[
+  [DHashVips::DHash, 18, 22],
+    # [[0, 17, 29, 27, 22, 29],
+    #  [17, 0, 30, 26, 33, 36],
+    #  [29, 30, 0, 18, 39, 30],
+    #  [27, 26, 18, 0, 35, 30],
+    #  [22, 33, 39, 35, 0, 17],
+    #  [29, 36, 30, 30, 17, 0]]
+].each do |lib, max_similar, min_not_similar|
+
+describe lib do
 
   # require "tmpdir"
   require "fileutils"
@@ -43,12 +53,6 @@ describe DHashVips do
     # require "pp"
     # pp table
     # abort
-    # [[0, 17, 29, 27, 22, 29],
-    #  [17, 0, 30, 26, 33, 36],
-    #  [29, 30, 0, 18, 39, 30],
-    #  [27, 26, 18, 0, 35, 30],
-    #  [22, 33, 39, 35, 0, 17],
-    #  [29, 36, 30, 30, 17, 0]]
 
     aggregate_failures do
       hashes.size.times.to_a.repeated_combination(2) do |i, j|
@@ -57,9 +61,9 @@ describe DHashVips do
           expect(table[i][j]).to eq 0
         when (j - i).abs == 1 && (i + j - 1) % 4 == 0
           expect(table[i][j]).to be > 0
-          expect(table[i][j]).to be < 19
+          expect(table[i][j]).to be <= max_similar
         else
-          expect(table[i][j]).to be > 21
+          expect(table[i][j]).to be >= min_not_similar
         end
       end
 
@@ -68,5 +72,7 @@ describe DHashVips do
     end
 
   end
+
+end
 
 end
