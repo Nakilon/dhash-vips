@@ -1,7 +1,7 @@
 require_relative "dhash-vips/version"
 require "vips"
 
-module DhashVips
+module DHashVips
   extend self
 
   def hamming a, b

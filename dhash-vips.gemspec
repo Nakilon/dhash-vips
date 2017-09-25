@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "dhash-vips"
-  spec.version       = (require_relative "lib/dhash-vips/version"; DhashVips::VERSION)
+  spec.version       = (require_relative "lib/dhash-vips/version"; DHashVips::VERSION)
   spec.author        = "Victor Maslov"
   spec.email         = "nakilon@gmail.com"
   spec.summary       = "dHash powered by Vips"

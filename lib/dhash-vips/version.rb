@@ -1,3 +1,3 @@
-module DhashVips
-  VERSION = "0.0.0.3"
+module DHashVips
+  VERSION = "0.0.1.0"
 end

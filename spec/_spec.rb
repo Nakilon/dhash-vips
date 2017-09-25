@@ -1,6 +1,6 @@
 require "dhash-vips"
 
-describe DhashVips do
+describe DHashVips do
 
   # require "tmpdir"
   require "fileutils"
@@ -37,9 +37,9 @@ describe DhashVips do
       end
     end
 
-    hashes = images.map &DhashVips.method(:calculate)
-    table = MLL::table[DhashVips.method(:hamming), [hashes], [hashes]]
-    
+    hashes = images.map &described_class.method(:calculate)
+    table = MLL::table[described_class.method(:hamming), [hashes], [hashes]]
+
     # require "pp"
     # pp table
     # abort
@@ -51,7 +51,7 @@ describe DhashVips do
     #  [29, 36, 30, 30, 17, 0]]
 
     aggregate_failures do
-      hashes.size.times.to_a.combination(2) do |i, j|
+      hashes.size.times.to_a.repeated_combination(2) do |i, j|
         case
         when i == j
           expect(table[i][j]).to eq 0
@@ -63,8 +63,8 @@ describe DhashVips do
         end
       end
 
-      hashes = [bw1, bw2].map &DhashVips.method(:calculate)
-      expect(DhashVips.hamming(*hashes)).to eq 0
+      hashes = [bw1, bw2].map &described_class.method(:calculate)
+      expect(described_class.hamming(*hashes)).to eq 0
     end
 
   end
