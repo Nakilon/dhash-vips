@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = ["spec"]
   spec.require_path  = "lib"
 
-  spec.add_dependency "vips"
+  spec.add_dependency "ruby-vips"
 
   spec.add_development_dependency "dhash"
 
