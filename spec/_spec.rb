@@ -1,21 +1,28 @@
 require "dhash-vips"
 
+require "pp"
+
 [
-  [DHashVips::DHash, 17, 18, 22],
-    # [[0, 17, 29, 27, 22, 29],
-    #  [17, 0, 30, 26, 33, 36],
-    #  [29, 30, 0, 18, 39, 30],
-    #  [27, 26, 18, 0, 35, 30],
-    #  [22, 33, 39, 35, 0, 17],
-    #  [29, 36, 30, 30, 17, 0]]
-  [DHashVips::IDHash, 5, 10, 15],
-    # [[0,  5, 21, 23, 18, 23],
-    #  [5,  0, 15, 16, 17, 28],
-    #  [21, 15, 0, 10, 31, 25],
-    #  [23, 16, 10, 0, 26, 28],
-    #  [18, 17, 31, 26, 0,  8],
-    #  [23, 28, 25, 28, 8,  0]]
-].each do |lib, min_similar, max_similar, min_not_similar|
+  [DHashVips::DHash, 17, 18, 22, 39],
+    # [[0, 17, 29, 27, 22, 29, 30, 29],
+    #  [17, 0, 30, 26, 33, 36, 37, 36],
+    #  [29, 30, 0, 18, 39, 30, 39, 36],
+    #  [27, 26, 18, 0, 35, 30, 35, 34],
+    #  [22, 33, 39, 35, 0, 17, 28, 23],
+    #  [29, 36, 30, 30, 17, 0, 33, 30],
+    #  [30, 37, 39, 35, 28, 33, 0, 5],
+    #  [29, 36, 36, 34, 23, 30, 5, 0]]
+  [DHashVips::IDHash, 15, 23, 28, 64],
+    # [[0, 16, 30, 32, 46, 58, 43, 43],
+    #  [16, 0, 28, 28, 47, 59, 46, 47],
+    #  [30, 28, 0, 15, 53, 49, 53, 52],
+    #  [32, 28, 15, 0, 56, 53, 61, 64],
+    #  [46, 47, 53, 56, 0, 23, 43, 45],
+    #  [58, 59, 49, 53, 23, 0, 44, 44],
+    #  [43, 46, 53, 61, 43, 44, 0, 0],
+    #  [43, 47, 52, 64, 45, 44, 0, 0]]
+  # [DHashVips::IDHash, 14, 14, 21],
+].each do |lib, min_similar, max_similar, min_not_similar, max_not_similar|
 
 describe lib do
 
@@ -77,7 +84,7 @@ describe lib do
             expect(table[i][j]).to be_between(min_similar, max_similar).inclusive
           end
         else
-          expect(table[i][j]).to be >= min_not_similar
+          expect(table[i][j]).to be_between(min_not_similar, max_not_similar).inclusive
         end
       end
 

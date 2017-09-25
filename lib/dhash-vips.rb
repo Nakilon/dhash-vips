@@ -1,5 +1,6 @@
 require_relative "dhash-vips/version"
 require "vips"
+require "mll"
 
 module DHashVips
   module DHash
@@ -31,10 +32,10 @@ module DHashVips
     extend self
 
     def hamming a, b
-      ad = a >> 64
-      ai = a - (ad << 64)
-      bd = b >> 64
-      bi = b - (bd << 64)
+      ad = a >> 128
+      ai = a - (ad << 128)
+      bd = b >> 128
+      bi = b - (bd << 128)
       ((ai | bi) & (ad ^ bd)).to_s(2).count "1"
     end
 
@@ -60,12 +61,18 @@ module DHashVips
 
     def calculate file, hash_size = 8
       image = Vips::Image.new_from_file file
-      image = image.resize((hash_size + 1).fdiv(image.width), vscale: hash_size.fdiv(image.height)).colourspace("b-w")
+      image = image.resize(hash_size.fdiv(image.width), vscale: hash_size.fdiv(image.height)).colourspace("b-w")
 
-      conv = image.cast("int").conv([1, -1]).crop(1, 0, 8, 8)
-      d = conv.>(0)./(255).cast("uchar").to_a.join.to_i(2)
-      i = conv.abs.>=(median conv.abs.to_a.flatten.sort)./(255).cast("uchar").to_a.join.to_i(2)
-      (d << 64) + i
+      array = image.to_a.map &:flatten
+      d1, i1, d2, i2 = [array, array.transpose].flat_map do |a|
+        d = MLL::subtract[a, a.rotate(1)].to_a.map &:to_a
+        m = median d.flatten.map(&:abs).sort
+        [
+          d.flatten.map{ |c| c     <  0 ? 1 : 0 }.join.to_i(2),
+          d.flatten.map{ |c| c.abs >= m ? 1 : 0 }.join.to_i(2),
+        ]
+      end
+      (((((d1 << 64) + d2) << 64) + i1) << 64) + i2
     end
 
   end
