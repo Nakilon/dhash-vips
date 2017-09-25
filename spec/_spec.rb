@@ -1,21 +1,21 @@
 require "dhash-vips"
 
 [
-  [DHashVips::DHash, 18, 22],
+  [DHashVips::DHash, 17, 18, 22],
     # [[0, 17, 29, 27, 22, 29],
     #  [17, 0, 30, 26, 33, 36],
     #  [29, 30, 0, 18, 39, 30],
     #  [27, 26, 18, 0, 35, 30],
     #  [22, 33, 39, 35, 0, 17],
     #  [29, 36, 30, 30, 17, 0]]
-  [DHashVips::IDHash, 10, 15],
+  [DHashVips::IDHash, 5, 10, 15],
     # [[0,  5, 21, 23, 18, 23],
     #  [5,  0, 15, 16, 17, 28],
     #  [21, 15, 0, 10, 31, 25],
     #  [23, 16, 10, 0, 26, 28],
     #  [18, 17, 31, 26, 0,  8],
     #  [23, 28, 25, 28, 8,  0]]
-].each do |lib, max_similar, min_not_similar|
+].each do |lib, min_similar, max_similar, min_not_similar|
 
 describe lib do
 
@@ -54,7 +54,7 @@ describe lib do
       end
     end
 
-    hashes = images.map &described_class.method(:calculate)
+    hashes = [*images, bw1, bw2].map &described_class.method(:calculate)
     table = MLL::table[described_class.method(:hamming), [hashes], [hashes]]
 
     # require "pp"
@@ -67,15 +67,20 @@ describe lib do
         when i == j
           expect(table[i][j]).to eq 0
         when (j - i).abs == 1 && (i + j - 1) % 4 == 0
-          expect(table[i][j]).to be > 0
-          expect(table[i][j]).to be <= max_similar
+          if [i, j] == [hashes.size - 2, hashes.size - 1]
+            if described_class == DHashVips::DHash
+              expect(table[i][j]).to be > 0
+            else
+              expect(table[i][j]).to eq 0
+            end
+          else
+            expect(table[i][j]).to be_between(min_similar, max_similar).inclusive
+          end
         else
           expect(table[i][j]).to be >= min_not_similar
         end
       end
 
-      hashes = [bw1, bw2].map &described_class.method(:calculate)
-      expect(described_class.hamming(*hashes)).to eq 0
     end
 
   end
