@@ -32,6 +32,7 @@ module DHashVips
     extend self
 
     def hamming a, b
+      # TODO: the hash_size=8 is hardcoded here
       ad = a >> 128
       ai = a - (ad << 128)
       bd = b >> 128
@@ -72,7 +73,7 @@ module DHashVips
           d.flatten.map{ |c| c.abs >= m ? 1 : 0 }.join.to_i(2),
         ]
       end
-      (((((d1 << 64) + d2) << 64) + i1) << 64) + i2
+      (((((d1 << hash_size * hash_size) + d2) << hash_size * hash_size) + i1) << hash_size * hash_size) + i2
     end
 
   end
