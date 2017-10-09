@@ -49,3 +49,77 @@ task :compare_kernels do |_|
     puts "kernel: #{kernel}, distance: #{DHashVips::DHash.hamming *hashes}"
   end
 end
+
+desc "Compare the quality of Dhash, DHashVips::DHash and DHashVips::IDHash -- run it only after `rake test`"
+task :compare_matrixes do |_|
+  require "dhash"
+  require_relative "lib/dhash-vips"
+  require "mll"
+  [Dhash, DHashVips::DHash, DHashVips::IDHash].each do |m|
+    hashes = %w{
+      71662d4d4029a3b41d47d5baf681ab9a.jpg
+      ad8a37f872956666c3077a3e9e737984.jpg
+      1d468d064d2e26b5b5de9a0241ef2d4b.jpg
+      92d90b8977f813af803c78107e7f698e.jpg
+      309666c7b45ecbf8f13e85a0bd6b0a4c.jpg
+      3f9f3db06db20d1d9f8188cd753f6ef4.jpg
+      df0a3b93e9412536ee8a11255f974141.jpg
+      679634ff89a31279a39f03e278bc9a01.jpg
+    }.map{ |filename| m.calculate "images/#{filename}" }
+    table = MLL::table[m.method(:hamming), [hashes], [hashes]]
+    array = Array.new(4){ [] }
+    hashes.size.times.to_a.repeated_combination(2) do |i, j|
+      array[i == j ? 0 : (j - i).abs == 1 && (i + j - 1) % 4 == 0 ? [i, j] == [0, 1] ? 1 : 2 : 3].push table[i][j]
+    end
+    p array.map &:sort
+  end
+end
+
+# ruby -c Rakefile && rm -f ab.jpg && rake compare_images -- fc762fa286489d8afc80adc8cdcb125e.jpg 9c2c240ec02356472fb532f404d28dde.jpg 2>/dev/null && ql ab.png
+desc "Visualizes the IDHash difference measurement between two images"
+task :compare_images do |_|
+  abort "there should be two image filenames passed as arguments" unless ARGV.size == 3
+  require_relative "lib/dhash-vips"
+  ha, hb = ARGV.drop(1).map &DHashVips::IDHash.method(:calculate)
+  puts "distance: #{DHashVips::IDHash.hamming ha, hb}"
+  a, b = ARGV.drop(1).map do |filename|
+    image = Vips::Image.new_from_file filename
+    image.resize(8.fdiv(image.width), vscale: 8.fdiv(image.height)).colourspace("b-w").
+          resize(100, vscale: 100, kernel: :nearest).colourspace("srgb")
+  end
+
+  ad = ha >> 128
+  ai = ha - (ad << 128)
+  bd = hb >> 128
+  bi = hb - (bd << 128)
+
+  a, b = [[a, ad, ai], [b, bd, bi]].map do |image, xd, xi|
+    127.downto(0).each do |i|
+      if i > 63
+        y, x = (127 - i).divmod 8
+      else
+        x, y = (63 - i).divmod 8
+      end
+      x = (image.width  * (x + 0.5) / 8).round
+      y = (image.height * (y + 0.5) / 8).round
+      if i > 63
+        (x-2..x+2).each do |x|
+          image = image.draw_line (1 - xd[i]) * 255, x,  y                                        , x, (y + image.height / 16 - 1) % image.height
+          image = image.draw_line      xd[i]  * 255, x, (y + image.height / 16 + 1) % image.height, x, (y + image.height /  8    ) % image.height
+        end if ai[i] + bi[i] > 0 && ad[i] != bd[i]
+        image = image.draw_circle      xd[i]  * 255, x, y + 20, 11, fill: true if xi[i] > 0
+        image = image.draw_circle (1 - xd[i]) * 255, x, y + 20, 10, fill: true if xi[i] > 0
+      else
+        (y-2..y+2).each do |y|
+          image = image.draw_line (1 - xd[i]) * 255,  x                                      , y, (x + image.width / 16 - 1) % image.width, y
+          image = image.draw_line      xd[i]  * 255, (x + image.width / 16 + 1) % image.width, y, (x + image.width /  8    ) % image.width, y
+        end if ai[i] + bi[i] > 0 && ad[i] != bd[i]
+        image = image.draw_circle      xd[i]  * 255, x + 20, y, 11, fill: true if xi[i] > 0
+        image = image.draw_circle (1 - xd[i]) * 255, x + 20, y, 10, fill: true if xi[i] > 0
+      end
+    end
+    image
+  end
+
+  a.join(b, :horizontal, shim: 10).write_to_file "ab.png"
+end
