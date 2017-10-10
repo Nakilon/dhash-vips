@@ -104,20 +104,26 @@ task :compare_images do |_|
       x = (image.width  * (x + 0.5) / 8).round
       y = (image.height * (y + 0.5) / 8).round
       if i > 63
-        (x-2..x+2).each do |x|
-          image = image.draw_line (1 - xd[i]) * 255, x,  y                                        , x, (y + image.height / 16 - 1) % image.height
-          image = image.draw_line      xd[i]  * 255, x, (y + image.height / 16 + 1) % image.height, x, (y + image.height /  8    ) % image.height
-        end if ai[i] + bi[i] > 0 && ad[i] != bd[i]
-        image = image.draw_circle      xd[i]  * 255, x, y + 20, 11, fill: true if xi[i] > 0
-        image = image.draw_circle (1 - xd[i]) * 255, x, y + 20, 10, fill: true if xi[i] > 0
+        (x-2..x+2).map do |x| [
+          [x,  y                                        , x, (y + image.height / 16 - 1) % image.height],
+          [x, (y + image.height / 16 + 1) % image.height, x, (y + image.height /  8    ) % image.height],
+        ] end
       else
-        (y-2..y+2).each do |y|
-          image = image.draw_line (1 - xd[i]) * 255,  x                                      , y, (x + image.width / 16 - 1) % image.width, y
-          image = image.draw_line      xd[i]  * 255, (x + image.width / 16 + 1) % image.width, y, (x + image.width /  8    ) % image.width, y
-        end if ai[i] + bi[i] > 0 && ad[i] != bd[i]
-        image = image.draw_circle      xd[i]  * 255, x + 20, y, 11, fill: true if xi[i] > 0
-        image = image.draw_circle (1 - xd[i]) * 255, x + 20, y, 10, fill: true if xi[i] > 0
+        (y-2..y+2).map do |y| [
+          [ x                                      , y, (x + image.width / 16 - 1) % image.width, y],
+          [(x + image.width / 16 + 1) % image.width, y, (x + image.width /  8    ) % image.width, y],
+        ] end
+      end.each do |coords1, coords2|
+        image = image.draw_line (1 - xd[i]) * 255, *coords1
+        image = image.draw_line      xd[i]  * 255, *coords2
+      end if ai[i] + bi[i] > 0 && ad[i] != bd[i]
+      cx, cy = if i > 63
+        [x, y + 20]
+      else
+        [x + 20, y]
       end
+      image = image.draw_circle      xd[i]  * 255, cx, cy, 11, fill: true if xi[i] > 0
+      image = image.draw_circle (1 - xd[i]) * 255, cx, cy, 10, fill: true if xi[i] > 0
     end
     image
   end
