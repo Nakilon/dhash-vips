@@ -83,10 +83,20 @@ task :compare_images do |_|
   require_relative "lib/dhash-vips"
   ha, hb = ARGV.drop(1).map &DHashVips::IDHash.method(:calculate)
   puts "distance: #{DHashVips::IDHash.hamming ha, hb}"
+
+  require "delegate"
+  class ImageMutable < SimpleDelegator
+    %i{ draw_line draw_circle }.each do |m|
+      define_method "#{m}!" do |*args|
+        __setobj__ self.send m, *args
+        self
+      end
+    end
+  end
   a, b = ARGV.drop(1).map do |filename|
     image = Vips::Image.new_from_file filename
-    image.resize(8.fdiv(image.width), vscale: 8.fdiv(image.height)).colourspace("b-w").
-          resize(100, vscale: 100, kernel: :nearest).colourspace("srgb")
+    ImageMutable.new image.resize(8.fdiv(image.width), vscale: 8.fdiv(image.height)).colourspace("b-w").
+                           resize(100, vscale: 100, kernel: :nearest).colourspace("srgb")
   end
 
   ad = ha >> 128
@@ -94,7 +104,8 @@ task :compare_images do |_|
   bd = hb >> 128
   bi = hb - (bd << 128)
 
-  a, b = [[a, ad, ai], [b, bd, bi]].map do |image, xd, xi|
+  n = 0
+  [[a, ad, ai], [b, bd, bi]].each do |image, xd, xi|
     127.downto(0).each do |i|
       if i > 63
         y, x = (127 - i).divmod 8
@@ -114,19 +125,20 @@ task :compare_images do |_|
           [(x + image.width / 16 + 1) % image.width, y, (x + image.width /  8    ) % image.width, y],
         ] end
       end.each do |coords1, coords2|
-        image = image.draw_line (1 - xd[i]) * 255, *coords1
-        image = image.draw_line      xd[i]  * 255, *coords2
+        n += 1
+        image.draw_line! (1 - xd[i]) * 255, *coords1
+        image.draw_line!      xd[i]  * 255, *coords2
       end if ai[i] + bi[i] > 0 && ad[i] != bd[i]
       cx, cy = if i > 63
         [x, y + 20]
       else
         [x + 20, y]
       end
-      image = image.draw_circle      xd[i]  * 255, cx, cy, 11, fill: true if xi[i] > 0
-      image = image.draw_circle (1 - xd[i]) * 255, cx, cy, 10, fill: true if xi[i] > 0
+      image.draw_circle!      xd[i]  * 255, cx, cy, 11, fill: true if xi[i] > 0
+      image.draw_circle! (1 - xd[i]) * 255, cx, cy, 10, fill: true if xi[i] > 0
     end
-    image
   end
+  puts "distance: #{n / 10}"
 
-  a.join(b, :horizontal, shim: 10).write_to_file "ab.png"
+  a.join(b.__getobj__, :horizontal, shim: 10).write_to_file "ab.png"
 end
