@@ -50,6 +50,7 @@ task :compare_kernels do |_|
   end
 end
 
+
 desc "Compare the quality of Dhash, DHashVips::DHash and DHashVips::IDHash -- run it only after `rake test`"
 task :compare_matrixes do |_|
   require "dhash"
@@ -75,7 +76,7 @@ task :compare_matrixes do |_|
   end
 end
 
-# ruby -c Rakefile && rm -f ab.jpg && rake compare_images -- fc762fa286489d8afc80adc8cdcb125e.jpg 9c2c240ec02356472fb532f404d28dde.jpg 2>/dev/null && ql ab.png
+# ruby -c Rakefile && rm -f ab.png && rake compare_images -- fc762fa286489d8afc80adc8cdcb125e.jpg 9c2c240ec02356472fb532f404d28dde.jpg 2>/dev/null && ql ab.png
 desc "Visualizes the IDHash difference measurement between two images"
 task :compare_images do |_|
   abort "there should be two image filenames passed as arguments" unless ARGV.size == 3
