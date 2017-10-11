@@ -62,11 +62,11 @@ module DHashVips
 
       array = image.to_a.map &:flatten
       d1, i1, d2, i2 = [array, array.transpose].flat_map do |a|
-        d = MLL::subtract[a, a.rotate(1)].to_a.map &:to_a
-        m = median d.flatten.map(&:abs).sort
+        d = MLL::subtract[a, a.rotate(1)].to_a.flat_map(&:to_a)
+        m = median d.map(&:abs).sort
         [
-          d.flatten.map{ |c| c     <  0 ? 1 : 0 }.join.to_i(2),
-          d.flatten.map{ |c| c.abs >= m ? 1 : 0 }.join.to_i(2),
+          d.map{ |c| c     <  0 ? 1 : 0 }.join.to_i(2),
+          d.map{ |c| c.abs >= m ? 1 : 0 }.join.to_i(2),
         ]
       end
       (((((d1 << hash_size * hash_size) + d2) << hash_size * hash_size) + i1) << hash_size * hash_size) + i2
