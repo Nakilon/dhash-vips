@@ -1,10 +1,9 @@
 require_relative "dhash-vips/version"
 require "vips"
-require "mll"
 
 module DHashVips
-  module DHash
 
+  module DHash
     extend self
 
     def hamming a, b
@@ -28,6 +27,7 @@ module DHashVips
 
   end
 
+  require "mll"
   module IDHash
     extend self
 
