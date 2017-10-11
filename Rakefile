@@ -142,3 +142,51 @@ task :compare_images do |_|
 
   a.join(b.__getobj__, :horizontal, shim: 10).write_to_file "ab.png"
 end
+
+desc "Benchmarks Dhash, DHashVips::DHash and DHashVips::IDHash"
+task :compare_speed do
+  require "dhash"
+  require_relative "lib/dhash-vips"
+
+  filenames = %w{
+    71662d4d4029a3b41d47d5baf681ab9a.jpg
+    ad8a37f872956666c3077a3e9e737984.jpg
+    1d468d064d2e26b5b5de9a0241ef2d4b.jpg
+    92d90b8977f813af803c78107e7f698e.jpg
+    309666c7b45ecbf8f13e85a0bd6b0a4c.jpg
+    3f9f3db06db20d1d9f8188cd753f6ef4.jpg
+    df0a3b93e9412536ee8a11255f974141.jpg
+    679634ff89a31279a39f03e278bc9a01.jpg
+  }.flat_map do |filename|
+    image = Vips::Image.new_from_file "images/#{filename}"
+    [0, 1, 2, 3].map do |a|
+      "benchmark/#{a}_#{filename}".tap do |filename|
+        next if File.exist? filename
+        FileUtils.mkdir_p "benchmark"
+        image.rot(a).write_to_file filename
+      end
+    end
+  end
+
+  require "benchmark"
+  puts "load and calculate:"
+  hashes = []
+  Benchmark.bm 18 do |bm|
+    [Dhash, DHashVips::DHash, DHashVips::IDHash].each do |m|
+      bm.report m do
+        hashes.push filenames.map &m.method(:calculate)
+      end
+    end
+  end
+  puts "hamming (1000 times):"
+  Benchmark.bm 18 do |bm|
+    [Dhash, DHashVips::DHash, DHashVips::IDHash].zip(hashes) do |m, hs|
+      bm.report m do
+        hs.product hs do |h1, h2|
+          1000.times{ m.hamming h1, h2 }
+        end
+      end
+    end
+  end
+
+end
