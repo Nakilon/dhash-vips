@@ -33,11 +33,7 @@ module DHashVips
 
     def hamming a, b
       # TODO: the hash_size=8 is hardcoded here
-      ad = a >> 128
-      ai = a - (ad << 128)
-      bd = b >> 128
-      bi = b - (bd << 128)
-      ((ai | bi) & (ad ^ bd)).to_s(2).count "1"
+      ((a | b) & (a >> 128 ^ b >> 128)).to_s(2).count "1"
     end
 
     def median array
