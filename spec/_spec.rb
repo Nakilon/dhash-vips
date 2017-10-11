@@ -3,7 +3,7 @@ require "dhash-vips"
 require "pp"
 
 [
-  [DHashVips::DHash, 17, 18, 22, 39],
+  [DHashVips::DHash, :hamming, 17, 18, 22, 39],
     # [[0, 17, 29, 27, 22, 29, 30, 29],
     #  [17, 0, 30, 26, 33, 36, 37, 36],
     #  [29, 30, 0, 18, 39, 30, 39, 36],
@@ -12,7 +12,7 @@ require "pp"
     #  [29, 36, 30, 30, 17, 0, 33, 30],
     #  [30, 37, 39, 35, 28, 33, 0, 5],
     #  [29, 36, 36, 34, 23, 30, 5, 0]]
-  [DHashVips::IDHash, 15, 23, 28, 64],
+  [DHashVips::IDHash, :distance, 15, 23, 28, 64],
     # [[0, 16, 30, 32, 46, 58, 43, 43],
     #  [16, 0, 28, 28, 47, 59, 46, 47],
     #  [30, 28, 0, 15, 53, 49, 53, 52],
@@ -22,7 +22,7 @@ require "pp"
     #  [43, 46, 53, 61, 43, 44, 0, 0],
     #  [43, 47, 52, 64, 45, 44, 0, 0]]
   # [DHashVips::IDHash, 14, 14, 21],
-].each do |lib, min_similar, max_similar, min_not_similar, max_not_similar|
+].each do |lib, dm, min_similar, max_similar, min_not_similar, max_not_similar|
 
 describe lib do
 
@@ -62,7 +62,7 @@ describe lib do
     end
 
     hashes = [*images, bw1, bw2].map &described_class.method(:calculate)
-    table = MLL::table[described_class.method(:hamming), [hashes], [hashes]]
+    table = MLL::table[described_class.method(dm), [hashes], [hashes]]
 
     # require "pp"
     # pp table

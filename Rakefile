@@ -56,7 +56,7 @@ task :compare_matrixes do |_|
   require "dhash"
   require_relative "lib/dhash-vips"
   require "mll"
-  [Dhash, DHashVips::DHash, DHashVips::IDHash].each do |m|
+  [[Dhash, :hamming], [DHashVips::DHash, :hamming], [DHashVips::IDHash, :distance]].each do |m, dm|
     hashes = %w{
       71662d4d4029a3b41d47d5baf681ab9a.jpg
       ad8a37f872956666c3077a3e9e737984.jpg
@@ -67,7 +67,7 @@ task :compare_matrixes do |_|
       df0a3b93e9412536ee8a11255f974141.jpg
       679634ff89a31279a39f03e278bc9a01.jpg
     }.map{ |filename| m.calculate "images/#{filename}" }
-    table = MLL::table[m.method(:hamming), [hashes], [hashes]]
+    table = MLL::table[m.method(dm), [hashes], [hashes]]
     array = Array.new(4){ [] }
     hashes.size.times.to_a.repeated_combination(2) do |i, j|
       array[i == j ? 0 : (j - i).abs == 1 && (i + j - 1) % 4 == 0 ? [i, j] == [0, 1] ? 1 : 2 : 3].push table[i][j]
@@ -82,7 +82,7 @@ task :compare_images do |_|
   abort "there should be two image filenames passed as arguments" unless ARGV.size == 3
   require_relative "lib/dhash-vips"
   ha, hb = ARGV.drop(1).map &DHashVips::IDHash.method(:calculate)
-  puts "distance: #{DHashVips::IDHash.hamming ha, hb}"
+  puts "distance: #{DHashVips::IDHash.distance ha, hb}"
 
   require "delegate"
   class ImageMutable < SimpleDelegator
@@ -178,12 +178,12 @@ task :compare_speed do
       end
     end
   end
-  puts "hamming (1000 times):"
+  puts "distance (1000 times):"
   Benchmark.bm 18 do |bm|
-    [Dhash, DHashVips::DHash, DHashVips::IDHash].zip(hashes) do |m, hs|
+    [[Dhash, :hamming], [DHashVips::DHash, :hamming], [DHashVips::IDHash, :distance]].zip(hashes) do |(m, dm), hs|
       bm.report m do
         hs.product hs do |h1, h2|
-          1000.times{ m.hamming h1, h2 }
+          1000.times{ m.send dm, h1, h2 }
         end
       end
     end

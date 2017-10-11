@@ -31,7 +31,7 @@ module DHashVips
   module IDHash
     extend self
 
-    def hamming a, b
+    def distance a, b
       # TODO: the hash_size=8 is hardcoded here
       ((a | b) & (a >> 128 ^ b >> 128)).to_s(2).count "1"
     end
