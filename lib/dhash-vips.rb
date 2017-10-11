@@ -36,7 +36,7 @@ module DHashVips
       ((a | b) & (a >> 128 ^ b >> 128)).to_s(2).count "1"
     end
 
-    def median array
+    @@median = lambda do |array|
       h = array.size / 2
       return array[h] if array[h] != array[h - 1]
       right = array.dup
@@ -46,15 +46,15 @@ module DHashVips
       return right.uniq[1] if left.count(left.last) > right.count(right.first)
       left.last
     end
-    fail unless 2 == median([1, 2, 2, 2, 2, 2, 3])
-    fail unless 3 == median([1, 2, 2, 2, 2, 3, 3])
-    fail unless 3 == median([1, 1, 2, 2, 3, 3, 3])
-    fail unless 2 == median([1, 1, 1, 2, 3, 3, 3])
-    fail unless 2 == median([1, 1, 2, 2, 2, 2, 3])
-    fail unless 2 == median([1, 2, 2, 2, 2, 3])
-    fail unless 3 == median([1, 2, 2, 3, 3, 3])
-    fail unless 1 == median([1, 1, 1])
-    fail unless 1 == median([1, 1])
+    fail unless 2 == @@median[[1, 2, 2, 2, 2, 2, 3]]
+    fail unless 3 == @@median[[1, 2, 2, 2, 2, 3, 3]]
+    fail unless 3 == @@median[[1, 1, 2, 2, 3, 3, 3]]
+    fail unless 2 == @@median[[1, 1, 1, 2, 3, 3, 3]]
+    fail unless 2 == @@median[[1, 1, 2, 2, 2, 2, 3]]
+    fail unless 2 == @@median[[1, 2, 2, 2, 2, 3]]
+    fail unless 3 == @@median[[1, 2, 2, 3, 3, 3]]
+    fail unless 1 == @@median[[1, 1, 1]]
+    fail unless 1 == @@median[[1, 1]]
 
     def calculate file, hash_size = 8
       image = Vips::Image.new_from_file file
@@ -63,7 +63,7 @@ module DHashVips
       array = image.to_a.map &:flatten
       d1, i1, d2, i2 = [array, array.transpose].flat_map do |a|
         d = MLL::subtract[a, a.rotate(1)].to_a.flat_map(&:to_a)
-        m = median d.map(&:abs).sort
+        m = @@median.call d.map(&:abs).sort
         [
           d.map{ |c| c     <  0 ? 1 : 0 }.join.to_i(2),
           d.map{ |c| c.abs >= m ? 1 : 0 }.join.to_i(2),
