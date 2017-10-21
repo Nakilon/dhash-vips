@@ -33,7 +33,7 @@ This is why `DHashVips::IDHash` appeared.
 
 ## IDHash (the Imprortant Difference Hash)
 
-It has improvements over the dHash that effectively made the pair of images mentioned above to have distance of 0 again. Three improvements are:  
+It has improvements over the dHash that made hashing less sensitive to the resizing algorithm and effectively made the pair of images mentioned above to have distance of 0 again. Three improvements are:  
 * The "Importance" is an array of extra 64 bits that tells the comparing function which half of 64 bits is important (when the difference between neighbors was enough significant) and which is not. So not every bit in a hash is being compared but only half of them.
 * It substracts not only horizontally but also vertically -- that adds 128 more bits.
 * Instead of resizing to 9x8 it resizes to 8x8 and puts the image on a torus so it substracts the left column from the right one and the top from bottom.
