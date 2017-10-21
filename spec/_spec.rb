@@ -21,12 +21,10 @@ require "pp"
     #  [58, 59, 49, 53, 23, 0, 44, 44],
     #  [43, 46, 53, 61, 43, 44, 0, 0],
     #  [43, 47, 52, 64, 45, 44, 0, 0]]
-  # [DHashVips::IDHash, 14, 14, 21],
 ].each do |lib, dm, min_similar, max_similar, min_not_similar, max_not_similar|
 
 describe lib do
 
-  # require "tmpdir"
   require "fileutils"
   require "open-uri"
   require "digest"
@@ -44,7 +42,7 @@ describe lib do
     bw1, bw2 = %w{
       71662d4d4029a3b41d47d5baf681ab9a.jpg
       ad8a37f872956666c3077a3e9e737984.jpg
-    }   # these is the same photo but of different size and bw
+    }   # these is the same photo but of different size and colorspace
 
     example.metadata[:extra_failure_lines] = []
     FileUtils.mkdir_p dir = "images"

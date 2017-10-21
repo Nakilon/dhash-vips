@@ -27,12 +27,11 @@ module DHashVips
 
   end
 
-  require "mll"
   module IDHash
     extend self
 
     def distance a, b
-      # TODO: the hash_size=8 is hardcoded here
+      # TODO: the hash_size is hardcoded here
       ((a | b) & (a >> 128 ^ b >> 128)).to_s(2).count "1"
     end
 
@@ -56,13 +55,14 @@ module DHashVips
     fail unless 1 == @@median[[1, 1, 1]]
     fail unless 1 == @@median[[1, 1]]
 
-    def calculate file, hash_size = 8
+    def calculate file
+      hash_size = 8
       image = Vips::Image.new_from_file file
       image = image.resize(hash_size.fdiv(image.width), vscale: hash_size.fdiv(image.height)).colourspace("b-w")
 
       array = image.to_a.map &:flatten
       d1, i1, d2, i2 = [array, array.transpose].flat_map do |a|
-        d = MLL::subtract[a, a.rotate(1)].to_a.flat_map(&:to_a)
+        d = a.zip(a.rotate(1)).flat_map{ |r1, r2| r1.zip(r2).map{ |i,j| i - j } }
         m = @@median.call d.map(&:abs).sort
         [
           d.map{ |c| c     <  0 ? 1 : 0 }.join.to_i(2),

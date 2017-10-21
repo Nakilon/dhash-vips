@@ -12,10 +12,8 @@ Gem::Specification.new do |spec|
   spec.require_path  = "lib"
 
   spec.add_dependency "ruby-vips"
-  spec.add_dependency "mll"
-
-  spec.add_development_dependency "dhash"
 
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec-core"
+  spec.add_development_dependency "dhash"
 end
