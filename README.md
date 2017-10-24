@@ -58,7 +58,7 @@ Remaining problems:
 * Neither dHash nor IDHash can't automatically detect very shifted crops and rotated images but you can make a wrapper that would call the comparison function iteratively.  
 * These algorithms are color blind because of converting an image to grayscale. If you take a photo of something in your yard the sun will create lights and shadows, but if you compare photos of something green painted on a blue wall there is a possibility the machine would see nothing painted at all. The `dhash` gem had such image in specs and that made them pretty useless (this was supposed to be a face):  
 ![](https://storage.googleapis.com/dhash-vips.nakilon.pro/colorblind.png)  
-* If you have a pile of 1000000 images to compare them with each other that would take a month or two. To improve the process you in case of DHashVips::DHash that uses Hamming distance you may want to read these:  
+* If you have a pile of 1000000 images comparing them with each other would take a month or two. To improve the process in case of dHash that uses Hamming distance you may want to read these threads on Stackexchange network:  
   * [How to find the closest pairs of a string of binary bins in Ruby without O^2 issues?](https://stackoverflow.com/q/8734034/322020)  
   * [Find all pairs of values that are close under Hamming distance](https://cstheory.stackexchange.com/q/18516/27420)  
   * [Finding the closest pair between two sets of points on the hypercube](https://cstheory.stackexchange.com/q/16322/27420)  
@@ -116,7 +116,7 @@ else
 end
 ```
 
-Note that `DHash#calculate` accepts `hash_size` optional parameter that sets hash size in bytes, but `IDHash` size is currently hardcoded and can't be adjusted.
+Note that `DHash#calculate` accepts `hash_size` optional parameter that sets hash size in bytes, but `IDHash` size is currently hardcoded and can't be adjusted. The method was renamed from `#hamming` to `#distance`, maybe I'll rename `#calculate` to `#fingerprint` too.
 
 ## Credits
 
