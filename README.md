@@ -38,13 +38,6 @@ It has improvements over the dHash that made hashing less sensitive to the resiz
 * It subtracts not only horizontally but also vertically -- that adds 128 more bits.
 * Instead of resizing to 9x8 it resizes to 8x8 and puts the image on a torus so it subtracts the left column from the right one and the top from bottom.
 
-For example, here are two photos (by Brian Lauer):  
-![](https://storage.googleapis.com/dhash-vips.nakilon.pro/idhash_example_in.png)  
-and visualization of IDHash (`rake compare_images -- image1.jpg image2.jpg`):  
-![](https://storage.googleapis.com/dhash-vips.nakilon.pro/idhash_example_out.png)  
-
-Here in each of 64 cells, there are two circles that color the difference between that cell and the neighbor one. If the difference is low the Importance bit is set to zero and the circle is invisible. So there are 128 pairs of corresponding circles and when you take one, if at least one circle is visible and is of different color the line is to be drawn. Here you see 15 lines and so the distance between hashes will be equal to 15 (that is pretty low and can be interpreted as "images look similar"). Also, you see here that floor on this photo matters -- classic dHash won't see that it's darker than wall because it's comparing only horizontal neighbors and if one photo had no floor the distance function won't notice that. Also, it sees the Important difference between the very right and left columns because the wall has a slow but visible gradient.
-
 You could see in hash calculation benchmark earlier that these improvements didn't make it slower than dHash because most of the time is spent on image resizing. The calculation of distance is what became two times slower:
 ```ruby
 ((a | b) & (a >> 128 ^ b >> 128)).to_s(2).count "1"
@@ -54,7 +47,17 @@ vs
 (a ^ b).to_s(2).count "1"
 ```
 
-Remaining problems:  
+### Example
+
+Here are two photos (by Brian Lauer):  
+![](https://storage.googleapis.com/dhash-vips.nakilon.pro/idhash_example_in.png)  
+and visualization of IDHash (`rake compare_images -- image1.jpg image2.jpg`):  
+![](https://storage.googleapis.com/dhash-vips.nakilon.pro/idhash_example_out.png)  
+
+Here in each of 64 cells, there are two circles that color the difference between that cell and the neighbor one. If the difference is low the Importance bit is set to zero and the circle is invisible. So there are 128 pairs of corresponding circles and when you take one, if at least one circle is visible and is of different color the line is to be drawn. Here you see 15 lines and so the distance between hashes will be equal to 15 (that is pretty low and can be interpreted as "images look similar"). Also, you see here that floor on this photo matters -- classic dHash won't see that it's darker than wall because it's comparing only horizontal neighbors and if one photo had no floor the distance function won't notice that. Also, it sees the Important difference between the very right and left columns because the wall has a slow but visible gradient.
+
+### Remaining problems
+
 * Neither dHash nor IDHash can't automatically detect very shifted crops and rotated images but you can make a wrapper that would call the comparison function iteratively.  
 * These algorithms are color blind because of converting an image to grayscale. If you take a photo of something in your yard the sun will create lights and shadows, but if you compare photos of something green painted on a blue wall there is a possibility the machine would see nothing painted at all. The `dhash` gem had such image in specs and that made them pretty useless (this was supposed to be a face):  
 ![](https://storage.googleapis.com/dhash-vips.nakilon.pro/colorblind.png)  
