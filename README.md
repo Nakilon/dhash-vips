@@ -2,10 +2,10 @@
 
 # dHash and IDHash gem powered by ruby-vips
 
-The "dHash" is an algorithm of hashing that can be used for measuring the similarity of two images.
+The "dHash" is an algorithm of fingerprinting that can be used to measure the similarity of two images.
 
 You may read about it in "Kind of Like That" blog post (21 January 2013): http://www.hackerfactor.com/blog/index.php?/archives/529-Kind-of-Like-That.html  
-The original idea is that you split the image into 64 segments and so there are 64 bits -- each tells if the one segment is brighter or darker than the neighbor one. Then the [Hamming distance](https://en.wikipedia.org/wiki/Hamming_distance) between hashes is the opposite of images similarity.
+The original idea is that you split the image into 64 segments and so there are 64 bits -- each tells if the one segment is brighter or darker than the neighbor one. Then the [Hamming distance](https://en.wikipedia.org/wiki/Hamming_distance) between fingerprints is the opposite of images similarity.
 
 There are several implementations on Github already but they all depend on ImageMagick. My implementation takes an advantage of libvips (the `ruby-vips` gem) -- it also uses the `.conv` method and in result converts image to an array of grayscale bytes almost 10 times faster:
 ```
@@ -63,6 +63,7 @@ Remaining problems:
   * [Find all pairs of values that are close under Hamming distance](https://cstheory.stackexchange.com/q/18516/27420)  
   * [Finding the closest pair between two sets of points on the hypercube](https://cstheory.stackexchange.com/q/16322/27420)  
   * [Would PCA work for boolean data types?](https://stats.stackexchange.com/q/159705/1125)  
+  * [Using pHash to search agaist a huge image database, what is the best approach?](https://stackoverflow.com/q/18257641/322020)  
 
 ## Installation
 
