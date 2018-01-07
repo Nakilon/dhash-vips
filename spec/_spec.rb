@@ -38,10 +38,10 @@ describe lib do
       3f9f3db06db20d1d9f8188cd753f6ef4.jpg
       df0a3b93e9412536ee8a11255f974141.jpg
       679634ff89a31279a39f03e278bc9a01.jpg
-      6d97739b4a08f965dc9239dd24382e96.jpg
-      1b1d4bde376084011d027bba1c047a4b.jpg
     }   # these images a consecutive pairs of slightly (but enough for nice asserts) silimar images
-        # while last two are tend to be false positive match by idhash
+      # 6d97739b4a08f965dc9239dd24382e96.jpg
+      # 1b1d4bde376084011d027bba1c047a4b.jpg
+        # while these two are tend to be false positive match by idhash
     bw1, bw2 = %w{
       71662d4d4029a3b41d47d5baf681ab9a.jpg
       ad8a37f872956666c3077a3e9e737984.jpg

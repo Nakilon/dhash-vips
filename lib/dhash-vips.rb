@@ -32,7 +32,7 @@ module DHashVips
 
     def distance a, b
       # TODO: the hash_size is hardcoded here
-      ((a | b) & (a >> 128 ^ b >> 128)).to_s(2).count "1"
+      ((a | b) & (a ^ b) >> 128).to_s(2).count "1"
     end
 
     @@median = lambda do |array|

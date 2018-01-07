@@ -157,6 +157,7 @@ task :compare_images do |_|
   a.join(b.__getobj__, :horizontal, shim: 10).write_to_file "ab.png"
 end
 
+# ./ruby `rbenv which rake` compare_speed
 desc "Benchmarks Dhash, DHashVips::DHash and DHashVips::IDHash"
 task :compare_speed do
   require "dhash"
@@ -183,7 +184,7 @@ task :compare_speed do
   end
 
   require "benchmark"
-  puts "load and calculate:"
+  puts "load and calculate the fingerprint:"
   hashes = []
   Benchmark.bm 18 do |bm|
     [Dhash, DHashVips::DHash, DHashVips::IDHash].each do |m|
@@ -192,7 +193,7 @@ task :compare_speed do
       end
     end
   end
-  puts "distance (1000 times):"
+  puts "measure the distance (1000 times):"
   Benchmark.bm 18 do |bm|
     [[Dhash, :hamming], [DHashVips::DHash, :hamming], [DHashVips::IDHash, :distance]].zip(hashes) do |(m, dm), hs|
       bm.report m do
