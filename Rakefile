@@ -50,33 +50,46 @@ task :compare_kernels do |_|
   end
 end
 
-
+# ./ruby `rbenv which rake` compare_matrixes
 desc "Compare the quality of Dhash, DHashVips::DHash and DHashVips::IDHash -- run it only after `rake test`"
 task :compare_matrixes do |_|
   require "dhash"
   require_relative "lib/dhash-vips"
   require "mll"
   [[Dhash, :hamming], [DHashVips::DHash, :hamming], [DHashVips::IDHash, :distance]].each do |m, dm|
+    puts "\n#{m}"
     hashes = %w{
       71662d4d4029a3b41d47d5baf681ab9a.jpg
       ad8a37f872956666c3077a3e9e737984.jpg
+
+      6d97739b4a08f965dc9239dd24382e96.jpg
+      1b1d4bde376084011d027bba1c047a4b.jpg
+
       1d468d064d2e26b5b5de9a0241ef2d4b.jpg
       92d90b8977f813af803c78107e7f698e.jpg
+
       309666c7b45ecbf8f13e85a0bd6b0a4c.jpg
       3f9f3db06db20d1d9f8188cd753f6ef4.jpg
       df0a3b93e9412536ee8a11255f974141.jpg
       679634ff89a31279a39f03e278bc9a01.jpg
     }.map{ |filename| m.calculate "images/#{filename}" }
     table = MLL::table[m.method(dm), [hashes], [hashes]]
-    array = Array.new(4){ [] }
+    # require "pp"
+    # pp table
+    array = Array.new(5){ [] }
     hashes.size.times.to_a.repeated_combination(2) do |i, j|
-      array[i == j ? 0 : (j - i).abs == 1 && (i + j - 1) % 4 == 0 ? [i, j] == [0, 1] ? 1 : 2 : 3].push table[i][j]
+      array[i == j ? 0 : (j - i).abs == 1 && (i + j - 1) % 4 == 0 ? [i, j] == [0, 1] ? 1 : [i, j] == [2, 3] ? 2 : 3 : 4].push table[i][j]
     end
-    p array.map &:sort
+    # p array.map &:sort
+    puts "Absolutely the same image: #{array[0].minmax.join ".."}"
+    puts "Complex B/W and the same but colorful: #{array[1][0]}"
+    puts "Similar images: #{array[3].minmax.join ".."}"
+    puts "Different images: #{[*array[2], *array[4]].minmax.join ".."}"
   end
 end
 
 # ruby -c Rakefile && rm -f ab.png && rake compare_images -- fc762fa286489d8afc80adc8cdcb125e.jpg 9c2c240ec02356472fb532f404d28dde.jpg 2>/dev/null && ql ab.png
+# rm -f ab.png && ./ruby `rbenv which rake` compare_images -- ~/photos/6d97739b4a08f965dc9239dd24382e96.jpg ~/photos/1b1d4bde376084011d027bba1c047a4b.jpg 2>/dev/null && ql ab.png
 desc "Visualizes the IDHash difference measurement between two images"
 task :compare_images do |_|
   abort "there should be two image filenames passed as arguments" unless ARGV.size == 3
@@ -139,6 +152,7 @@ task :compare_images do |_|
     end
   end
   puts "distance: #{n / 10}"
+  puts "(above should be equal if raketask works correcly)"
 
   a.join(b.__getobj__, :horizontal, shim: 10).write_to_file "ab.png"
 end

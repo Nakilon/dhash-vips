@@ -99,8 +99,6 @@ else
 end
 ```
 
-These `10` and `20` numbers are found empirically and just work enough well for 8-byte hashes.
-
 ### IDHash:
 
 ```ruby
@@ -119,7 +117,43 @@ else
 end
 ```
 
+These `10` and `20` numbers are found empirically and just work enough well for 8-byte hashes.  
+To find out these tresholds we can run a rake task with hardcoded test cases:
+```
+$ rake compare_matrixes
+
+Dhash
+Absolutely the same image: 0..0
+Complex B/W and the same but colorful: 0
+Similar images: 13..16
+Different images: 9..41
+
+DHashVips::DHash
+Absolutely the same image: 0..0
+Complex B/W and the same but colorful: 5
+Similar images: 17..18
+Different images: 14..39
+
+DHashVips::IDHash
+Absolutely the same image: 0..0
+Complex B/W and the same but colorful: 0
+Similar images: 15..23
+Different images: 19..64
+```
+
 Note that `DHash#calculate` accepts `hash_size` optional parameter that sets hash size in bytes, but `IDHash` size is currently hardcoded and can't be adjusted. The method was renamed from `#hamming` to `#distance`, maybe I'll rename `#calculate` to `#fingerprint` too.
+
+## Troubleshooting
+
+El Captain and rbenv may cause environment issues that would make you do things like:
+```
+./ruby `rbenv which rake` compare_matrixes
+```
+instead of just
+```
+rake compare_matrixes
+```
+For more information on that: https://github.com/jcupitt/ruby-vips/issues/141
 
 ## Credits
 
