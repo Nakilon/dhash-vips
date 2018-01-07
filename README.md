@@ -40,7 +40,7 @@ It has improvements over the dHash that made hashing less sensitive to the resiz
 
 You could see in hash calculation benchmark earlier that these improvements didn't make it slower than dHash because most of the time is spent on image resizing. The calculation of distance is what became two times slower:
 ```ruby
-((a | b) & (a >> 128 ^ b >> 128)).to_s(2).count "1"
+((a | b) & ((a ^ b) >> 128)).to_s(2).count "1"
 ```
 vs
 ```ruby
