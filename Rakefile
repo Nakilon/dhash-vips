@@ -89,7 +89,7 @@ task :compare_matrixes do |_|
 end
 
 # ruby -c Rakefile && rm -f ab.png && rake compare_images -- fc762fa286489d8afc80adc8cdcb125e.jpg 9c2c240ec02356472fb532f404d28dde.jpg 2>/dev/null && ql ab.png
-# rm -f ab.png && ./ruby `rbenv which rake` compare_images -- ~/photos/6d97739b4a08f965dc9239dd24382e96.jpg ~/photos/1b1d4bde376084011d027bba1c047a4b.jpg 2>/dev/null && ql ab.png
+# rm -f ab.png && ./ruby `rbenv which rake` compare_images -- 6d97739b4a08f965dc9239dd24382e96.jpg 1b1d4bde376084011d027bba1c047a4b.jpg 2>/dev/null && ql ab.png
 desc "Visualizes the IDHash difference measurement between two images"
 task :compare_images do |_|
   abort "there should be two image filenames passed as arguments" unless ARGV.size == 3
@@ -97,20 +97,12 @@ task :compare_images do |_|
   ha, hb = ARGV.drop(1).map &DHashVips::IDHash.method(:calculate)
   puts "distance: #{DHashVips::IDHash.distance ha, hb}"
 
-  require "delegate"
-  class ImageMutable < SimpleDelegator
-    %i{ draw_line draw_circle }.each do |m|
-      define_method "#{m}!" do |*args|
-        __setobj__ self.send m, *args
-        self
-      end
-    end
-  end
   a, b = ARGV.drop(1).map do |filename|
     image = Vips::Image.new_from_file filename
-    ImageMutable.new image.resize(8.fdiv(image.width), vscale: 8.fdiv(image.height)).colourspace("b-w").
+    image = image.resize(8.fdiv(image.width), vscale: 8.fdiv(image.height)).colourspace("b-w").
                            resize(100, vscale: 100, kernel: :nearest).colourspace("srgb")
   end
+  fail unless a.width == b.width && a.height == b.height
 
   ad = ha >> 128
   ai = ha - (ad << 128)
@@ -139,22 +131,23 @@ task :compare_images do |_|
         ] end
       end.each do |coords1, coords2|
         n += 1
-        image.draw_line! (1 - xd[i]) * 255, *coords1
-        image.draw_line!      xd[i]  * 255, *coords2
+        image = image.draw_line (1 - xd[i]) * 255, *coords1
+        image = image.draw_line      xd[i]  * 255, *coords2
       end if ai[i] + bi[i] > 0 && ad[i] != bd[i]
       cx, cy = if i > 63
         [x, y + 20]
       else
         [x + 20, y]
       end
-      image.draw_circle!      xd[i]  * 255, cx, cy, 11, fill: true if xi[i] > 0
-      image.draw_circle! (1 - xd[i]) * 255, cx, cy, 10, fill: true if xi[i] > 0
+      image = image.draw_circle      xd[i]  * 255, cx, cy, 11, fill: true if xi[i] > 0
+      image = image.draw_circle (1 - xd[i]) * 255, cx, cy, 10, fill: true if xi[i] > 0
     end
+    image
   end
   puts "distance: #{n / 10}"
   puts "(above should be equal if raketask works correcly)"
 
-  a.join(b.__getobj__, :horizontal, shim: 10).write_to_file "ab.png"
+  a.join(b, :horizontal, shim: 10).write_to_file "ab.png"
 end
 
 # ./ruby `rbenv which rake` compare_speed
