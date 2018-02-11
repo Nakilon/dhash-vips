@@ -1,4 +1,3 @@
-require_relative "dhash-vips/version"
 require "vips"
 
 module DHashVips
@@ -32,7 +31,7 @@ module DHashVips
 
     def distance a, b
       # TODO: the hash_size is hardcoded here
-      ((a | b) & (a ^ b) >> 128).to_s(2).count "1"
+      ((a ^ b) & (a | b) >> 128).to_s(2).count "1"
     end
 
     @@median = lambda do |array|
@@ -69,7 +68,7 @@ module DHashVips
           d.map{ |c| c.abs >= m ? 1 : 0 }.join.to_i(2),
         ]
       end
-      (((((d1 << hash_size * hash_size) + d2) << hash_size * hash_size) + i1) << hash_size * hash_size) + i2
+      (((((i1 << hash_size * hash_size) + i2) << hash_size * hash_size) + d1) << hash_size * hash_size) + d2
     end
 
   end

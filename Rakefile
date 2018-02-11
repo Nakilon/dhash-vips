@@ -104,10 +104,10 @@ task :compare_images do |_|
   end
   fail unless a.width == b.width && a.height == b.height
 
-  ad = ha >> 128
-  ai = ha - (ad << 128)
-  bd = hb >> 128
-  bi = hb - (bd << 128)
+  ai = ha >> 128
+  ad = ha - (ai << 128)
+  bi = hb >> 128
+  bd = hb - (bi << 128)
 
   n = 0
   [[a, ad, ai], [b, bd, bi]].each do |image, xd, xi|
