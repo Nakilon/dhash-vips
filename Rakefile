@@ -52,7 +52,7 @@ end
 
 # ./ruby `rbenv which rake` compare_matrixes
 desc "Compare the quality of Dhash, DHashVips::DHash and DHashVips::IDHash -- run it only after `rake test`"
-task :compare_matrixes do |_|
+task :compare_matrices do |_|
   require "dhash"
   require_relative "lib/dhash-vips"
   require "mll"
@@ -147,7 +147,7 @@ task :compare_images do |_|
   puts "distance: #{n / 10}"
   puts "(above should be equal if raketask works correcly)"
 
-  a.join(b, :horizontal, shim: 10).write_to_file "ab.png"
+  a.join(b, :horizontal, shim: 15).write_to_file "ab.png"
 end
 
 # ./ruby `rbenv which rake` compare_speed
