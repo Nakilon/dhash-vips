@@ -29,9 +29,19 @@ module DHashVips
   module IDHash
     extend self
 
+    def distance3 a, b
+      return ((a ^ b) & (a | b) >> 128).to_s(2).count "1"
+    end
     def distance a, b
-      # TODO: the hash_size is hardcoded here
-      ((a ^ b) & (a | b) >> 128).to_s(2).count "1"
+      size_a, size_b = [a, b].map do |x|
+        case x.size
+        when            32 ; 8
+        when 128, 124, 120 ; 16
+        else          ; fail "invalid size of fingerprint; #{x.size}"
+        end
+      end
+      fail "fingerprints were taken with different `power` param: #{size_a} and #{size_b}" if size_a != size_b
+      ((a ^ b) & (a | b) >> 2 * size_a * size_a).to_s(2).count "1"
     end
 
     @@median = lambda do |array|
@@ -54,10 +64,10 @@ module DHashVips
     fail unless 1 == @@median[[1, 1, 1]]
     fail unless 1 == @@median[[1, 1]]
 
-    def calculate file
-      hash_size = 8
+    def fingerprint file, power = 3
+      size = 2 ** power
       image = Vips::Image.new_from_file file
-      image = image.resize(hash_size.fdiv(image.width), vscale: hash_size.fdiv(image.height)).colourspace("b-w")
+      image = image.resize(size.fdiv(image.width), vscale: size.fdiv(image.height)).colourspace("b-w")
 
       array = image.to_a.map &:flatten
       d1, i1, d2, i2 = [array, array.transpose].flat_map do |a|
@@ -68,7 +78,7 @@ module DHashVips
           d.map{ |c| c.abs >= m ? 1 : 0 }.join.to_i(2),
         ]
       end
-      (((((i1 << hash_size * hash_size) + i2) << hash_size * hash_size) + d1) << hash_size * hash_size) + d2
+      (((((i1 << size * size) + i2) << size * size) + d1) << size * size) + d2
     end
 
   end

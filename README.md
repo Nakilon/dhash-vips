@@ -120,26 +120,57 @@ To find out these tresholds we can run a rake task with hardcoded test cases:
 ```
 $ rake compare_matrices
 
-Dhash
+Dhash 
 Absolutely the same image: 0..0
 Complex B/W and the same but colorful: 0
 Similar images: 13..16
 Different images: 9..41
 
-DHashVips::DHash
+DHashVips::DHash 
 Absolutely the same image: 0..0
 Complex B/W and the same but colorful: 5
 Similar images: 17..18
 Different images: 14..39
 
-DHashVips::IDHash
+DHashVips::IDHash 
 Absolutely the same image: 0..0
 Complex B/W and the same but colorful: 0
 Similar images: 15..23
 Different images: 19..64
+
+DHashVips::IDHash 4
+Absolutely the same image: 0..0
+Complex B/W and the same but colorful: 0
+Similar images: 71..108
+Different images: 102..211
+
 ```
 
-Note that `DHash#calculate` accepts `hash_size` optional parameter that sets hash size in bytes, but `IDHash` size is currently hardcoded and can't be adjusted. The method was renamed from `#hamming` to `#distance`, maybe I'll rename `#calculate` to `#fingerprint` too.
+### Notes
+
+* Methods were renamed from `#calculate` to `#fingerprint` and from `#hamming` to `#distance`.  
+* The `DHash#calculate` accepts `hash_size` optional parameter that is 8 by default. The `IDHash#fingerprint`'s optional parameter is called `power` and works in a bit different way: 3 means 8 and 4 means 16 -- other sizes are not supported because they don't seem to be useful (higher fingerprint resolution makes it vulnerable to image shifts and croppings). Because IDHash's fingerprint is more complex than DHash's one it's not that straight forward to compare them so under the hood the `#distance` methods have to check the size of fingerprint -- this trade-off costs 30-40% of speed that can be eliminated by using `#distance3` method that assumes fingerprint to be of power=3. So the full benchmark is this one:
+
+```
+$ rake compare_speed
+
+load and calculate the fingerprint:
+                          user     system      total        real
+Dhash                12.400000   0.820000  13.220000 ( 13.329952)
+DHashVips::DHash      1.330000   0.230000   1.560000 (  1.509826)
+DHashVips::IDHash     1.060000   0.090000   1.150000 (  1.100332)
+DHashVips::IDHash 4   1.030000   0.080000   1.110000 (  1.089148)
+
+measure the distance (1000 times):
+                                   user     system      total        real
+Dhash hamming                  3.140000   0.020000   3.160000 (  3.179392)
+DHashVips::DHash hamming       3.040000   0.020000   3.060000 (  3.095190)
+DHashVips::IDHash distance     8.170000   0.040000   8.210000 (  8.279950)
+DHashVips::IDHash distance3    6.720000   0.030000   6.750000 (  6.790900)
+DHashVips::IDHash distance 4  24.430000   0.130000  24.560000 ( 24.652625)
+```
+
+Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4 and 0.0.5 became incompatible, but you probably can convert them manually. I know, incompatibilities suck but if we put the version or structure information inside fingerprint it will became slow to (de)serialize and store.
 
 ## Troubleshooting
 
