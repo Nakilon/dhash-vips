@@ -16,4 +16,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec-core"
   spec.add_development_dependency "dhash"
+  spec.add_development_dependency "get_process_mem"
 end

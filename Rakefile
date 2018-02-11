@@ -120,25 +120,31 @@ task :compare_images do |_|
   _127 = shift - 1
   _63 = size * size - 1
   n = 0
+  width = a.width
+  height = a.height
 
+
+  require "get_process_mem"
   a, b = [[a, ad, ai], [b, bd, bi]].map do |image, xd, xi|
     _127.downto(0).each_with_index do |i, ii|
+      mem = GetProcessMem.new(Process.pid).mb
+      abort ">1000mb of memory consumed" if 1000 < mem
       if i > _63
         y, x = (_127 - i).divmod size
       else
         x, y = (_63 - i).divmod size
       end
-      x = (image.width  * (x + 0.5) / size).round
-      y = (image.height * (y + 0.5) / size).round
+      x = (width  * (x + 0.5) / size).round
+      y = (height * (y + 0.5) / size).round
       if i > _63
         (x-2..x+2).map do |x| [
-          [x,  y                                              , x, (y + image.height / size / 2 - 1) % image.height],
-          [x, (y + image.height / size / 2 + 1) % image.height, x, (y + image.height / size        ) % image.height],
+          [x,  y                                  , x, (y + height / size / 2 - 1) % height],
+          [x, (y + height / size / 2 + 1) % height, x, (y + height / size        ) % height],
         ] end
       else
         (y-2..y+2).map do |y| [
-          [ x                                            , y, (x + image.width / size / 2 - 1) % image.width, y],
-          [(x + image.width / size / 2 + 1) % image.width, y, (x + image.width / size        ) % image.width, y],
+          [ x                                , y, (x + width / size / 2 - 1) % width, y],
+          [(x + width / size / 2 + 1) % width, y, (x + width / size        ) % width, y],
         ] end
       end.each do |coords1, coords2|
         n += 1
