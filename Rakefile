@@ -123,6 +123,26 @@ task :compare_images do |_|
   width = a.width
   height = a.height
 
+  Vips::Operation.class_eval do
+    old_initialize = instance_method :initialize
+    define_method :initialize do |value|
+      old_initialize.bind(self).(value).tap do
+        self.instance_variable_set "@operation_name", value
+      end
+    end
+    old_set = instance_method :set
+    define_method :set do |*args|
+      args[1].instance_variable_set "@operation_name", self.instance_variable_get("@operation_name") if args.first == "image"
+      old_set.bind(self).(*args)
+    end
+  end
+  Vips::Image.class_eval do
+    def copy
+      return self if caller.first.end_with?("/gems/ruby-vips-2.0.9/lib/vips/operation.rb:148:in `set'") &&
+                     %w{ draw_line draw_circle }.include?(instance_variable_get "@operation_name")
+      method_missing :copy
+    end
+  end
 
   require "get_process_mem"
   a, b = [[a, ad, ai], [b, bd, bi]].map do |image, xd, xi|
