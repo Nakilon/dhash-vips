@@ -64,9 +64,9 @@ module DHashVips
     fail unless 1 == @@median[[1, 1, 1]]
     fail unless 1 == @@median[[1, 1]]
 
-    def fingerprint file, power = 3
+    def fingerprint filename, power = 3
       size = 2 ** power
-      image = Vips::Image.new_from_file file
+      image = Vips::Image.new_from_file filename
       image = image.resize(size.fdiv(image.width), vscale: size.fdiv(image.height)).colourspace("b-w")
 
       array = image.to_a.map &:flatten

@@ -230,7 +230,7 @@ task :compare_speed do
   end
   hashes[-1, 1] = hashes[-2, 2]     # for `distance` and `distance3` we use the same hashes
   puts "\nmeasure the distance (1000 times):"
-  Benchmark.bm 28 do |bm|
+  Benchmark.bm 29 do |bm|
     [
       [Dhash, :hamming],
       [DHashVips::DHash, :hamming],

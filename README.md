@@ -16,10 +16,10 @@ DHashVips::DHash      1.330000   0.230000   1.560000 (  1.509826)
 DHashVips::IDHash     1.060000   0.090000   1.150000 (  1.100332)
 
 measure the distance (1000 times):
-                                   user     system      total        real
-Dhash hamming                  3.140000   0.020000   3.160000 (  3.179392)
-DHashVips::DHash hamming       3.040000   0.020000   3.060000 (  3.095190)
-DHashVips::IDHash distance     6.720000   0.030000   6.750000 (  6.790900)
+                          user     system      total        real
+Dhash hamming         3.140000   0.020000   3.160000 (  3.179392)
+DHashVips::DHash      3.040000   0.020000   3.060000 (  3.095190)
+DHashVips::IDHash     6.720000   0.030000   6.750000 (  6.790900)
 ```
 
 Here the `Dhash` is [another gem](https://github.com/maccman/dhash) that I used earlier in my projects.  
@@ -102,11 +102,11 @@ end
 ```ruby
 require "dhash-vips"
 
-hash1 = DHashVips::IDHash.calculate "photo1.jpg"
-hash2 = DHashVips::IDHash.calculate "photo2.jpg"
+hash1 = DHashVips::IDHash.fingerprint "photo1.jpg"
+hash2 = DHashVips::IDHash.fingerprint "photo2.jpg"
 
 distance = DHashVips::IDHash.distance hash1, hash2
-if distance < 10
+if distance < 15
   puts "Images are very similar"
 elsif distance < 25
   puts "Images are slightly similar"
@@ -115,7 +115,7 @@ else
 end
 ```
 
-These `10` and `20` numbers are found empirically and just work enough well for 8-byte hashes.  
+These `15` and `25` numbers are found empirically and just work enough well for 8-byte hashes.  
 To find out these tresholds we can run a rake task with hardcoded test cases:
 ```
 $ rake compare_matrices
@@ -162,12 +162,12 @@ DHashVips::IDHash     1.060000   0.090000   1.150000 (  1.100332)
 DHashVips::IDHash 4   1.030000   0.080000   1.110000 (  1.089148)
 
 measure the distance (1000 times):
-                                   user     system      total        real
-Dhash hamming                  3.140000   0.020000   3.160000 (  3.179392)
-DHashVips::DHash hamming       3.040000   0.020000   3.060000 (  3.095190)
-DHashVips::IDHash distance     8.170000   0.040000   8.210000 (  8.279950)
-DHashVips::IDHash distance3    6.720000   0.030000   6.750000 (  6.790900)
-DHashVips::IDHash distance 4  24.430000   0.130000  24.560000 ( 24.652625)
+                                    user     system      total        real
+Dhash hamming                   3.140000   0.020000   3.160000 (  3.179392)
+DHashVips::DHash hamming        3.040000   0.020000   3.060000 (  3.095190)
+DHashVips::IDHash distance      8.170000   0.040000   8.210000 (  8.279950)
+DHashVips::IDHash distance3     6.720000   0.030000   6.750000 (  6.790900)
+DHashVips::IDHash distance 4   24.430000   0.130000  24.560000 ( 24.652625)
 ```
 
 Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4 and 0.0.5 became incompatible, but you probably can convert them manually. I know, incompatibilities suck but if we put the version or structure information inside fingerprint it will became slow to (de)serialize and store.
