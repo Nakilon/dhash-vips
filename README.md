@@ -11,15 +11,15 @@ There were several implementations on Github already but they all depend on Imag
 ```
 load and calculate the fingerprint:
                           user     system      total        real
-Dhash                12.400000   0.820000  13.220000 ( 13.329952)
-DHashVips::DHash      1.330000   0.230000   1.560000 (  1.509826)
-DHashVips::IDHash     1.060000   0.090000   1.150000 (  1.100332)
+Dhash                13.110000   0.950000  14.060000 ( 14.537057)
+DHashVips::DHash      1.480000   0.310000   1.790000 (  1.808787)
+DHashVips::IDHash     1.080000   0.100000   1.180000 (  1.156446)
 
 measure the distance (1000 times):
                           user     system      total        real
-Dhash hamming         3.140000   0.020000   3.160000 (  3.179392)
-DHashVips::DHash      3.040000   0.020000   3.060000 (  3.095190)
-DHashVips::IDHash     6.720000   0.030000   6.750000 (  6.790900)
+Dhash hamming         1.770000   0.010000   1.780000 (  1.815612)
+DHashVips::DHash      1.810000   0.010000   1.820000 (  1.875666)
+DHashVips::IDHash     3.430000   0.020000   3.450000 (  3.499031)
 ```
 
 Here the `Dhash` is [another gem](https://github.com/maccman/dhash) that I used earlier in my projects.  
@@ -36,7 +36,7 @@ It has improvements over the dHash that made fingerprinting less sensitive to th
 * It subtracts not only horizontally but also vertically -- that adds 128 more bits.  
 * Instead of resizing to 9x8 it resizes to 8x8 and puts the image on a torus so it subtracts the left column from the right one and the top from bottom.
 
-You could see in fingerprint calculation benchmark earlier that these improvements didn't make it slower than dHash because most of the time is spent on image resizing. The calculation of distance is what became two times slower:
+You could see in fingerprint calculation benchmark earlier that these improvements didn't make it slower than dHash because most of the time is spent on image resizing (at some point it actually even became faster, idk why). The calculation of distance is what became two times slower:
 ```ruby
 ((a | b) & ((a ^ b) >> 128)).to_s(2).count "1"
 ```
@@ -149,10 +149,10 @@ Different images: 102..211
 ### Notes
 
 * Methods were renamed from `#calculate` to `#fingerprint` and from `#hamming` to `#distance`.  
-* The `DHash#calculate` accepts `hash_size` optional parameter that is 8 by default. The `IDHash#fingerprint`'s optional parameter is called `power` and works in a bit different way: 3 means 8 and 4 means 16 -- other sizes are not supported because they don't seem to be useful (higher fingerprint resolution makes it vulnerable to image shifts and croppings). Because IDHash's fingerprint is more complex than DHash's one it's not that straight forward to compare them so under the hood the `#distance` methods have to check the size of fingerprint -- this trade-off costs 30-40% of speed that can be eliminated by using `#distance3` method that assumes fingerprint to be of power=3. So the full benchmark is this one:
+* The `DHash#calculate` accepts `hash_size` optional parameter that is 8 by default. The `IDHash#fingerprint`'s optional parameter is called `power` and works in a bit different way: 3 means 8 and 4 means 16 -- other sizes are not supported because they don't seem to be useful (higher fingerprint resolution makes it vulnerable to image shifts and croppings, also `#distance` becomes much slower). Because IDHash's fingerprint is more complex than DHash's one it's not that straight forward to compare them so under the hood the `#distance` methods have to check the size of fingerprint -- this trade-off costs 30-40% of speed that can be eliminated by using `#distance3` method that assumes fingerprint to be of power=3. So the full benchmark is this one:
 
 ```
-$ rake compare_speed
+# Ruby 2.0.0
 
 load and calculate the fingerprint:
                           user     system      total        real
@@ -168,6 +168,25 @@ DHashVips::DHash hamming        3.040000   0.020000   3.060000 (  3.095190)
 DHashVips::IDHash distance      8.170000   0.040000   8.210000 (  8.279950)
 DHashVips::IDHash distance3     6.720000   0.030000   6.750000 (  6.790900)
 DHashVips::IDHash distance 4   24.430000   0.130000  24.560000 ( 24.652625)
+```
+(macOS system MRI 2.3 has some nice bit arithmetics improvement compared to 2.0)
+```
+# Ruby 2.3.3
+
+load and calculate the fingerprint:
+                          user     system      total        real
+Dhash                13.110000   0.950000  14.060000 ( 14.537057)
+DHashVips::DHash      1.480000   0.310000   1.790000 (  1.808787)
+DHashVips::IDHash     1.080000   0.100000   1.180000 (  1.156446)
+DHashVips::IDHash 4   1.030000   0.090000   1.120000 (  1.076117)
+
+measure the distance (1000 times):
+                                    user     system      total        real
+Dhash hamming                   1.770000   0.010000   1.780000 (  1.815612)
+DHashVips::DHash hamming        1.810000   0.010000   1.820000 (  1.875666)
+DHashVips::IDHash distance      4.250000   0.020000   4.270000 (  4.350071)
+DHashVips::IDHash distance3     3.430000   0.020000   3.450000 (  3.499031)
+DHashVips::IDHash distance 4    8.210000   0.110000   8.320000 (  8.510735)
 ```
 
 Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4 and 0.0.5 became incompatible, but you probably can convert them manually. I know, incompatibilities suck but if we put the version or structure information inside fingerprint it will became slow to (de)serialize and store.

@@ -34,11 +34,10 @@ module DHashVips
     end
     def distance a, b
       size_a, size_b = [a, b].map do |x|
-        case x.size
-        when            32 ; 8
-        when 128, 124, 120 ; 16
-        else          ; fail "invalid size of fingerprint; #{x.size}"
-        end
+        # TODO write a test about possible hash sizes
+        #      they were 32 and 128, 124, 120 for MRI 2.0
+        #      but also 31, 30 happens for MRI 2.3
+        x.size <= 32 ? 8 : 16
       end
       fail "fingerprints were taken with different `power` param: #{size_a} and #{size_b}" if size_a != size_b
       ((a ^ b) & (a | b) >> 2 * size_a * size_a).to_s(2).count "1"
