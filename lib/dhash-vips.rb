@@ -66,7 +66,7 @@ module DHashVips
     def fingerprint filename, power = 3
       size = 2 ** power
       image = Vips::Image.new_from_file filename
-      image = image.resize(size.fdiv(image.width), vscale: size.fdiv(image.height)).colourspace("b-w")
+      image = image.resize(size.fdiv(image.width), vscale: size.fdiv(image.height)).colourspace("b-w").flatten
 
       array = image.to_a.map &:flatten
       d1, i1, d2, i2 = [array, array.transpose].flat_map do |a|
