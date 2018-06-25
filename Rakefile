@@ -72,7 +72,6 @@ task :compare_matrices do |_|
 
       1d468d064d2e26b5b5de9a0241ef2d4b.jpg
       92d90b8977f813af803c78107e7f698e.jpg
-
       309666c7b45ecbf8f13e85a0bd6b0a4c.jpg
       3f9f3db06db20d1d9f8188cd753f6ef4.jpg
       df0a3b93e9412536ee8a11255f974141.jpg
@@ -83,13 +82,20 @@ task :compare_matrices do |_|
     # pp table
     array = Array.new(5){ [] }
     hashes.size.times.to_a.repeated_combination(2) do |i, j|
-      array[i == j ? 0 : (j - i).abs == 1 && (i + j - 1) % 4 == 0 ? [i, j] == [0, 1] ? 1 : [i, j] == [2, 3] ? 2 : 3 : 4].push table[i][j]
+      array[
+        case
+        when i == j ; 0
+        when [i, j] == [0, 1] ; 1
+        when i > 3 && i + 1 == j && i % 2 == 0; 2
+        else ; 3
+        end
+      ].push table[i][j]
     end
     # p array.map &:sort
     puts "Absolutely the same image: #{array[0].minmax.join ".."}"
     puts "Complex B/W and the same but colorful: #{array[1][0]}"
-    puts "Similar images: #{array[3].minmax.join ".."}"
-    puts "Different images: #{[*array[2], *array[4]].minmax.join ".."}"
+    puts "Similar images: #{array[2].minmax.join ".."}"
+    puts "Different images: #{array[3].minmax.join ".."}"
   end
 end
 
