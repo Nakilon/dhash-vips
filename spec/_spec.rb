@@ -5,7 +5,7 @@ require "pp"
 # TODO tests about `fingerprint(4)`
 
 [
-  [DHashVips::DHash, :hamming, :calculate, 17, 18, 22, 39],
+  [DHashVips::DHash, :hamming, :calculate, 13, 16, 21, 42],
     # [[0, 17, 29, 27, 22, 29, 30, 29],
     #  [17, 0, 30, 26, 33, 36, 37, 36],
     #  [29, 30, 0, 18, 39, 30, 39, 36],
@@ -14,7 +14,7 @@ require "pp"
     #  [29, 36, 30, 30, 17, 0, 33, 30],
     #  [30, 37, 39, 35, 28, 33, 0, 5],
     #  [29, 36, 36, 34, 23, 30, 5, 0]]
-  [DHashVips::IDHash, :distance, :fingerprint, 15, 23, 28, 64],
+  [DHashVips::IDHash, :distance, :fingerprint, 9, 22, 28, 64],
     # [[0, 16, 30, 32, 46, 58, 43, 43],
     #  [16, 0, 28, 28, 47, 59, 46, 47],
     #  [30, 28, 0, 15, 53, 49, 53, 52],
@@ -79,7 +79,7 @@ describe lib do
         when (j - i).abs == 1 && (i + j - 1) % 4 == 0
           if [i, j] == [hashes.size - 2, hashes.size - 1]
             if described_class == DHashVips::DHash
-              expect(table[i][j]).to be == 5
+              expect(table[i][j]).to be == 4
             else
               expect(table[i][j]).to eq 0
             end
