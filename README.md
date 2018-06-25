@@ -128,22 +128,21 @@ Different images: 9..41
 
 DHashVips::DHash 
 Absolutely the same image: 0..0
-Complex B/W and the same but colorful: 5
-Similar images: 17..18
-Different images: 14..39
+Complex B/W and the same but colorful: 4
+Similar images: 13..16
+Different images: 9..42
 
 DHashVips::IDHash 
 Absolutely the same image: 0..0
 Complex B/W and the same but colorful: 0
-Similar images: 15..23
-Different images: 19..64
+Similar images: 9..22
+Different images: 18..64
 
 DHashVips::IDHash 4
 Absolutely the same image: 0..0
 Complex B/W and the same but colorful: 0
-Similar images: 71..108
-Different images: 102..211
-
+Similar images: 86..120
+Different images: 120..209
 ```
 
 ### Notes
