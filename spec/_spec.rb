@@ -3,6 +3,7 @@ require "dhash-vips"
 require "pp"
 
 # TODO tests about `fingerprint(4)`
+# TODO switch to Minitest?
 
 [
   [DHashVips::DHash, :hamming, :calculate, 13, 16, 21, 42],
@@ -28,7 +29,6 @@ require "pp"
 describe lib do
 
   require "fileutils"
-  require "open-uri"
   require "digest"
   require "mll"
   example do |example|
@@ -50,18 +50,9 @@ describe lib do
     }   # these are the same photo but of different size and colorspace
 
     example.metadata[:extra_failure_lines] = []
-    FileUtils.mkdir_p dir = "images"
+    require_relative "../common"
     *images, bw1, bw2 = [*images, bw1, bw2].map do |image|
-      "#{dir}/#{image}".tap do |filename|
-        unless File.exist?(filename) && Digest::MD5.file(filename) == File.basename(filename, ".jpg")
-          example.metadata[:extra_failure_lines] << "copying image from web to #{filename}"
-          open("https://storage.googleapis.com/dhash-vips.nakilon.pro/#{image}") do |link|
-            File.open(filename, "wb") do |file|
-              IO.copy_stream link, file
-            end
-          end
-        end
-      end
+      download_and_keep image
     end
 
     hashes = [*images, bw1, bw2].map &described_class.method(calc)

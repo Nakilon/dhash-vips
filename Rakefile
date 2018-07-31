@@ -50,9 +50,8 @@ task :compare_kernels do |_|
   end
 end
 
-# ./ruby `rbenv which rake` compare_matrixes
 desc "Compare the quality of Dhash, DHashVips::DHash and DHashVips::IDHash -- run it only after `rake test`"
-task :compare_matrices do |_|
+task :compare_quality do |_|
   require "dhash"
   require_relative "lib/dhash-vips"
   require "mll"
@@ -63,6 +62,7 @@ task :compare_matrices do |_|
     [DHashVips::IDHash, :fingerprint, :distance, 4],
   ].each do |m, calc, dm, power|
     puts "\n#{m} #{power}"
+    require_relative "common"
     hashes = %w{
       71662d4d4029a3b41d47d5baf681ab9a.jpg
       ad8a37f872956666c3077a3e9e737984.jpg
@@ -76,7 +76,9 @@ task :compare_matrices do |_|
       3f9f3db06db20d1d9f8188cd753f6ef4.jpg
       df0a3b93e9412536ee8a11255f974141.jpg
       679634ff89a31279a39f03e278bc9a01.jpg
-    }.map{ |filename| m.public_send calc, "images/#{filename}", *power }
+      54192a3f65bd03163b04849e1577a40b.jpg
+      6d32f57459e5b79b5deca2a361eb8c6e.jpg
+    }.map(&method(:download_and_keep)).map{ |filename| m.public_send calc, filename, *power }
     table = MLL::table[m.method(dm), [hashes], [hashes]]
     # require "pp"
     # pp table

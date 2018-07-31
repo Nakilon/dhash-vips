@@ -118,31 +118,31 @@ end
 These `15` and `25` numbers are found empirically and just work enough well for 8-byte hashes.  
 To find out these tresholds we can run a rake task with hardcoded test cases:
 ```
-$ rake compare_matrices
+$ rake compare_quality
 
 Dhash 
 Absolutely the same image: 0..0
 Complex B/W and the same but colorful: 0
-Similar images: 13..16
-Different images: 9..41
+Similar images: 12..16
+Different images: 9..43
 
 DHashVips::DHash 
 Absolutely the same image: 0..0
 Complex B/W and the same but colorful: 4
-Similar images: 13..16
+Similar images: 10..16
 Different images: 9..42
 
 DHashVips::IDHash 
 Absolutely the same image: 0..0
 Complex B/W and the same but colorful: 0
-Similar images: 9..22
+Similar images: 6..22
 Different images: 18..64
 
 DHashVips::IDHash 4
 Absolutely the same image: 0..0
 Complex B/W and the same but colorful: 0
-Similar images: 86..120
-Different images: 120..209
+Similar images: 78..120
+Different images: 120..213
 ```
 
 ### Notes
@@ -192,7 +192,7 @@ Also note that to make `#distance` able to assume the fingerprint resolution fro
 
 ## Troubleshooting
 
-El Captain and rbenv may cause environment issues that would make you do things like:
+OS X El Captain and rbenv may cause environment issues that would make you do things like:
 ```
 ./ruby `rbenv which rake` compare_matrixes
 ```
