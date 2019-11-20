@@ -125,6 +125,12 @@ To find out these tresholds we can run a rake task with hardcoded test cases:
     Similar images: 7..17
     Different images: 9..44
 
+    Phamilie 
+    Absolutely the same image: 0..0
+    Complex B/W and the same but colorful: 2
+    Similar images: 14..28
+    Different images: 22..40
+
     DHashVips::DHash 
     Absolutely the same image: 0..0
     Complex B/W and the same but colorful: 4
@@ -148,6 +154,8 @@ To find out these tresholds we can run a rake task with hardcoded test cases:
 * Methods were renamed from `#calculate` to `#fingerprint` and from `#hamming` to `#distance`.  
 * The `DHash#calculate` accepts `hash_size` optional parameter that is 8 by default. The `IDHash#fingerprint`'s optional parameter is called `power` and works in a bit different way: 3 means 8 and 4 means 16 -- other sizes are not supported because they don't seem to be useful (higher fingerprint resolution makes it vulnerable to image shifts and croppings, also `#distance` becomes much slower). Because IDHash's fingerprint is more complex than DHash's one it's not that straight forward to compare them so under the hood the `#distance` methods have to check the size of fingerprint -- this trade-off costs 30-40% of speed that can be eliminated by using `#distance3` method that assumes fingerprint to be of power=3. So the full benchmark is this one:
 
+    $ bundle exec rake compare_speed
+
     # Ruby 2.0.0
 
     load and calculate the fingerprint:
@@ -165,7 +173,7 @@ To find out these tresholds we can run a rake task with hardcoded test cases:
     DHashVips::IDHash distance3     6.720000   0.030000   6.750000 (  6.790900)
     DHashVips::IDHash distance 4   24.430000   0.130000  24.560000 ( 24.652625)
 
-macOS system MRI 2.3 has some nice bit arithmetics improvement compared to 2.0:
+macOS system MRI 2.3 seems to have some bit arithmetics improvement compared to 2.0:
 
     # Ruby 2.3.3
 
@@ -186,22 +194,26 @@ macOS system MRI 2.3 has some nice bit arithmetics improvement compared to 2.0:
 
 newer CPU (`sysctl -n machdep.cpu.brand_string #=> Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz`):
 
-    # Ruby 2.3.8p459 (2.4.6, 2.5.5 and 2.6.3 are all similar)
+    # Ruby 2.6.3p62 (2.3.8, 2.4.6 and 2.5.5 are all similar)
 
     load and calculate the fingerprint:
                               user     system      total        real
-    Dhash                 6.240000   0.240000   6.480000 (  6.510437)
-    DHashVips::DHash      0.900000   0.140000   1.040000 (  0.963216)
-    DHashVips::IDHash     0.830000   0.100000   0.930000 (  0.866190)
-    DHashVips::IDHash 4   0.840000   0.090000   0.930000 (  0.871797)
+    Dhash                 6.191731   0.230885   6.422616 (  6.428763)
+    Phamilie              5.361751   0.037524   5.399275 (  5.402553)
+    DHashVips::DHash      0.858045   0.144820   1.002865 (  0.924308)
+    DHashVips::IDHash     0.769975   0.071087   0.841062 (  0.790470)
+    DHashVips::IDHash 4   0.805311   0.077918   0.883229 (  0.825897)
 
     measure the distance (1000 times):
                                         user     system      total        real
-    Dhash hamming                   0.890000   0.000000   0.890000 (  0.894549)
-    DHashVips::DHash hamming        0.890000   0.000000   0.890000 (  0.891149)
-    DHashVips::IDHash distance      1.970000   0.010000   1.980000 (  1.983171)
-    DHashVips::IDHash distance3     1.600000   0.000000   1.600000 (  1.614572)
-    DHashVips::IDHash distance 4    3.530000   0.040000   3.570000 (  3.577088)
+    Dhash hamming                   0.845866   0.000544   0.846410 (  0.847105)
+    Phamilie distance               0.464094   0.000292   0.464386 (  0.464639)
+    DHashVips::DHash hamming        0.843819   0.000585   0.844404 (  0.844961)
+    DHashVips::IDHash distance      2.007639   0.001255   2.008894 (  2.009921)
+    DHashVips::IDHash distance3     1.643094   0.001005   1.644099 (  1.645249)
+    DHashVips::IDHash distance 4    3.458882   0.011378   3.470260 (  3.472131)
+
+Here I've added the [`phamilie` gem](https://github.com/toy/phamilie) that is DCT based (not a kind of dhash). It is slow in fingerprinting but fast in distance measurement (because it's a Ruby C extension). Previously in this document you could notice the `compare_quality` benchmark that showed it's also comparable to the IDHash quality.
 
 Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4 and 0.0.5 became incompatible, but you probably can convert them manually. I know, incompatibilities suck but if we put the version or structure information inside fingerprint it will became slow to (de)serialize and store.
 
@@ -209,11 +221,11 @@ Also note that to make `#distance` able to assume the fingerprint resolution fro
 
 OS X El Captain and rbenv may cause environment issues that would make you do things like:
 ```bash
-    ./ruby `rbenv which rake` compare_matrixes
+    $ ./ruby `rbenv which rake` compare_matrixes
 ```
 instead of just
 
-    rake compare_matrixes
+    $ rake compare_matrixes
 
 For more information on that: https://github.com/jcupitt/ruby-vips/issues/141
 
@@ -225,13 +237,13 @@ On macOS, when you do `bundle install` it may fail to install `rmagick` gem (`dh
 
 To resolve this do:
 ```bash
-brew install imagemagick@6
-LDFLAGS="-L/usr/local/opt/imagemagick@6/lib" CPPFLAGS="-I/usr/local/opt/imagemagick@6/include" bundle install
+$ brew install imagemagick@6
+$ LDFLAGS="-L/usr/local/opt/imagemagick@6/lib" CPPFLAGS="-I/usr/local/opt/imagemagick@6/include" bundle install
 ```
 
 If you get `No package 'MagickCore' found` try:
 ```bash
-PKG_CONFIG_PATH="/usr/local/Cellar/imagemagick@6/6.9.10-74/lib/pkgconfig" bundle install
+$ PKG_CONFIG_PATH="/usr/local/Cellar/imagemagick@6/6.9.10-74/lib/pkgconfig" bundle install
 ```
 
 You might need to prepend `bundle exec` to all the `rake` commands.

@@ -50,13 +50,16 @@ task :compare_kernels do |_|
   end
 end
 
-desc "Compare the quality of Dhash, DHashVips::DHash and DHashVips::IDHash -- run it only after `rake test`"
+desc "Compare the quality of Dhash, Phamilie, DHashVips::DHash, DHashVips::IDHash -- run it only after `rake test`"
 task :compare_quality do |_|
   require "dhash"
+  require "phamilie"
+  phamilie = Phamilie.new
   require_relative "lib/dhash-vips"
   require "mll"
   [
     [Dhash, :calculate, :hamming],
+    [phamilie, :fingerprint, :distance, nil, 0],
     [DHashVips::DHash, :calculate, :hamming],
     [DHashVips::IDHash, :fingerprint, :distance],
     [DHashVips::IDHash, :fingerprint, :distance, 4],
@@ -78,7 +81,7 @@ task :compare_quality do |_|
       679634ff89a31279a39f03e278bc9a01.jpg
       54192a3f65bd03163b04849e1577a40b.jpg
       6d32f57459e5b79b5deca2a361eb8c6e.jpg
-    }.map{ |filename| [filename, m.public_send(calc, download_and_keep(filename), *power)] }
+    }.map(&method(:download_and_keep)).map{ |filename| [filename, m.public_send(calc, filename, *power)] }
     table = MLL::table[m.method(dm), [hashes.map{|_|_[ii||1]}], [hashes.map{|_|_[ii||1]}]]
     # require "pp"
     # pp table
@@ -199,6 +202,8 @@ end
 desc "Benchmarks Dhash, DHashVips::DHash and DHashVips::IDHash"
 task :compare_speed do
   require "dhash"
+  require "phamilie"
+  phamilie = Phamilie.new
   require_relative "lib/dhash-vips"
 
   filenames = %w{
@@ -227,11 +232,12 @@ task :compare_speed do
   Benchmark.bm 19 do |bm|
     [
       [Dhash, :calculate],
+      [phamilie, :fingerprint],
       [DHashVips::DHash, :calculate],
       [DHashVips::IDHash, :fingerprint],
       [DHashVips::IDHash, :fingerprint, 4],
     ].each do |m, calc, power|
-      bm.report "#{m} #{power}" do
+      bm.report "#{m.is_a?(Module) ? m : m.class} #{power}" do
         hashes.push filenames.map{ |filename| m.send calc, filename, *power }
       end
     end
@@ -241,13 +247,15 @@ task :compare_speed do
   Benchmark.bm 29 do |bm|
     [
       [Dhash, :hamming],
+      [phamilie, :distance, nil, 1],
       [DHashVips::DHash, :hamming],
       [DHashVips::IDHash, :distance],
       [DHashVips::IDHash, :distance3],
       [DHashVips::IDHash, :distance, 4],
-    ].zip(hashes) do |(m, dm, power), hs|
-      bm.report "#{m} #{dm} #{power}" do
-        hs.product hs do |h1, h2|
+    ].zip(hashes) do |(m, dm, power, ii), hs|
+      bm.report "#{m.is_a?(Module) ? m : m.class} #{dm} #{power}" do
+        _ = [hs, filenames][ii || 0]
+        _.product _ do |h1, h2|
           1000.times{ m.public_send dm, h1, h2 }
         end
       end

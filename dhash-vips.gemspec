@@ -19,5 +19,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "mll"
 
   spec.add_development_dependency "rmagick", "~>2.16"
+  spec.add_development_dependency "phamilie"
   spec.add_development_dependency "dhash"
 end
