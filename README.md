@@ -74,7 +74,7 @@ Then:
 
     gem install dhash-vips
 
-If you have troubles with the `gem ruby-vips` dependency, see https://github.com/jcupitt/ruby-vips  
+If you have troubles with the `gem ruby-vips` dependency, see https://github.com/libvips/ruby-vips
 
 ## Usage
 
