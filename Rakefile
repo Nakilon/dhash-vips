@@ -60,8 +60,8 @@ task :compare_quality do |_|
     [DHashVips::DHash, :calculate, :hamming],
     [DHashVips::IDHash, :fingerprint, :distance],
     [DHashVips::IDHash, :fingerprint, :distance, 4],
-  ].each do |m, calc, dm, power|
-    puts "\n#{m} #{power}"
+  ].each do |m, calc, dm, power, ii|
+    puts "\n#{m.is_a?(Module) ? m : m.class} #{power}"
     require_relative "common"
     hashes = %w{
       71662d4d4029a3b41d47d5baf681ab9a.jpg
@@ -78,8 +78,8 @@ task :compare_quality do |_|
       679634ff89a31279a39f03e278bc9a01.jpg
       54192a3f65bd03163b04849e1577a40b.jpg
       6d32f57459e5b79b5deca2a361eb8c6e.jpg
-    }.map(&method(:download_and_keep)).map{ |filename| m.public_send calc, filename, *power }
-    table = MLL::table[m.method(dm), [hashes], [hashes]]
+    }.map{ |filename| [filename, m.public_send(calc, download_and_keep(filename), *power)] }
+    table = MLL::table[m.method(dm), [hashes.map{|_|_[ii||1]}], [hashes.map{|_|_[ii||1]}]]
     # require "pp"
     # pp table
     array = Array.new(5){ [] }
