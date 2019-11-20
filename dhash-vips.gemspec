@@ -11,10 +11,12 @@ Gem::Specification.new do |spec|
   spec.files         = `git ls-files -z`.split("\x0") - spec.test_files
   spec.require_path  = "lib"
 
-  spec.add_dependency "ruby-vips", "~>2.0.9"
+  spec.add_dependency "ruby-vips", "2.0.12"
 
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec-core"
+  spec.add_development_dependency "rmagick", "~>2.16"
   spec.add_development_dependency "dhash"
   spec.add_development_dependency "get_process_mem"
+  spec.add_development_dependency "mll"
 end

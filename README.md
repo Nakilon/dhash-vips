@@ -8,19 +8,18 @@ You may read about it in "Kind of Like That" blog post (21 January 2013): http:/
 The original idea is that you split the image into 64 segments and so there are 64 bits -- each tells if the one segment is brighter or darker than the neighbor one. Then the [Hamming distance](https://en.wikipedia.org/wiki/Hamming_distance) between fingerprints is the opposite of images similarity.
 
 There were several implementations on Github already but they all depend on ImageMagick. My implementation takes an advantage of libvips (the `ruby-vips` gem) -- it also uses the `.conv` method and in result converts image to an array of grayscale bytes almost 10 times faster:
-```
-load and calculate the fingerprint:
-                          user     system      total        real
-Dhash                13.110000   0.950000  14.060000 ( 14.537057)
-DHashVips::DHash      1.480000   0.310000   1.790000 (  1.808787)
-DHashVips::IDHash     1.080000   0.100000   1.180000 (  1.156446)
 
-measure the distance (1000 times):
-                          user     system      total        real
-Dhash hamming         1.770000   0.010000   1.780000 (  1.815612)
-DHashVips::DHash      1.810000   0.010000   1.820000 (  1.875666)
-DHashVips::IDHash     3.430000   0.020000   3.450000 (  3.499031)
-```
+    load and calculate the fingerprint:
+                              user     system      total        real
+    Dhash                13.110000   0.950000  14.060000 ( 14.537057)
+    DHashVips::DHash      1.480000   0.310000   1.790000 (  1.808787)
+    DHashVips::IDHash     1.080000   0.100000   1.180000 (  1.156446)
+
+    measure the distance (1000 times):
+                              user     system      total        real
+    Dhash hamming         1.770000   0.010000   1.780000 (  1.815612)
+    DHashVips::DHash      1.810000   0.010000   1.820000 (  1.875666)
+    DHashVips::IDHash     3.430000   0.020000   3.450000 (  3.499031)
 
 Here the `Dhash` is [another gem](https://github.com/maccman/dhash) that I used earlier in my projects.  
 The `DHashVips::DHash` is a port of it that uses vips. I would like to tell you that you can replace the `dhash` with `dhash-vips` gem right now but it appeared to have a barely noticeable issue. There is a lot of magic behind the libvips speed and resizing -- you may not notice it with unarmed eyes but when two neighbor segments are enough similar by luminosity the difference can change the sign. So I found two identical images that were just of different colorspace and size (photo by Jordan Voth):  
@@ -117,90 +116,127 @@ end
 
 These `15` and `25` numbers are found empirically and just work enough well for 8-byte hashes.  
 To find out these tresholds we can run a rake task with hardcoded test cases:
-```
-$ rake compare_quality
 
-Dhash 
-Absolutely the same image: 0..0
-Complex B/W and the same but colorful: 0
-Similar images: 12..16
-Different images: 9..43
+    $ rake compare_quality
 
-DHashVips::DHash 
-Absolutely the same image: 0..0
-Complex B/W and the same but colorful: 4
-Similar images: 10..16
-Different images: 9..42
+    Dhash 
+    Absolutely the same image: 0..0
+    Complex B/W and the same but colorful: 4
+    Similar images: 7..17
+    Different images: 9..44
 
-DHashVips::IDHash 
-Absolutely the same image: 0..0
-Complex B/W and the same but colorful: 0
-Similar images: 6..22
-Different images: 18..64
+    DHashVips::DHash 
+    Absolutely the same image: 0..0
+    Complex B/W and the same but colorful: 4
+    Similar images: 10..16
+    Different images: 9..42
 
-DHashVips::IDHash 4
-Absolutely the same image: 0..0
-Complex B/W and the same but colorful: 0
-Similar images: 78..120
-Different images: 120..213
-```
+    DHashVips::IDHash 
+    Absolutely the same image: 0..0
+    Complex B/W and the same but colorful: 0
+    Similar images: 6..22
+    Different images: 18..64
+
+    DHashVips::IDHash 4
+    Absolutely the same image: 0..0
+    Complex B/W and the same but colorful: 0
+    Similar images: 78..120
+    Different images: 120..213
 
 ### Notes
 
 * Methods were renamed from `#calculate` to `#fingerprint` and from `#hamming` to `#distance`.  
 * The `DHash#calculate` accepts `hash_size` optional parameter that is 8 by default. The `IDHash#fingerprint`'s optional parameter is called `power` and works in a bit different way: 3 means 8 and 4 means 16 -- other sizes are not supported because they don't seem to be useful (higher fingerprint resolution makes it vulnerable to image shifts and croppings, also `#distance` becomes much slower). Because IDHash's fingerprint is more complex than DHash's one it's not that straight forward to compare them so under the hood the `#distance` methods have to check the size of fingerprint -- this trade-off costs 30-40% of speed that can be eliminated by using `#distance3` method that assumes fingerprint to be of power=3. So the full benchmark is this one:
 
-```
-# Ruby 2.0.0
+    # Ruby 2.0.0
 
-load and calculate the fingerprint:
-                          user     system      total        real
-Dhash                12.400000   0.820000  13.220000 ( 13.329952)
-DHashVips::DHash      1.330000   0.230000   1.560000 (  1.509826)
-DHashVips::IDHash     1.060000   0.090000   1.150000 (  1.100332)
-DHashVips::IDHash 4   1.030000   0.080000   1.110000 (  1.089148)
+    load and calculate the fingerprint:
+                              user     system      total        real
+    Dhash                12.400000   0.820000  13.220000 ( 13.329952)
+    DHashVips::DHash      1.330000   0.230000   1.560000 (  1.509826)
+    DHashVips::IDHash     1.060000   0.090000   1.150000 (  1.100332)
+    DHashVips::IDHash 4   1.030000   0.080000   1.110000 (  1.089148)
 
-measure the distance (1000 times):
-                                    user     system      total        real
-Dhash hamming                   3.140000   0.020000   3.160000 (  3.179392)
-DHashVips::DHash hamming        3.040000   0.020000   3.060000 (  3.095190)
-DHashVips::IDHash distance      8.170000   0.040000   8.210000 (  8.279950)
-DHashVips::IDHash distance3     6.720000   0.030000   6.750000 (  6.790900)
-DHashVips::IDHash distance 4   24.430000   0.130000  24.560000 ( 24.652625)
-```
-(macOS system MRI 2.3 has some nice bit arithmetics improvement compared to 2.0)
-```
-# Ruby 2.3.3
+    measure the distance (1000 times):
+                                        user     system      total        real
+    Dhash hamming                   3.140000   0.020000   3.160000 (  3.179392)
+    DHashVips::DHash hamming        3.040000   0.020000   3.060000 (  3.095190)
+    DHashVips::IDHash distance      8.170000   0.040000   8.210000 (  8.279950)
+    DHashVips::IDHash distance3     6.720000   0.030000   6.750000 (  6.790900)
+    DHashVips::IDHash distance 4   24.430000   0.130000  24.560000 ( 24.652625)
 
-load and calculate the fingerprint:
-                          user     system      total        real
-Dhash                13.110000   0.950000  14.060000 ( 14.537057)
-DHashVips::DHash      1.480000   0.310000   1.790000 (  1.808787)
-DHashVips::IDHash     1.080000   0.100000   1.180000 (  1.156446)
-DHashVips::IDHash 4   1.030000   0.090000   1.120000 (  1.076117)
+macOS system MRI 2.3 has some nice bit arithmetics improvement compared to 2.0:
 
-measure the distance (1000 times):
-                                    user     system      total        real
-Dhash hamming                   1.770000   0.010000   1.780000 (  1.815612)
-DHashVips::DHash hamming        1.810000   0.010000   1.820000 (  1.875666)
-DHashVips::IDHash distance      4.250000   0.020000   4.270000 (  4.350071)
-DHashVips::IDHash distance3     3.430000   0.020000   3.450000 (  3.499031)
-DHashVips::IDHash distance 4    8.210000   0.110000   8.320000 (  8.510735)
-```
+    # Ruby 2.3.3
+
+    load and calculate the fingerprint:
+                              user     system      total        real
+    Dhash                13.110000   0.950000  14.060000 ( 14.537057)
+    DHashVips::DHash      1.480000   0.310000   1.790000 (  1.808787)
+    DHashVips::IDHash     1.080000   0.100000   1.180000 (  1.156446)
+    DHashVips::IDHash 4   1.030000   0.090000   1.120000 (  1.076117)
+
+    measure the distance (1000 times):
+                                        user     system      total        real
+    Dhash hamming                   1.770000   0.010000   1.780000 (  1.815612)
+    DHashVips::DHash hamming        1.810000   0.010000   1.820000 (  1.875666)
+    DHashVips::IDHash distance      4.250000   0.020000   4.270000 (  4.350071)
+    DHashVips::IDHash distance3     3.430000   0.020000   3.450000 (  3.499031)
+    DHashVips::IDHash distance 4    8.210000   0.110000   8.320000 (  8.510735)
+
+newer CPU (`sysctl -n machdep.cpu.brand_string #=> Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz`):
+
+    # Ruby 2.3.8p459 (2.4.6, 2.5.5 and 2.6.3 are all similar)
+
+    load and calculate the fingerprint:
+                              user     system      total        real
+    Dhash                 6.240000   0.240000   6.480000 (  6.510437)
+    DHashVips::DHash      0.900000   0.140000   1.040000 (  0.963216)
+    DHashVips::IDHash     0.830000   0.100000   0.930000 (  0.866190)
+    DHashVips::IDHash 4   0.840000   0.090000   0.930000 (  0.871797)
+
+    measure the distance (1000 times):
+                                        user     system      total        real
+    Dhash hamming                   0.890000   0.000000   0.890000 (  0.894549)
+    DHashVips::DHash hamming        0.890000   0.000000   0.890000 (  0.891149)
+    DHashVips::IDHash distance      1.970000   0.010000   1.980000 (  1.983171)
+    DHashVips::IDHash distance3     1.600000   0.000000   1.600000 (  1.614572)
+    DHashVips::IDHash distance 4    3.530000   0.040000   3.570000 (  3.577088)
 
 Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4 and 0.0.5 became incompatible, but you probably can convert them manually. I know, incompatibilities suck but if we put the version or structure information inside fingerprint it will became slow to (de)serialize and store.
 
 ## Troubleshooting
 
 OS X El Captain and rbenv may cause environment issues that would make you do things like:
-```
-./ruby `rbenv which rake` compare_matrixes
+```bash
+    ./ruby `rbenv which rake` compare_matrixes
 ```
 instead of just
-```
-rake compare_matrixes
-```
+
+    rake compare_matrixes
+
 For more information on that: https://github.com/jcupitt/ruby-vips/issues/141
+
+## Development
+
+On macOS, when you do `bundle install` it may fail to install `rmagick` gem (`dhash` gem dependency) saying:
+
+    ERROR: Can't install RMagick 4.0.0. Can't find magick/MagickCore.h.
+
+To resolve this do:
+```bash
+brew install imagemagick@6
+LDFLAGS="-L/usr/local/opt/imagemagick@6/lib" CPPFLAGS="-I/usr/local/opt/imagemagick@6/include" bundle install
+```
+
+If you get `No package 'MagickCore' found` try:
+```bash
+PKG_CONFIG_PATH="/usr/local/Cellar/imagemagick@6/6.9.10-74/lib/pkgconfig" bundle install
+```
+
+You might need to prepend `bundle exec` to all the `rake` commands.
+
+Execute the `rake compare_quality` at least once before executing other rake tasks because it's currently the only one that downloads the test images.
 
 ## Credits
 
