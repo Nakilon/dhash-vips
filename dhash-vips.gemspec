@@ -15,6 +15,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec-core"
+  spec.add_development_dependency "rspec-expectations"  # for aggregate_failures
   spec.add_development_dependency "get_process_mem"
   spec.add_development_dependency "mll"
 
