@@ -25,54 +25,54 @@ require "dhash-vips"
     #  [45, 51, 55, 57, 40, 41, 0, 0]]
 ].each do |lib, dm, calc, min_similar, max_similar, min_not_similar, max_not_similar, bw_exceptional|
 
-describe lib do
+  describe lib do
 
-  # these are false positive by idhash
-  # 6d97739b4a08f965dc9239dd24382e96.jpg
-  # 1b1d4bde376084011d027bba1c047a4b.jpg
-  [
-    [ %w{
-      1d468d064d2e26b5b5de9a0241ef2d4b.jpg 92d90b8977f813af803c78107e7f698e.jpg
-      309666c7b45ecbf8f13e85a0bd6b0a4c.jpg 3f9f3db06db20d1d9f8188cd753f6ef4.jpg
-      df0a3b93e9412536ee8a11255f974141.jpg 679634ff89a31279a39f03e278bc9a01.jpg
-    }, min_similar, max_similar], # slightly silimar images
-    [ %w{
-      71662d4d4029a3b41d47d5baf681ab9a.jpg ad8a37f872956666c3077a3e9e737984.jpg
-    }, bw_exceptional, bw_exceptional], # these are the same photo but of different size and colorspace
-  ].each do |images, min, max|
+    # these are false positive by idhash
+    # 6d97739b4a08f965dc9239dd24382e96.jpg
+    # 1b1d4bde376084011d027bba1c047a4b.jpg
+    [
+      [ %w{
+        1d468d064d2e26b5b5de9a0241ef2d4b.jpg 92d90b8977f813af803c78107e7f698e.jpg
+        309666c7b45ecbf8f13e85a0bd6b0a4c.jpg 3f9f3db06db20d1d9f8188cd753f6ef4.jpg
+        df0a3b93e9412536ee8a11255f974141.jpg 679634ff89a31279a39f03e278bc9a01.jpg
+      }, min_similar, max_similar], # slightly silimar images
+      [ %w{
+        71662d4d4029a3b41d47d5baf681ab9a.jpg ad8a37f872956666c3077a3e9e737984.jpg
+      }, bw_exceptional, bw_exceptional], # these are the same photo but of different size and colorspace
+    ].each do |images, min, max|
 
-    require "fileutils"
-    require "digest" if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("2.5.0")
-    require "mll"
+      require "fileutils"
+      require "digest" if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("2.5.0")
+      require "mll"
 
-    require_relative "../common"
-    images = images.map &method(:download_and_keep)
+      require_relative "common"
+      images = images.map &method(:download_and_keep)
 
-    hashes = images.map &lib.method(calc)
-    table = MLL::table[lib.method(dm), [hashes], [hashes]]
+      hashes = images.map &lib.method(calc)
+      table = MLL::table[lib.method(dm), [hashes], [hashes]]
 
-    # require "pp"
-    # STDERR.puts ""
-    # pp table, STDERR
-    # STDERR.puts ""
+      # require "pp"
+      # STDERR.puts ""
+      # pp table, STDERR
+      # STDERR.puts ""
 
-    hashes.size.times.to_a.repeated_combination(2) do |i, j|
-      it do
-        case
-        when i == j
-          assert_predicate table[i][j], :zero?
-        when (j - i).abs == 1 && (i + j - 1) % 4 == 0
-          # STDERR.puts [table[i][j], min, max].inspect
-          assert_includes min..max, table[i][j]
-        else
-          # STDERR.puts [table[i][j], min_not_similar, max_not_similar].inspect
-          assert_includes min_not_similar..max_not_similar, table[i][j]
+      hashes.size.times.to_a.repeated_combination(2) do |i, j|
+        it do
+          case
+          when i == j
+            assert_predicate table[i][j], :zero?
+          when (j - i).abs == 1 && (i + j - 1) % 4 == 0
+            # STDERR.puts [table[i][j], min, max].inspect
+            assert_includes min..max, table[i][j]
+          else
+            # STDERR.puts [table[i][j], min_not_similar, max_not_similar].inspect
+            assert_includes min_not_similar..max_not_similar, table[i][j]
+          end
         end
       end
-    end
 
     end
 
-end
+  end
 
 end
