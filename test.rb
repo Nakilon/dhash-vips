@@ -5,24 +5,28 @@ require "dhash-vips"
 # TODO tests about `fingerprint(4)`
 
 [
-  [DHashVips::DHash, :hamming, :calculate, 10, 16, 21, 42, 4],
-    # [[0, 14, 26, 27, 31, 27, 32, 28],
-    #  [14, 0, 28, 25, 39, 35, 32, 32],
-    #  [26, 28, 0, 13, 35, 41, 28, 30],
-    #  [27, 25, 13, 0, 36, 36, 31, 35],
-    #  [31, 39, 35, 36, 0, 16, 33, 33],
-    #  [27, 35, 41, 36, 16, 0, 41, 41],
-    #  [32, 32, 28, 31, 33, 41, 0, 10],
-    #  [28, 32, 30, 35, 33, 41, 10, 0]]
-  [DHashVips::IDHash, :distance, :fingerprint, 6, 22, 30, 64, 0],
-    # [[0, 17, 32, 35, 57, 45, 51, 50],
-    #  [17, 0, 30, 35, 58, 46, 54, 55],
-    #  [32, 30, 0, 9, 47, 54, 45, 41],
-    #  [35, 35, 9, 0, 54, 64, 42, 40],
-    #  [57, 58, 47, 54, 0, 22, 43, 45],
-    #  [45, 46, 54, 64, 22, 0, 53, 54],
-    #  [51, 54, 45, 42, 43, 53, 0, 6],
-    #  [50, 55, 41, 40, 45, 54, 6, 0]]
+  [DHashVips::DHash, :hamming, :calculate, 2, 16, 21, 43, 4],
+    # [[0, 14, 26, 27, 31, 27, 32, 28, 43, 43],
+    #  [14, 0, 28, 25, 39, 35, 32, 32, 43, 43],
+    #  [26, 28, 0, 13, 35, 41, 28, 30, 41, 41],
+    #  [27, 25, 13, 0, 36, 36, 31, 35, 40, 40],
+    #  [31, 39, 35, 36, 0, 16, 33, 33, 40, 40],
+    #  [27, 35, 41, 36, 16, 0, 41, 41, 38, 38],
+    #  [32, 32, 28, 31, 33, 41, 0, 10, 27, 25],
+    #  [28, 32, 30, 35, 33, 41, 10, 0, 27, 27],
+    #  [43, 43, 41, 40, 40, 38, 27, 27, 0, 2],
+    #  [43, 43, 41, 40, 40, 38, 25, 27, 2, 0]]
+  [DHashVips::IDHash, :distance, :fingerprint, 6, 22, 30, 65, 0],
+    # [[0, 17, 32, 35, 57, 45, 51, 50, 48, 47],
+    #  [17, 0, 30, 35, 58, 46, 54, 55, 47, 51],
+    #  [32, 30, 0, 9, 47, 54, 45, 41, 65, 62],
+    #  [35, 35, 9, 0, 54, 64, 42, 40, 57, 56],
+    #  [57, 58, 47, 54, 0, 22, 43, 45, 64, 61],
+    #  [45, 46, 54, 64, 22, 0, 53, 54, 55, 54],
+    #  [51, 54, 45, 42, 43, 53, 0, 6, 33, 35],
+    #  [50, 55, 41, 40, 45, 54, 6, 0, 38, 41],
+    #  [48, 47, 65, 57, 64, 55, 33, 38, 0, 9],
+    #  [47, 51, 62, 56, 61, 54, 35, 41, 9, 0]]
 ].each do |lib, dm, calc, min_similar, max_similar, min_not_similar, max_not_similar, bw_exceptional|
 
   describe lib do
@@ -36,6 +40,7 @@ require "dhash-vips"
         309666c7b45ecbf8f13e85a0bd6b0a4c.jpg 3f9f3db06db20d1d9f8188cd753f6ef4.jpg
         679634ff89a31279a39f03e278bc9a01.jpg df0a3b93e9412536ee8a11255f974141.jpg
         54192a3f65bd03163b04849e1577a40b.jpg 6d32f57459e5b79b5deca2a361eb8c6e.jpg
+        4b62e0eef58bfbc8d0d2fbf2b9d05483.jpg b8eb0ca91855b657f12fb3d627d45c53.jpg
       }, min_similar, max_similar], # slightly silimar images
       [ %w{
         71662d4d4029a3b41d47d5baf681ab9a.jpg ad8a37f872956666c3077a3e9e737984.jpg
@@ -52,10 +57,10 @@ require "dhash-vips"
       hashes = images.map &lib.method(calc)
       table = MLL::table[lib.method(dm), [hashes], [hashes]]
 
-      # require "pp"
-      # STDERR.puts ""
-      # PP.pp table, STDERR
-      # STDERR.puts ""
+      require "pp"
+      STDERR.puts ""
+      PP.pp table, STDERR
+      STDERR.puts ""
 
       hashes.size.times.to_a.repeated_combination(2) do |i, j|
         it do
