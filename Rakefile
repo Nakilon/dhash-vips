@@ -72,6 +72,7 @@ task :compare_quality do |_|
         4b62e0eef58bfbc8d0d2fbf2b9d05483.jpg b8eb0ca91855b657f12fb3d627d45c53.jpg
         21cd9a6986d98976b6b4655e1de7baf4.jpg 9b158c0d4953d47171a22ed84917f812.jpg
         9c2c240ec02356472fb532f404d28dde.jpg fc762fa286489d8afc80adc8cdcb125e.jpg
+        7a833d873f8d49f12882e86af1cc6b79.jpg ac033cf01a3941dd1baa876082938bc9.jpg
       }.map(&method(:download_and_keep)).map{ |filename| [filename, m.public_send(calc, filename, *power)] }
       table = MLL::table[m.method(dm), [hashes.map{|_|_[ii||1]}], [hashes.map{|_|_[ii||1]}]]
       report = Struct.new(:same, :bw, :sim, :not_sim).new [], [], [], []
