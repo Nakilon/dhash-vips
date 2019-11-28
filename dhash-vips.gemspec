@@ -14,8 +14,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "ruby-vips", "~>2.0.12"
 
   spec.add_development_dependency "rake"
-  spec.add_development_dependency "rspec-core"
-  spec.add_development_dependency "rspec-expectations"  # for aggregate_failures
+  spec.add_development_dependency "minitest"
   spec.add_development_dependency "get_process_mem"
   spec.add_development_dependency "mll"
 

@@ -1,7 +1,8 @@
+require "minitest/autorun"
+
 require "dhash-vips"
 
 # TODO tests about `fingerprint(4)`
-# TODO switch to Minitest?
 
 [
   [DHashVips::DHash, :hamming, :calculate, 13, 16, 21, 42, 4],
@@ -47,8 +48,8 @@ describe lib do
     require_relative "../common"
     images = images.map &method(:download_and_keep)
 
-    hashes = images.map &described_class.method(calc)
-    table = MLL::table[described_class.method(dm), [hashes], [hashes]]
+    hashes = images.map &lib.method(calc)
+    table = MLL::table[lib.method(dm), [hashes], [hashes]]
 
     # require "pp"
     # STDERR.puts ""
@@ -56,16 +57,16 @@ describe lib do
     # STDERR.puts ""
 
     hashes.size.times.to_a.repeated_combination(2) do |i, j|
-      example do
+      it do
         case
         when i == j
-          expect(table[i][j]).to eq 0
+          assert_predicate table[i][j], :zero?
         when (j - i).abs == 1 && (i + j - 1) % 4 == 0
           # STDERR.puts [table[i][j], min, max].inspect
-          expect(table[i][j]).to be_between(min, max).inclusive
+          assert_includes min..max, table[i][j]
         else
           # STDERR.puts [table[i][j], min_not_similar, max_not_similar].inspect
-          expect(table[i][j]).to be_between(min_not_similar, max_not_similar).inclusive
+          assert_includes min_not_similar..max_not_similar, table[i][j]
         end
       end
     end
