@@ -71,23 +71,23 @@ task :compare_quality do |_|
         54192a3f65bd03163b04849e1577a40b.jpg 6d32f57459e5b79b5deca2a361eb8c6e.jpg
       }.map(&method(:download_and_keep)).map{ |filename| [filename, m.public_send(calc, filename, *power)] }
       table = MLL::table[m.method(dm), [hashes.map{|_|_[ii||1]}], [hashes.map{|_|_[ii||1]}]]
-      array = Array.new(5){ [] }
+      report = Struct.new(:same, :bw, :sim, :not_sim).new [], [], [], []
       hashes.size.times.to_a.repeated_combination(2) do |i, j|
-        array[
+        report[
           case
-          when i == j ; 0
-          when [i, j] == [0, 1] ; 1
-          when i > 3 && i + 1 == j && i % 2 == 0; 2
-          else ; 3
+          when i == j                            ; :same
+          when [i, j] == [0, 1]                  ; :bw
+          when i > 3 && i + 1 == j && i % 2 == 0 ; :sim
+          else                                   ; :not_sim
           end
         ].push table[i][j]
       end
       [
         "#{m.is_a?(Module) ? m : m.class}#{" #{power}" if power}",
-        array[0].minmax.join(".."),
-        array[1][0],
-        array[2].minmax.join(".."),
-        array[3].minmax.join(".."),
+        report.same.   minmax.join(".."),
+        report.bw[0],
+        report.sim.    minmax.join(".."),
+        report.not_sim.minmax.join(".."),
       ]
     end,
   ].transpose, spacings: [2, 0], alignment: :right )
