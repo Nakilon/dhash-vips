@@ -122,7 +122,7 @@ To find out these tresholds we can run a rake task with hardcoded test cases:
                           Dhash   Phamilie   DHashVips::DHash   DHashVips::IDHash   DHashVips::IDHash 4  
         The same image:    0..0       0..0               0..0                0..0                  0..0  
     'Jordan Voth case':       4          2                  4                   0                     0  
-        Similar images:   1..17     14..32              2..16               6..22               53..120  
+        Similar images:   1..17     14..32              2..19               6..22               53..124  
       Different images:   9..47     22..42              9..47              18..65              120..233  
 
 ### Notes
