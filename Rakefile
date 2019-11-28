@@ -42,8 +42,9 @@ task :compare_kernels do |_|
   end
 end
 
-desc "Compare the quality of Dhash, Phamilie, DHashVips::DHash, DHashVips::IDHash -- run it only after `rake test`"
-task :compare_quality do |_|
+desc "Compare the quality of Dhash, Phamilie, DHashVips::DHash, DHashVips::IDHash"
+# in this test we want to know not that photos are the same but rather that they are from the same photosession
+task :compare_quality do
   require "dhash"
   require "phamilie"
   phamilie = Phamilie.new
@@ -51,7 +52,7 @@ task :compare_quality do |_|
   require "mll"
 
   puts MLL::grid.call( [
-    ["", "The same image:", "'Jordan Voth case':", "Similar images:", "Different images:"],
+    ["", "The same image:", "'Jordan Voth case':", "Similar images:", "Different images:", "1/FMI^2 =", "FP, FN ="],
     *[
       [Dhash, :calculate, :hamming],
       [phamilie, :fingerprint, :distance, nil, 0],
@@ -86,15 +87,24 @@ task :compare_quality do |_|
           end
         ].push table[i][j]
       end
+      min, max = [*report.sim, *report.not_sim].minmax
+      fmi, fp, fn = (min..max+1).map do |b|
+        fp = report.not_sim.count{ |_| _ < b }
+        tp = report.sim.count{ |_| _ < b }
+        fn = report.sim.count{ |_| _ >= b }
+        [((tp + fp) * (tp + fn)).fdiv(tp * tp), fp, fn]
+      end.reject{ |_,| _.nan? }.min_by(&:first)
       [
-        "#{m.is_a?(Module) ? m : m.class}#{" #{power}" if power}",
+        "#{m.is_a?(Module) ? m : m.class}#{"(#{power})" if power}",
         report.same.   minmax.join(".."),
         report.bw[0],
         report.sim.    minmax.join(".."),
         report.not_sim.minmax.join(".."),
+        fmi.round(3),
+        [fp, fn]
       ]
     end,
-  ].transpose, spacings: [2, 0], alignment: :right )
+  ].transpose, spacings: [1.5, 0], alignment: :right )
 end
 
 # ruby -c Rakefile && rm -f ab.png && rake compare_images -- fc762fa286489d8afc80adc8cdcb125e.jpg 9c2c240ec02356472fb532f404d28dde.jpg 2>/dev/null && ql ab.png
@@ -220,7 +230,7 @@ task :compare_speed do
   end
 
   require "benchmark"
-  puts "load and calculate the fingerprint:"
+  puts "load the image and calculate the fingerprint:"
   hashes = []
   Benchmark.bm 19 do |bm|
     [
