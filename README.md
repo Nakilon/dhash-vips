@@ -119,35 +119,11 @@ To find out these tresholds we can run a rake task with hardcoded test cases:
 
     $ rake compare_quality
 
-    Dhash 
-    Absolutely the same image: 0..0
-    Complex B/W and the same but colorful: 4
-    Similar images: 7..17
-    Different images: 9..44
-
-    Phamilie 
-    Absolutely the same image: 0..0
-    Complex B/W and the same but colorful: 2
-    Similar images: 14..28
-    Different images: 22..40
-
-    DHashVips::DHash 
-    Absolutely the same image: 0..0
-    Complex B/W and the same but colorful: 4
-    Similar images: 10..16
-    Different images: 9..42
-
-    DHashVips::IDHash 
-    Absolutely the same image: 0..0
-    Complex B/W and the same but colorful: 0
-    Similar images: 6..22
-    Different images: 18..64
-
-    DHashVips::IDHash 4
-    Absolutely the same image: 0..0
-    Complex B/W and the same but colorful: 0
-    Similar images: 78..120
-    Different images: 120..213
+                          Dhash   Phamilie   DHashVips::DHash   DHashVips::IDHash   DHashVips::IDHash 4  
+        The same image:    0..0       0..0               0..0                0..0                  0..0  
+    'Jordan Voth case':       4          2                  4                   0                     0  
+        Similar images:   7..17     14..28             10..16               6..22               78..120  
+      Different images:   9..44     22..40              9..42              18..64              120..213  
 
 ### Notes
 

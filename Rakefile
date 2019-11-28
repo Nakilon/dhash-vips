@@ -1,14 +1,6 @@
 STDOUT.sync = true
+require "pp"
 
-require "bundler/gem_tasks"
-
-
-task :default => %w{ spec }
-
-require "rspec/core/rake_task"
-RSpec::Core::RakeTask.new :spec do |t|
-  t.verbose = false
-end
 
 
 visualize_hash = lambda do |hash|
@@ -57,34 +49,28 @@ task :compare_quality do |_|
   phamilie = Phamilie.new
   require_relative "lib/dhash-vips"
   require "mll"
-  [
+
+  puts MLL::grid.call( [
+    ["", "The same image:", "'Jordan Voth case':", "Similar images:", "Different images:"],
+  *[
     [Dhash, :calculate, :hamming],
     [phamilie, :fingerprint, :distance, nil, 0],
     [DHashVips::DHash, :calculate, :hamming],
     [DHashVips::IDHash, :fingerprint, :distance],
     [DHashVips::IDHash, :fingerprint, :distance, 4],
-  ].each do |m, calc, dm, power, ii|
-    puts "\n#{m.is_a?(Module) ? m : m.class} #{power}"
+  ].map do |m, calc, dm, power, ii|
     require_relative "common"
     hashes = %w{
-      71662d4d4029a3b41d47d5baf681ab9a.jpg
-      ad8a37f872956666c3077a3e9e737984.jpg
+      71662d4d4029a3b41d47d5baf681ab9a.jpg ad8a37f872956666c3077a3e9e737984.jpg
 
-      6d97739b4a08f965dc9239dd24382e96.jpg
-      1b1d4bde376084011d027bba1c047a4b.jpg
+      6d97739b4a08f965dc9239dd24382e96.jpg 1b1d4bde376084011d027bba1c047a4b.jpg
 
-      1d468d064d2e26b5b5de9a0241ef2d4b.jpg
-      92d90b8977f813af803c78107e7f698e.jpg
-      309666c7b45ecbf8f13e85a0bd6b0a4c.jpg
-      3f9f3db06db20d1d9f8188cd753f6ef4.jpg
-      df0a3b93e9412536ee8a11255f974141.jpg
-      679634ff89a31279a39f03e278bc9a01.jpg
-      54192a3f65bd03163b04849e1577a40b.jpg
-      6d32f57459e5b79b5deca2a361eb8c6e.jpg
+      1d468d064d2e26b5b5de9a0241ef2d4b.jpg 92d90b8977f813af803c78107e7f698e.jpg
+      309666c7b45ecbf8f13e85a0bd6b0a4c.jpg 3f9f3db06db20d1d9f8188cd753f6ef4.jpg
+      df0a3b93e9412536ee8a11255f974141.jpg 679634ff89a31279a39f03e278bc9a01.jpg
+      54192a3f65bd03163b04849e1577a40b.jpg 6d32f57459e5b79b5deca2a361eb8c6e.jpg
     }.map(&method(:download_and_keep)).map{ |filename| [filename, m.public_send(calc, filename, *power)] }
     table = MLL::table[m.method(dm), [hashes.map{|_|_[ii||1]}], [hashes.map{|_|_[ii||1]}]]
-    # require "pp"
-    # pp table
     array = Array.new(5){ [] }
     hashes.size.times.to_a.repeated_combination(2) do |i, j|
       array[
@@ -96,12 +82,15 @@ task :compare_quality do |_|
         end
       ].push table[i][j]
     end
-    # p array.map &:sort
-    puts "Absolutely the same image: #{array[0].minmax.join ".."}"
-    puts "Complex B/W and the same but colorful: #{array[1][0]}"
-    puts "Similar images: #{array[2].minmax.join ".."}"
-    puts "Different images: #{array[3].minmax.join ".."}"
-  end
+    [
+      "#{m.is_a?(Module) ? m : m.class}#{" #{power}" if power}",
+      array[0].minmax.join(".."),
+      array[1][0],
+      array[2].minmax.join(".."),
+      array[3].minmax.join(".."),
+    ]
+  end,
+  ].transpose, spacings: [2, 0], alignment: :right )
 end
 
 # ruby -c Rakefile && rm -f ab.png && rake compare_images -- fc762fa286489d8afc80adc8cdcb125e.jpg 9c2c240ec02356472fb532f404d28dde.jpg 2>/dev/null && ql ab.png

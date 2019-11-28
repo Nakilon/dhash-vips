@@ -16,9 +16,11 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake"
   spec.add_development_dependency "minitest"
   spec.add_development_dependency "get_process_mem"
-  spec.add_development_dependency "mll"
 
   spec.add_development_dependency "rmagick", "~>2.16"
   spec.add_development_dependency "phamilie"
   spec.add_development_dependency "dhash"
+
+  spec.add_development_dependency "mll"
+  spec.add_development_dependency "byebug"
 end
