@@ -40,7 +40,6 @@ describe lib do
     }, bw_exceptional, bw_exceptional], # these are the same photo but of different size and colorspace
   ].each do |images, min, max|
 
-  example do
     require "fileutils"
     require "digest" if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("2.5.0")
     require "mll"
@@ -56,8 +55,8 @@ describe lib do
     # pp table, STDERR
     # STDERR.puts ""
 
-    aggregate_failures do
-      hashes.size.times.to_a.repeated_combination(2) do |i, j|
+    hashes.size.times.to_a.repeated_combination(2) do |i, j|
+      example do
         case
         when i == j
           expect(table[i][j]).to eq 0
@@ -69,13 +68,10 @@ describe lib do
           expect(table[i][j]).to be_between(min_not_similar, max_not_similar).inclusive
         end
       end
+    end
 
     end
 
-  end
-
-  end
-
-  end
+end
 
 end
