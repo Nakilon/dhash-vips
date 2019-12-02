@@ -1,3 +1,8 @@
 /Gemfile.lock
 /images/
 /benchmark/
+
+/Makefile
+/mkmf.log
+/idhashdist.bundle
+/idhashdist.o
