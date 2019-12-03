@@ -1,16 +1,7 @@
-// $ bundle exec ruby extconf.rb && rm -f idhashdist.o && make && ruby ./temp.rb
-
-// (byebug) hashes[0]
-// 27362028616592833077810614538336061650596602259623245623188871925927275101952
-// (byebug) hashes[1]
-// 57097733966917585112089915289446881218887831888508524872740133297073405558528
-// (byebug) DHashVips::IDHash.distance hashes[0], hashes[1]
-// 17
-
 // #include <ruby.h>
 #include <bignum.c>
 
-VALUE idhash_dist(VALUE a, VALUE b){
+static VALUE idhash_distance(VALUE self, VALUE a, VALUE b){
     BDIGIT* tempd;
     long i, an = BIGNUM_LEN(a), bn = BIGNUM_LEN(b), templ, acc = 0;
     BDIGIT* as = BDIGITS(a);
@@ -29,21 +20,8 @@ VALUE idhash_dist(VALUE a, VALUE b){
     }
     RB_GC_GUARD(a);
     RB_GC_GUARD(b);
-    return acc;
+    return INT2FIX(acc);
 }
-
-static VALUE qweqwe(VALUE self, VALUE a, VALUE b) {
-  // ((a ^ b) & (a | b) >> 128).to_s(2).count "1"
-
-  // return INT2NUM(3);
-  // int sum = 0;
-  // for (int pos = RARRAY_LEN(arr1); pos--; ) {
-  //   sum += fix_abs(rb_ary_entry(arr1, pos) -
-  //                  rb_ary_entry(arr2, pos));
-  // }
-  // return INT2NUM(sum);
-
-  return INT2NUM(idhash_dist(a, b));
 
   // return a;
   // return rb_big_and(a, b);
@@ -61,8 +39,9 @@ static VALUE qweqwe(VALUE self, VALUE a, VALUE b) {
   // return rb_big_and(rb_big_xor(a, b), rb_big_rshift(rb_big_or(a, b), LONG2FIX(128L)));
   // return idhash_and(idhash_xor(a, b), idhash_rshift(idhash_or(a, b), LONG2FIX(128L)));
   // return idhash_popcount(self, idhash_and(idhash_xor(a, b), idhash_rshift(idhash_or(a, b), LONG2FIX(128L))));
-}
 
-void Init_idhashdist() {
-  rb_define_global_function("dist", qweqwe, 2);
+void Init_idhash() {
+  VALUE m = rb_define_module("DHashVips");
+  VALUE mm = rb_define_module_under(m, "IDHash");
+  rb_define_module_function(mm, "distance3_c", idhash_distance, 2);
 }

@@ -1,7 +1,15 @@
+# (byebug) hashes[0]
+# 27362028616592833077810614538336061650596602259623245623188871925927275101952
+# (byebug) hashes[1]
+# 57097733966917585112089915289446881218887831888508524872740133297073405558528
+# (byebug) DHashVips::IDHash.distance hashes[0], hashes[1]
+# 17
+
+# $ bundle exec ruby extconf.rb && rm -f idhash.o && make && ruby -r./idhashdist ./temp.rb
+# require_relative "idhashdist"
+
 a, b = 27362028616592833077810614538336061650596602259623245623188871925927275101952, 57097733966917585112089915289446881218887831888508524872740133297073405558528
 f = ->a,b{ ((a ^ b) & (a | b) >> 128).to_s(2).count(?1) }
-
-require_relative "idhashdist"
 
 p as = [a.to_s(16).rjust(64,?0)].pack("H*").unpack("N*")
 p bs = [b.to_s(16).rjust(64,?0)].pack("H*").unpack("N*")

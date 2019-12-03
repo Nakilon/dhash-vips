@@ -29,8 +29,16 @@ module DHashVips
   module IDHash
     extend self
 
-    def distance3 a, b
+    def distance3_ruby a, b
       return ((a ^ b) & (a | b) >> 128).to_s(2).count "1"
+    end
+    require "../idhash"
+    def distance3 a, b
+      if respond_to?(:distance3_c) && s1.is_a?(Bignum) && s2.is_a?(Bignum)
+        distance3_c a, b
+      else
+        distance3_ruby a, b
+      end
     end
     def distance a, b
       size_a, size_b = [a, b].map do |x|

@@ -7,9 +7,10 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/nakilon/dhash-vips"
   spec.license       = "MIT"
 
-  spec.test_files    = %w{ spec }
+  spec.test_files    = %w{ test.rb }
   spec.files         = `git ls-files -z`.split("\x0") - spec.test_files
   spec.require_path  = "lib"
+  spec.extensions    = %w{ extconf.rb }
 
   spec.add_dependency "ruby-vips", "~>2.0.12"
 
