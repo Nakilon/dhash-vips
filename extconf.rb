@@ -24,11 +24,11 @@ end
 
 # Cases to check:
 # 0. all is ok
-# 1. not macOS && rbenv
-# 2. `` error and so abort
-# 3. exception in append_cppflags
-# 4. failed compilation
-# 5. failed tests
-# `rm -rf idhash.o idhash.bundle pkg && bundle exec rake install` # idk why errors
-# `rm -f idhash.o idhash.bundle Makefile && ruby extconf.rb && make`
+# `rm -rf idhash.o idhash.bundle pkg && bundle exec rake install`    # w/o ext  # ["/Users/nakilon/_/dhash-vips/lib/dhash-vips.rb", 32]
+# `rm -f idhash.o idhash.bundle Makefile && ruby extconf.rb && make` # with ext # ["/Users/nakilon/_/dhash-vips/lib/dhash-vips.rb", 40]
 # `bundle exec rake -rdhash-vips -e "p DHashVips::IDHash.method(:distance3).source_location"`
+# 1. not macOS && rbenv
+# 2. fail during append_cppflags
+# 3. failed compilation
+# 4. failed tests
+
