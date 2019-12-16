@@ -1,8 +1,11 @@
 /Gemfile.lock
 /images/
 /benchmark/
+/pkg/
 
 /Makefile
 /mkmf.log
-/idhashdist.bundle
-/idhashdist.o
+/idhash.bundle
+/idhash.o
+
+/.byebug_history

@@ -30,14 +30,19 @@ module DHashVips
     extend self
 
     def distance3_ruby a, b
-      return ((a ^ b) & (a | b) >> 128).to_s(2).count "1"
+      ((a ^ b) & (a | b) >> 128).to_s(2).count "1"
     end
-    require "../idhash"
-    def distance3 a, b
-      if respond_to?(:distance3_c) && s1.is_a?(Bignum) && s2.is_a?(Bignum)
-        distance3_c a, b
-      else
-        distance3_ruby a, b
+    begin
+      require_relative "../idhash.bundle"
+    rescue LoadError
+      alias_method :distance3, :distance3_ruby
+    else
+      def distance3 a, b
+        if a.is_a?(Bignum) && b.is_a?(Bignum)
+          distance3_c a, b
+        else
+          distance3_ruby a, b
+        end
       end
     end
     def distance a, b
@@ -47,6 +52,7 @@ module DHashVips
         #      but also 31, 30 happens for MRI 2.3
         x.size <= 32 ? 8 : 16
       end
+      return distance3 a, b if [8, 8] == [size_a, size_b]
       fail "fingerprints were taken with different `power` param: #{size_a} and #{size_b}" if size_a != size_b
       ((a ^ b) & (a | b) >> 2 * size_a * size_a).to_s(2).count "1"
     end

@@ -113,10 +113,11 @@ end
                 1/FMI^2 =    1.25       4.0             1.556               1.25                 1.306 
                  FP, FN =  [2, 0]    [0, 6]            [1, 2]             [2, 0]                [1, 1] 
 
-    The `FMI` line here is the "quality of algorithm", i.e. the best achievable function from the ["Fowlkes–Mallows index"](https://en.wikipedia.org/wiki/Fowlkes%E2%80%93Mallows_index) value if you take the "similar" and "different" test pairs and try to draw the treshold line. Smaller number is better. Here I've added the [`phamilie` gem](https://github.com/toy/phamilie) that is DCT based (not a kind of dhash). It is slow in fingerprinting, fast in distance measurement (because it's a Ruby C extension) but produces too many false positives (`FP`) and false negatives (`FN`) -- the last line shows their values corresponding to the best achieved FMI.
+    The `FMI` line here is the "quality of algorithm", i.e. the best achievable function from the ["Fowlkes–Mallows index"](https://en.wikipedia.org/wiki/Fowlkes%E2%80%93Mallows_index) value if you take the "similar" and "different" test pairs and try to draw the treshold line. Smaller number is better. Here I've added the [`phamilie` gem](https://github.com/toy/phamilie) that is DCT based (not a kind of dhash). The last line shows number of false positives (`FP`) and false negatives (`FN`) in case of to the best achieved FMI.
 
 * Methods were renamed from `#calculate` to `#fingerprint` and from `#hamming` to `#distance`.  
-* The `DHash#calculate` accepts `hash_size` optional parameter that is 8 by default. The `IDHash#fingerprint`'s optional parameter is called `power` and works in a bit different way: 3 means 8 and 4 means 16 -- other sizes are not supported because they don't seem to be useful (higher fingerprint resolution makes it vulnerable to image shifts and croppings, also `#distance` becomes much slower). Because IDHash's fingerprint is more complex than DHash's one it's not that straight forward to compare them so under the hood the `#distance` methods have to check the size of fingerprint -- this trade-off costs 30-40% of speed that can be eliminated by using `#distance3` method that assumes fingerprint to be of power=3. So the full benchmark is this one:
+* The `DHash#calculate` accepts `hash_size` optional parameter that is 8 by default. The `IDHash#fingerprint`'s optional parameter is called `power` and works in a bit different way: 3 means 8 and 4 means 16 -- other sizes are not supported because they don't seem to be useful (higher fingerprint resolution makes it vulnerable to image shifts and croppings, also `#distance` becomes much slower). Because IDHash's fingerprint is more complex than DHash's one it's not that straight forward to compare them so under the hood the `#distance` method have to check the size of fingerprint. To skip the check you may use the `#distance3` method (that assumes fingerprint to be of power=3) directly.  
+* The `#distance3` method will use Ruby C extension to compare fingerprints that is much faster than pure Ruby implementation -- native extension is currently hardcoded to be compiled only if it's macOS and rbenv Ruby 2.3.8 but if you know how to make the gem gracefully fallback to native Ruby if `make` fails let me know or make a pull request. So the full benchmark:
 
   * Ruby 2.0.0
 
@@ -154,7 +155,7 @@ end
         DHashVips::IDHash distance3     3.430000   0.020000   3.450000 (  3.499031)
         DHashVips::IDHash distance 4    8.210000   0.110000   8.320000 (  8.510735)
 
-  * Ruby 2.6.3p62 (2.3.8, 2.4.6 and 2.5.5 are all similar) with newer CPU (`sysctl -n machdep.cpu.brand_string #=> Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz`):
+  * Ruby 2.3.8p459 (2.4.6, 2.5.5 and 2.6.3 are all similar) with newer CPU (`sysctl -n machdep.cpu.brand_string #=> Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz`):
 
         load the image and calculate the fingerprint:
                                   user     system      total        real
@@ -164,16 +165,17 @@ end
         DHashVips::IDHash     0.769975   0.071087   0.841062 (  0.790470)
         DHashVips::IDHash 4   0.805311   0.077918   0.883229 (  0.825897)
 
-        measure the distance (1000 times):
-                                            user     system      total        real
-        Dhash hamming                   0.845866   0.000544   0.846410 (  0.847105)
-        Phamilie distance               0.464094   0.000292   0.464386 (  0.464639)
-        DHashVips::DHash hamming        0.843819   0.000585   0.844404 (  0.844961)
-        DHashVips::IDHash distance      2.007639   0.001255   2.008894 (  2.009921)
-        DHashVips::IDHash distance3     1.643094   0.001005   1.644099 (  1.645249)
-        DHashVips::IDHash distance 4    3.458882   0.011378   3.470260 (  3.472131)
+        measure the distance (2000 times):
+                                               user     system      total        real
+        Dhash hamming                      1.810000   0.000000   1.810000 (  1.824719)
+        Phamilie distance                  1.000000   0.010000   1.010000 (  1.006127)
+        DHashVips::DHash hamming           1.810000   0.000000   1.810000 (  1.817415)
+        DHashVips::IDHash distance         1.400000   0.000000   1.400000 (  1.401333)
+        DHashVips::IDHash distance3_ruby   3.320000   0.010000   3.330000 (  3.337920)
+        DHashVips::IDHash distance3_c      0.210000   0.000000   0.210000 (  0.212864)
+        DHashVips::IDHash distance 4       8.300000   0.120000   8.420000 (  8.499735)
 
-* Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4 and 0.0.5 became incompatible, but you probably can convert them manually. I know, incompatibilities suck but if we put the version or structure information inside fingerprint it will became slow to (de)serialize and store.
+* Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4 and 0.0.5 became incompatible, but you probably can convert them manually. Otherwise if we put the version or structure information inside fingerprint it would became slow to (de)serialize and store.
 
 ## Development
 

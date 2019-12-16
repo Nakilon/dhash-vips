@@ -1,7 +1,7 @@
 STDOUT.sync = true
 require "pp"
 
-
+require "bundler/gem_tasks"
 
 visualize_hash = lambda do |hash|
   puts hash.to_s(2).rjust(64, ?0).gsub(/(?<=.)/, '\0 ').scan(/.{16}/)
@@ -245,21 +245,26 @@ task :compare_speed do
       end
     end
   end
-  hashes[-1, 1] = hashes[-2, 2]     # for `distance` and `distance3` we use the same hashes
-  puts "\nmeasure the distance (1000 times):"
-  Benchmark.bm 29 do |bm|
+
+  # for `distance`, `distance3_ruby` and `distance3_c` we use the same hashes
+  hashes[-1, 1] = hashes[-2, 2]
+  hashes[-1, 1] = hashes[-2, 2]
+
+  puts "\nmeasure the distance (2000 times):"
+  Benchmark.bm 32 do |bm|
     [
       [Dhash, :hamming],
       [phamilie, :distance, nil, 1],
       [DHashVips::DHash, :hamming],
       [DHashVips::IDHash, :distance],
-      [DHashVips::IDHash, :distance3],
+      [DHashVips::IDHash, :distance3_ruby],
+      [DHashVips::IDHash, :distance3_c],
       [DHashVips::IDHash, :distance, 4],
     ].zip(hashes) do |(m, dm, power, ii), hs|
       bm.report "#{m.is_a?(Module) ? m : m.class} #{dm} #{power}" do
         _ = [hs, filenames][ii || 0]
         _.product _ do |h1, h2|
-          1000.times{ m.public_send dm, h1, h2 }
+          2000.times{ m.public_send dm, h1, h2 }
         end
       end
     end
