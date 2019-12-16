@@ -1,7 +1,5 @@
 require "mkmf"
 
-# append_cppflags "-O3 -I#{Gem.loaded_specs["bit_utils"].full_gem_path}/ext"
-
 File.write "Makefile", dummy_makefile(?.).join
 unless Gem::Platform.local.os == "darwin" && Gem::Version.new(RUBY_VERSION) == Gem::Version.new("2.3.8")
 else
@@ -31,4 +29,3 @@ end
 # 2. fail during append_cppflags
 # 3. failed compilation
 # 4. failed tests
-

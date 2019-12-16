@@ -1,4 +1,3 @@
-// #include <ruby.h>
 #include <bignum.c>
 
 static VALUE idhash_distance(VALUE self, VALUE a, VALUE b){
@@ -22,23 +21,6 @@ static VALUE idhash_distance(VALUE self, VALUE a, VALUE b){
     RB_GC_GUARD(b);
     return INT2FIX(acc);
 }
-
-  // return a;
-  // return rb_big_and(a, b);
-  // return idhash_and(a, b);
-  // return idhash_or(a, b);
-  // return idhash_xor(a, b);
-  // return idhash_popcount(self, a);
-  // return rb_big_xor(a, b);
-  // return rb_big_and(a, rb_big_xor(a, b));
-  // return rb_big_and(rb_big_xor(a, b), b);
-  // return rb_big_and(b, rb_big_xor(a, b));
-  // return rb_big_and(rb_big_xor(a, b), rb_big_xor(a, b));
-  // return rb_big_and(rb_big_xor(a, b), rb_big_rshift(rb_big_or(a, b), LONG2FIX(128L)));
-  // return rb_big_xor(a, b), rb_big_rshift(rb_big_or(a, b), LONG2FIX(128L));
-  // return rb_big_and(rb_big_xor(a, b), rb_big_rshift(rb_big_or(a, b), LONG2FIX(128L)));
-  // return idhash_and(idhash_xor(a, b), idhash_rshift(idhash_or(a, b), LONG2FIX(128L)));
-  // return idhash_popcount(self, idhash_and(idhash_xor(a, b), idhash_rshift(idhash_or(a, b), LONG2FIX(128L))));
 
 void Init_idhash() {
   VALUE m = rb_define_module("DHashVips");
