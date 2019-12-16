@@ -117,7 +117,7 @@ end
 
 * Methods were renamed from `#calculate` to `#fingerprint` and from `#hamming` to `#distance`.  
 * The `DHash#calculate` accepts `hash_size` optional parameter that is 8 by default. The `IDHash#fingerprint`'s optional parameter is called `power` and works in a bit different way: 3 means 8 and 4 means 16 -- other sizes are not supported because they don't seem to be useful (higher fingerprint resolution makes it vulnerable to image shifts and croppings, also `#distance` becomes much slower). Because IDHash's fingerprint is more complex than DHash's one it's not that straight forward to compare them so under the hood the `#distance` method have to check the size of fingerprint. If you are sure that fingerprints were made with power=3 then to skip the check you may use the `#distance3` method directly.  
-* The `#distance3` method will use Ruby C extension that is around 15 times faster than pure Ruby implementation -- native extension is currently hardcoded to be compiled only if it's macOS and rbenv Ruby 2.3.8 but if you know how to make the gem gracefully fallback to native Ruby if `make` fails let me know or make a pull request. So the full benchmark:
+* The `#distance3` method will use Ruby C extension that is around 15 times faster than pure Ruby implementation -- native extension is currently hardcoded to be compiled only if it's macOS and rbenv Ruby 2.3.8 installed with `-k` flag but if you know how to make the gem gracefully fallback to native Ruby if `make` fails let me know or make a pull request. So the full benchmark:
 
   * Ruby 2.0.0
 

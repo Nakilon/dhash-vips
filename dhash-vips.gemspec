@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.require_path  = "lib"
   spec.extensions    = %w{ extconf.rb }
 
-  spec.add_dependency "ruby-vips", "~>2.0.17"
+  spec.add_dependency "ruby-vips", "~>2.0.16"
 
   spec.add_development_dependency "rake"
   spec.add_development_dependency "minitest"
