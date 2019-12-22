@@ -1,7 +1,7 @@
 STDOUT.sync = true
 require "pp"
 
-require "bundler/gem_tasks"
+require "bundler/gem_tasks" # to push to rubygems
 
 visualize_hash = lambda do |hash|
   puts hash.to_s(2).rjust(64, ?0).gsub(/(?<=.)/, '\0 ').scan(/.{16}/)
