@@ -21,7 +21,7 @@ module DHashVips
     def calculate file, hash_size = 8, kernel = nil
       image = pixelate file, hash_size, kernel
 
-      image.cast("int").conv([1, -1]).crop(1, 0, hash_size, hash_size).>(0)./(255).cast("uchar").to_a.join.to_i(2)
+      image.cast("int").conv([[1, -1]]).crop(1, 0, hash_size, hash_size).>(0)./(255).cast("uchar").to_a.join.to_i(2)
     end
 
   end
@@ -29,8 +29,21 @@ module DHashVips
   module IDHash
     extend self
 
-    def distance3 a, b
-      return ((a ^ b) & (a | b) >> 128).to_s(2).count "1"
+    def distance3_ruby a, b
+      ((a ^ b) & (a | b) >> 128).to_s(2).count "1"
+    end
+    begin
+      require_relative "../idhash.bundle"
+    rescue LoadError
+      alias_method :distance3, :distance3_ruby
+    else
+      def distance3 a, b
+        if a.is_a?(Bignum) && b.is_a?(Bignum)
+          distance3_c a, b
+        else
+          distance3_ruby a, b
+        end
+      end
     end
     def distance a, b
       size_a, size_b = [a, b].map do |x|
@@ -39,6 +52,7 @@ module DHashVips
         #      but also 31, 30 happens for MRI 2.3
         x.size <= 32 ? 8 : 16
       end
+      return distance3 a, b if [8, 8] == [size_a, size_b]
       fail "fingerprints were taken with different `power` param: #{size_a} and #{size_b}" if size_a != size_b
       ((a ^ b) & (a | b) >> 2 * size_a * size_a).to_s(2).count "1"
     end
