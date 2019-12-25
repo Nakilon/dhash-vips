@@ -7,10 +7,7 @@ chars = %w{
   FileUtils.mkdir_p "chars/#{font}"
   (?A..?Z).map do |char|
     filename = "chars/#{font}/#{char.ord}.png"
-    unless File.exist? filename
-      text = Vips::Image.text(char, font: font, width: 100, height: 100).invert
-      text.write_to_file filename
-    end
+    Vips::Image.text(char, font: font, width: 100, height: 100).invert.write_to_file filename unless File.exist? filename
     [DHashVips::IDHash.fingerprint(filename), char]
   end
 end
