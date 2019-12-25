@@ -1,8 +1,8 @@
 require "dhash-vips"
 
-# Arial Courier Monaco Tahoma Verdana
+# Courier Menlo Monaco Tahoma
 chars = %w{
-  Menlo
+  Arial Verdana
 }.flat_map do |font|
   FileUtils.mkdir_p "chars/#{font}"
   (?A..?Z).map do |char|
