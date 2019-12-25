@@ -10,6 +10,9 @@ The program renders 26 upper case chars of each font you want using your OS font
 This isn't made to break captchas so it assumes that chars are clearly whitespace separated, not rotated, black-on-white, etc. At the end it recognizes it as:
 
 ```
+$ bundle install --without development
+$ bundle exec ruby main.rb
+
 THEQUIOKBROWNHOXUUVPS
 OVERTHELAZYDOG
 ```
