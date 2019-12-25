@@ -63,7 +63,7 @@ require "dhash-vips"
     ].each do |images, min, max|
 
       require "fileutils"
-      require "digest" if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("2.5.0")
+      require "digest"
       require "mll"
 
       require_relative "common"
