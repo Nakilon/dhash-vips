@@ -1,3 +1,6 @@
 source "https://rubygems.org"
 
+gem "byebug"
+gem "unicode_plot"
+
 gemspec path: ".."

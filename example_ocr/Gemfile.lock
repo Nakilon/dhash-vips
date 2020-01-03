@@ -20,6 +20,7 @@ GEM
     rmagick (2.16.0)
     ruby-vips (2.0.16)
       ffi (~> 1.9)
+    unicode_plot (0.0.1)
 
 PLATFORMS
   ruby
@@ -34,6 +35,7 @@ DEPENDENCIES
   phamilie
   rake
   rmagick (~> 2.16)
+  unicode_plot
 
 BUNDLED WITH
    2.0.2
