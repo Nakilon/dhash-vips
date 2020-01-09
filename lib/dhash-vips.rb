@@ -10,7 +10,7 @@ module DHashVips
     end
 
     def pixelate file, hash_size, kernel = nil
-      image = Vips::Image.new_from_file file
+      image = Vips::Image.new_from_file file, access: :sequential
       if kernel
         image.resize((hash_size + 1).fdiv(image.width), vscale: hash_size.fdiv(image.height), kernel: kernel).colourspace("b-w")
       else
@@ -79,7 +79,7 @@ module DHashVips
 
     def fingerprint filename, power = 3
       size = 2 ** power
-      image = Vips::Image.new_from_file filename
+      image = Vips::Image.new_from_file filename, access: :sequential
       image = image.resize(size.fdiv(image.width), vscale: size.fdiv(image.height)).colourspace("b-w").flatten
 
       array = image.to_a.map &:flatten
