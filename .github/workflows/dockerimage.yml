@@ -3,10 +3,9 @@ on:
   push:
     tags:
     - "*"
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - run: docker build -f Dockerfile -t ${{github.repository}}:${{github.ref}}
+    - run: docker build -f Dockerfile -t dhash-vips:${{github.sha}}
