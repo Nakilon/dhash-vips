@@ -7,8 +7,8 @@ ARG VIPS_VERSION=8.9.0
 ARG DHASH_VIPS_VERSION
 
 RUN set -ex -o pipefail && \
-    wget -O- https://github.com/libvips/libvips/releases/download/v${VIPS_VERSION}/vips-${VIPS_VERSION}.tar.gz | tar xzC /tmp
-RUN apk update && apk upgrade && apk add --no-cache \
+    wget -O- https://github.com/libvips/libvips/releases/download/v${VIPS_VERSION}/vips-${VIPS_VERSION}.tar.gz | tar xzC /tmp && \
+    apk update && apk upgrade && apk add --no-cache \
       zlib libxml2 glib-dev gobject-introspection \
       libjpeg-turbo libexif lcms2 fftw libpng \
       orc libgsf openexr && \
@@ -23,9 +23,7 @@ RUN apk update && apk upgrade && apk add --no-cache \
                                                 --enable-debug=no \
                                                 --disable-static \
                                                 --disable-dependency-tracking \
-                                                --enable-silent-rules
-RUN cd /tmp/vips-${VIPS_VERSION} && make -s install-strip && cd $OLDPWD && rm -rf /tmp/vips-${VIPS_VERSION} && \
-    apk del --purge vips-dependencies
-RUN echo $DHASH_VIPS_VERSION
-# RUN gem install dhash-vips -v $DHASH_VIPS_VERSION
-RUN apk add --no-cache --virtual ffi-dependencies build-base libffi-dev && gem install dhash-vips -v $DHASH_VIPS_VERSION && apk del --purge ffi-dependencies
+                                                --enable-silent-rules && \
+    make -s install-strip && cd $OLDPWD && rm -rf /tmp/vips-${VIPS_VERSION} && \
+    apk del --purge vips-dependencies && \
+    apk add --no-cache --virtual ffi-dependencies build-base libffi-dev && gem install dhash-vips -v $DHASH_VIPS_VERSION && apk del --purge ffi-dependencies
