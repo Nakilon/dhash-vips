@@ -1,6 +1,7 @@
 # Image duplicates search demo
 
-This is a sample Docker image that you can use to find duplicates in a folder you link, so you don't need Ruby to run it, just Docker.
+This is a sample Docker image that you can use to find duplicates in a folder you link.  
+So you don't need Ruby to try the gem, just Docker.
 
 ![](https://storage.googleapis.com/dhash-vips.nakilon.pro/example_dups.png)
 
@@ -36,8 +37,9 @@ probably similar image pairs: 3
   Eiffelturm.jpeg
 ```
 
-Here tresholds are hardcoded as `[0..14, 15..19, 20..24]`. They are a bit lowered and adjusted for demo purposes -- all landscapes are a bit similar because they have a horizon line.
-
+Here tresholds are hardcoded as `[0..14, 15..19, 20..24]`. They are a bit lowered and adjusted for demo purposes -- all landscapes are a bit similar because they have a horizon line.  
 In your programs you should find the best fitting tresholds and maybe preprocess images by smart cropping, applying filters, etc.
 
-P.S.: don't forget that Docker `-v` needs the absolute path. The `:ro` "read-only" parameter optional -- the program does not write anything.
+Maybe some day I'll make it a feature (with JSON and HTML export) within a gem if anyone needs it.
+
+P.S.: don't forget that Docker `-v` needs an absolute path.
