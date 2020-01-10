@@ -10,7 +10,7 @@ jobs:
     - uses: actions/checkout@v2
     - run: echo ::set-env name=DHASH_VIPS_VERSION::$(echo "$GITHUB_REF" | rev | cut -dv -f1 | rev)
     - run: docker build . -f Dockerfile -t nakilonishe/dhash-vips:$GITHUB_SHA --build-arg DHASH_VIPS_VERSION
-    - run: docker run --rm -v $(pwd):/test:ro nakilonishe/dhash-vips:$GITHUB_SHA sh -c "cd /test && gem install mll && ruby test.rb"
+    - run: docker run --rm -v $(pwd):/test nakilonishe/dhash-vips:$GITHUB_SHA sh -c "cd /test && gem install mll && ruby test.rb"
     - run: docker login -u dhashvips -p "$DOCKERHUB_ACCESS_TOKEN"
       env:
         DOCKERHUB_ACCESS_TOKEN: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
