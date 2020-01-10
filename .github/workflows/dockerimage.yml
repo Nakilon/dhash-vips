@@ -2,10 +2,9 @@ name: Docker Image
 on:
   push:
     tags:
-    - "*"
+    - "v*.*.*.*"
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - run: docker build . -f Dockerfile -t dhash-vips:${{github.sha}}
+    - run: GEM_VERSION=$(echo "$GITHUB_REF" | rev | cut -dv -f1 | rev) && docker build . -f Dockerfile -t dhash-vips:$GITHUB_SHA
