@@ -8,4 +8,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - run: echo ::set-env name=DHASH_VIPS_VERSION::$(echo "$GITHUB_REF" | rev | cut -dv -f1 | rev)
     - run: DHASH_VIPS_VERSION=$(echo "$GITHUB_REF" | rev | cut -dv -f1 | rev) && docker build . -f Dockerfile -t dhash-vips:$GITHUB_SHA
