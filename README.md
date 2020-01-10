@@ -206,6 +206,8 @@ end
 
 * Execute the `rake compare_quality` at least once before executing other rake tasks because it's currently the only one that downloads the test images.
 
+* The tag `v0.0.0.4` is not semver and not real gem version -- it's only for Github Actions testing purposes.
+
 ## Credits
 
 [John Cupitt](https://github.com/jcupitt) (libvips and ruby-vips maintainer) helped me a lot.

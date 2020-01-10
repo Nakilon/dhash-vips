@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.license       = "MIT"
 
   spec.test_files    = %w{ test.rb }
-  spec.files         = `git ls-files -z`.split("\x0") - spec.test_files - %w{ .gitignore Dockerfile } - Dir.glob("example_ocr/**/*") - Dir.glob(".github/**/*")
+  spec.files         = `git ls-files -z`.split("\x0") - spec.test_files - %w{ .gitignore Dockerfile } - Dir.glob("example_*/**/*") - Dir.glob(".github/**/*")
   spec.require_path  = "lib"
   spec.extensions    = %w{ extconf.rb }
 
