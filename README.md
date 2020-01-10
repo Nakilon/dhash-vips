@@ -101,7 +101,7 @@ end
 
 ### Notes and benchmarks
 
-* The above `15` and `25` constants are found empirically and just work enough well for 8-byte hashes. To find these tresholds we can run a rake task with hardcoded test cases (pairs of photos from the same photosession are not the same but are considered to be enough 'similar' for the purpose of this benchmark):
+* The above `15` and `25` constants are found empirically and just work enough well for 8-byte hashes. To find these thresholds we can run a rake task with hardcoded test cases (pairs of photos from the same photosession are not the same but are considered to be enough 'similar' for the purpose of this benchmark):
 
       $ rake compare_quality
 
@@ -113,7 +113,7 @@ end
                 1/FMI^2 =    1.25       4.0             1.556               1.25                 1.306 
                  FP, FN =  [2, 0]    [0, 6]            [1, 2]             [2, 0]                [1, 1] 
 
-    The `FMI` line here is the "quality of algorithm", i.e. the best achievable function from the ["Fowlkes–Mallows index"](https://en.wikipedia.org/wiki/Fowlkes%E2%80%93Mallows_index) value if you take the "similar" and "different" test pairs and try to draw the treshold line. Smaller number is better. Here I've added the [`phamilie` gem](https://github.com/toy/phamilie) that is DCT based (not a kind of dhash). The last line shows number of false positives (`FP`) and false negatives (`FN`) in case of the best achieved FMI.
+    The `FMI` line here is the "quality of algorithm", i.e. the best achievable function from the ["Fowlkes–Mallows index"](https://en.wikipedia.org/wiki/Fowlkes%E2%80%93Mallows_index) value if you take the "similar" and "different" test pairs and try to draw the threshold line. Smaller number is better. Here I've added the [`phamilie` gem](https://github.com/toy/phamilie) that is DCT based (not a kind of dhash). The last line shows number of false positives (`FP`) and false negatives (`FN`) in case of the best achieved FMI.
 
 * Methods were renamed from `#calculate` to `#fingerprint` and from `#hamming` to `#distance`.  
 * The `DHash#calculate` accepts `hash_size` optional parameter that is 8 by default. The `IDHash#fingerprint`'s optional parameter is called `power` and works in a bit different way: 3 means 8 and 4 means 16 -- other sizes are not supported because they don't seem to be useful (higher fingerprint resolution makes it vulnerable to image shifts and croppings, also `#distance` becomes much slower). Because IDHash's fingerprint is more complex than DHash's one it's not that straight forward to compare them so under the hood the `#distance` method have to check the size of fingerprint. If you are sure that fingerprints were made with power=3 then to skip the check you may use the `#distance3` method directly.  
