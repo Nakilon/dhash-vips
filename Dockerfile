@@ -1,4 +1,5 @@
-FROM ruby:2.6-alpine
+# FROM ruby:2.6-alpine
+FROM andrius/alpine-ruby
 
 # based on felixbuenemann/vips-alpine and codechimpio/vips-alpine
 # TODO: also take a look at https://github.com/jcupitt/docker-builds/blob/master/ruby-vips-alpine/Dockerfile
@@ -25,6 +26,6 @@ RUN set -ex -o pipefail && \
                                                 --disable-dependency-tracking \
                                                 --enable-silent-rules && \
     make -s install-strip && cd $OLDPWD && rm -rf /tmp/vips-${VIPS_VERSION} && \
-    apk del --purge vips-dependencies && \
-    apk add --no-cache --virtual ffi-dependencies build-base libffi-dev && gem install dhash-vips -v 0.1.0.1 && apk del --purge ffi-dependencies
+    apk del --purge vips-dependencies
+RUN apk add --no-cache --virtual ffi-dependencies build-base libffi-dev ruby-dev && gem install dhash-vips -v $DHASH_VIPS_VERSION && apk del --purge ffi-dependencies
 # we don't install from checkouted folder, because we want to test that the gem is available at Rubygems
