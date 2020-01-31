@@ -201,7 +201,6 @@ task :compare_images do |_|
   a.join(b, :horizontal, shim: 15).write_to_file "ab.png"
 end
 
-# ./ruby `rbenv which rake` compare_speed
 desc "Benchmarks Dhash, DHashVips::DHash and DHashVips::IDHash"
 task :compare_speed do
   require "dhash"
@@ -250,7 +249,7 @@ task :compare_speed do
   hashes[-1, 1] = hashes[-2, 2]
   hashes[-1, 1] = hashes[-2, 2]
 
-  puts "\nmeasure the distance (2000 times):"
+  puts "\nmeasure the distance (32*32*2000 times):"
   Benchmark.bm 32 do |bm|
     [
       [Dhash, :hamming],

@@ -7,17 +7,7 @@ The **IDHash** is the new algorithm that has some improvements over dHash -- I'l
 
 You can read about the dHash and perceptual hashing in the article ["Kind of Like That" at "The Hacker Factor Blog"](http://www.hackerfactor.com/blog/index.php?/archives/529-Kind-of-Like-That.html) (21 January 2013). The idea is that you resize the otiginal image to 8x9 and then convert it to 8x8 array of bits -- each tells if the corresponding segment of the image is brighter or darker than the one on the right (or left). Then you apply the [Hamming distance](https://en.wikipedia.org/wiki/Hamming_distance) to such arrays to measure how much they are different.
 
-There were several Ruby implementations on Github already but they all depended on ImageMagick. My implementation takes an advantage of speed of the libvips (the `ruby-vips` gem) -- it fingerprints images much faster:
-
-    load the image and calculate the fingerprint:
-                              user     system      total        real
-    Dhash                 6.191731   0.230885   6.422616 (  6.428763)
-    DHashVips::DHash      0.858045   0.144820   1.002865 (  0.924308)
-
-`Dhash` here is [another gem](https://github.com/maccman/dhash) that I used earlier in my projects before I decided to make this one.  
-Unfortunately both gems made slightly different fingerprints for two image files that are supposed to have the same fingerprint because from the human point of view they are the same (photo by Jordan Voth):  
-![](https://storage.googleapis.com/dhash-vips.nakilon.pro/dhash_issue_example.png)  
-The distance here appeared to be equal to 5. This is why I've decided to improve the algorithm and this is how the "IDHash" appeared.
+There were several Ruby implementations on Github already but they all depended on ImageMagick. My implementation takes an advantage of speed of the libvips (the `ruby-vips` gem) -- it fingerprints images much faster. For even more speed the fingerprint comparison function is made as native C extension.
 
 ## IDHash (the Important Difference Hash)
 
@@ -26,8 +16,6 @@ The main improvement over the dHash is what makes it insensitive to the resizing
 * The "Importance" is an array of extra 64 bits that tells the comparing function which half of 64 bits is important (when the difference between neighbors was enough significant) and which is not. So not every bit in a fingerprint is being compared but only half of them.  
 * It subtracts not only horizontally but also vertically -- that adds 128 more bits.  
 * Instead of resizing to 8x9 it resizes to 8x8 and puts the image on a torus so it subtracts the very left column from the very right one and the top from the bottom.
-
-You could see in fingerprint calculation benchmark earlier that these improvements didn't make it slower than dHash because most of the time is spent on image resizing. Distance measurement is what became slower.
 
 ### Example
 
@@ -49,6 +37,8 @@ Here in each of 64 cells, there are two circles that color the difference betwee
   * [Finding the closest pair between two sets of points on the hypercube](https://cstheory.stackexchange.com/q/16322/27420)  
   * [Would PCA work for boolean data types?](https://stats.stackexchange.com/q/159705/1125)  
   * [Using pHash to search agaist a huge image database, what is the best approach?](https://stackoverflow.com/q/18257641/322020)  
+  * [How do I speed up this BIT_COUNT query for hamming distance?](https://stackoverflow.com/q/35065675/322020)  
+  * [Hamming distance on binary strings in SQL](https://stackoverflow.com/q/4777070/322020)
 
 ## Installation
 
@@ -130,7 +120,7 @@ end
         DHashVips::IDHash     1.060000   0.090000   1.150000 (  1.100332)
         DHashVips::IDHash 4   1.030000   0.080000   1.110000 (  1.089148)
 
-        measure the distance (1000 times):
+        measure the distance (32*32*1000 times):
                                             user     system      total        real
         Dhash hamming                   3.140000   0.020000   3.160000 (  3.179392)
         DHashVips::DHash hamming        3.040000   0.020000   3.060000 (  3.095190)
@@ -147,7 +137,7 @@ end
         DHashVips::IDHash     1.080000   0.100000   1.180000 (  1.156446)
         DHashVips::IDHash 4   1.030000   0.090000   1.120000 (  1.076117)
 
-        measure the distance (1000 times):
+        measure the distance (32*32*1000 times):
                                             user     system      total        real
         Dhash hamming                   1.770000   0.010000   1.780000 (  1.815612)
         DHashVips::DHash hamming        1.810000   0.010000   1.820000 (  1.875666)
@@ -165,7 +155,7 @@ end
         DHashVips::IDHash     0.769975   0.071087   0.841062 (  0.790470)
         DHashVips::IDHash 4   0.805311   0.077918   0.883229 (  0.825897)
 
-        measure the distance (2000 times):
+        measure the distance (32*32*2000 times):
                                                user     system      total        real
         Dhash hamming                      1.810000   0.000000   1.810000 (  1.824719)
         Phamilie distance                  1.000000   0.010000   1.010000 (  1.006127)
@@ -177,7 +167,7 @@ end
 
 * Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4 and 0.0.5 became incompatible, but you probably can convert them manually. Otherwise if we put the version or structure information inside fingerprint it would became slow to (de)serialize and store.
 
-## Development
+## Development notes
 
 * OS X El Captain and rbenv may cause environment issues that would make you do things like:
 
@@ -207,6 +197,8 @@ end
 * Execute the `rake compare_quality` at least once before executing other rake tasks because it's currently the only one that downloads the test images.
 
 * The tag `v0.0.0.4` is not semver and not real gem version -- it's only for Github Actions testing purposes.
+
+* To quickly find out what does the dhash-vips Docker image include: `docker run --rm <image_name> sh -c "cat /etc/alpine-release; ruby -v; vips -v; gem list dhash-vips` (TODO: write in this README about the existing Docker image).
 
 ## Credits
 

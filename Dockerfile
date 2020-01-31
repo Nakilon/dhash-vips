@@ -26,5 +26,5 @@ RUN set -ex -o pipefail && \
                                                 --enable-silent-rules && \
     make -s install-strip && cd $OLDPWD && rm -rf /tmp/vips-${VIPS_VERSION} && \
     apk del --purge vips-dependencies && \
-    apk add --no-cache --virtual ffi-dependencies build-base libffi-dev && gem install dhash-vips -v 0.1.0.1 && apk del --purge ffi-dependencies
+    apk add --no-cache --virtual ffi-dependencies build-base libffi-dev && gem install dhash-vips -v $DHASH_VIPS_VERSION && apk del --purge ffi-dependencies
 # we don't install from checkouted folder, because we want to test that the gem is available at Rubygems
