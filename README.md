@@ -11,7 +11,7 @@ There were several Ruby implementations on Github already but they all depended 
 
 ## IDHash (the Important Difference Hash)
 
-The main improvement over the dHash is what makes it insensitive to the resizing algorithm, color scheme and effectively made the pair of images above to have a distance of 0.
+The main improvement over the dHash is what makes it insensitive to the resizing algorithm and possible errors due to color scheme conversion.
 
 * The "Importance" is an array of extra 64 bits that tells the comparing function which half of 64 bits is important (when the difference between neighbors was enough significant) and which is not. So not every bit in a fingerprint is being compared but only half of them.  
 * It subtracts not only horizontally but also vertically -- that adds 128 more bits.  
