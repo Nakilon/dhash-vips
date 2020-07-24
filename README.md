@@ -169,6 +169,8 @@ end
 
 ## Development notes
 
+    $ ruby test.rb
+
 * OS X El Captain and rbenv may cause environment issues that would make you do things like:
 
         $ ./ruby `rbenv which rake` compare_matrixes

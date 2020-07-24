@@ -3,7 +3,7 @@ FROM ruby:2.6-alpine
 # based on felixbuenemann/vips-alpine and codechimpio/vips-alpine
 # TODO: also take a look at https://github.com/jcupitt/docker-builds/blob/master/ruby-vips-alpine/Dockerfile
 
-ARG VIPS_VERSION=8.9.0
+ARG VIPS_VERSION=8.9.2
 ARG DHASH_VIPS_VERSION
 
 RUN set -ex -o pipefail && \
