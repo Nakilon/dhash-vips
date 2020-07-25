@@ -93,15 +93,19 @@ end
 
 * The above `15` and `25` constants are found empirically and just work enough well for 8-byte hashes. To find these thresholds we can run a rake task with hardcoded test cases (pairs of photos from the same photosession are not the same but are considered to be enough 'similar' for the purpose of this benchmark):
 
+      $ vips -v
+      vips-8.9.2-Tue Apr 21 09:26:11 UTC 2020
+      $ identify -version | head -1
+      Version: ImageMagick 6.9.11-24 Q16 x86_64 2020-07-18 https://imagemagick.org
       $ rake compare_quality
 
-                            Dhash  Phamilie  DHashVips::DHash  DHashVips::IDHash  DHashVips::IDHash(4) 
-          The same image:    0..0      0..0              0..0               0..0                  0..0 
-      'Jordan Voth case':       4         2                 4                  0                     0 
-          Similar images:   1..17    14..34             2..23              6..22               53..166 
-        Different images:   9..57    22..42             9..50             18..65              120..233 
-                1/FMI^2 =    1.25       4.0             1.556               1.25                 1.306 
-                 FP, FN =  [2, 0]    [0, 6]            [1, 2]             [2, 0]                [1, 1] 
+                            Dhash  Phamilie  DHashVips::DHash  DHashVips::IDHash  DHashVips::IDHash(4)
+          The same image:    0..0      0..0              0..0               0..0                  0..0
+      'Jordan Voth case':       2         2                 4                  0                     0
+          Similar images:   1..15    14..34             2..23              6..22               53..166
+        Different images:  10..54    22..42            10..50             17..65              120..233
+                1/FMI^2 =   1.375       4.0             1.556               1.25                 1.306
+                 FP, FN =  [3, 0]    [0, 6]            [1, 2]             [2, 0]                [1, 1]
 
     The `FMI` line here is the "quality of algorithm", i.e. the best achievable function from the ["Fowlkes–Mallows index"](https://en.wikipedia.org/wiki/Fowlkes%E2%80%93Mallows_index) value if you take the "similar" and "different" test pairs and try to draw the threshold line. Smaller number is better. Here I've added the [`phamilie` gem](https://github.com/toy/phamilie) that is DCT based (not a kind of dhash). The last line shows number of false positives (`FP`) and false negatives (`FN`) in case of the best achieved FMI.
 
@@ -171,6 +175,18 @@ end
 
     $ ruby test.rb
 
+* You might need to prepend `bundle exec` to all the `rake` commands.
+
+* You get this:
+
+        Can't install RMagick 2.16.0. Can't find MagickWand.h.
+
+    because Imagemagick sucks but we need it to benchmark alternative gems, so:
+
+        $ brew install imagemagick@6
+        $ brew unlink imagemagick@7
+        $ brew link imagemagick@6 --force
+
 * OS X El Captain and rbenv may cause environment issues that would make you do things like:
 
         $ ./ruby `rbenv which rake` compare_matrixes
@@ -193,8 +209,6 @@ end
 * If you get `No package 'MagickCore' found` try:
 
         $ PKG_CONFIG_PATH="/usr/local/Cellar/imagemagick@6/6.9.10-74/lib/pkgconfig" bundle install
-
-* You might need to prepend `bundle exec` to all the `rake` commands.
 
 * Execute the `rake compare_quality` at least once before executing other rake tasks because it's currently the only one that downloads the test images.
 
