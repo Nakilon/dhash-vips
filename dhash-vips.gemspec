@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "dhash-vips"
-  spec.version       = "0.1.0.2"
+  spec.version       = "0.1.0.3"
   spec.author        = "Victor Maslov"
   spec.email         = "nakilon@gmail.com"
   spec.summary       = "dHash and IDHash powered by Vips"
@@ -23,5 +23,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "dhash"
 
   spec.add_development_dependency "mll"
-  # spec.add_development_dependency "byebug"
+  spec.add_development_dependency "byebug"
 end
