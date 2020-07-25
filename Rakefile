@@ -201,7 +201,7 @@ task :compare_images do |_|
   a.join(b, :horizontal, shim: 15).write_to_file "ab.png"
 end
 
-desc "Benchmarks Dhash, DHashVips::DHash and DHashVips::IDHash"
+desc "Benchmark speed of Dhash, DHashVips::DHash, DHashVips::IDHash and Phamilie"
 task :compare_speed do
   require "dhash"
   require "phamilie"
@@ -246,6 +246,7 @@ task :compare_speed do
   end
 
   # for `distance`, `distance3_ruby` and `distance3_c` we use the same hashes
+  # this array manipulation converts [1, 2, 3, 4, 5] into [1, 2, 3, 4, 4, 4, 5]
   hashes[-1, 1] = hashes[-2, 2]
   hashes[-1, 1] = hashes[-2, 2]
 
@@ -269,4 +270,87 @@ task :compare_speed do
     end
   end
 
+end
+
+desc "Benchmarks everything about Dhash, DHashVips::DHash, DHashVips::IDHash and Phamilie"
+task :benchmark do
+  abort "provide a folder with images grouped by similarity" unless 2 === ARGV.size
+  abort "invalid folder provided" unless Dir.exist?(dir = ARGV.last)
+
+  require "dhash"
+  require "phamilie"
+  phamilie = Phamilie.new
+  require_relative "lib/dhash-vips"
+
+  filenames = Dir.glob("#{dir}/*").map{ |_| Dir.glob "#{_}/*" }
+  puts "image groups sizes: #{filenames.map(&:size)}"
+  require "benchmark"
+
+  puts "step 1 / 3 (fingerprinting)"
+  hashes = []
+  bm1 = [
+    [phamilie, :fingerprint],
+    [Dhash, :calculate],
+    [DHashVips::DHash, :calculate],
+    [DHashVips::IDHash, :fingerprint],
+  ].map do |m, calc, power|
+    Benchmark.realtime do
+      hashes.push filenames.flatten.map{ |filename| m.send calc, filename, *power }
+    end
+  end
+
+  puts "step 2 / 3 (comparing fingerprints)"
+  combs = filenames.flatten.size ** 2
+  n = 10_000_000_000_000 / Dir.glob("#{dir}/*/*").map(&File.method(:size)).inject(:+) / combs
+  bm2 = [
+    [phamilie, :distance, nil, filenames.flatten],
+    [Dhash, :hamming],
+    [DHashVips::DHash, :hamming],
+    [DHashVips::IDHash, :distance3_c],
+  ].zip(hashes).map do |(m, dm, power, ii), hs|
+    Benchmark.realtime do
+      _ = ii || hs
+      _.product _ do |h1, h2|
+        n.times{ m.public_send dm, h1, h2 }
+      end
+    end
+  end
+
+  puts "step 3 / 3 (looking for the best threshold)"
+  bm3 = [
+    [phamilie, :fingerprint, :distance, nil, 0],
+    [Dhash, :calculate, :hamming],
+    [DHashVips::DHash, :calculate, :hamming],
+    [DHashVips::IDHash, :fingerprint, :distance],
+  ].map do |m, calc, dm, power, ii|
+    require_relative "common"
+    hashes = Dir.glob("#{dir}/*").flat_map{ |_| Dir.glob "#{_}/*" }.map{ |filename| [filename, m.public_send(calc, filename, *power)] }
+    report = Struct.new(:same, :sim, :not_sim).new [], [], []
+    hashes.size.times.to_a.repeated_combination(2) do |i, j|
+      report[
+        case
+        when i == j                                                   ; :same
+        when File.split(File.split(hashes[i][0]).first).last ==
+             File.split(File.split(hashes[j][0]).first).last && i < j ; :sim
+        else                                                          ; :not_sim
+        end
+      ].push m.method(dm).call hashes[i][ii||1], hashes[j][ii||1]
+    end
+    min, max = [*report.sim, *report.not_sim].minmax
+    fmi, fp, fn = (min..max+1).map do |b|
+      fp = report.not_sim.count{ |_| _ < b }
+      tp = report.sim.count{ |_| _ < b }
+      fn = report.sim.count{ |_| _ >= b }
+      [((tp + fp) * (tp + fn)).fdiv(tp * tp), fp, fn]
+    end.reject{ |_,| _.nan? }.min_by(&:first)
+    fmi
+  end
+
+  require "mll"
+  puts MLL::grid.call %w{ \  Fingerprint Compare 1/FMI^2 }.zip(*[
+    %w{ Phamilie Dhash DHash IDHash },
+    *[bm1, bm2].map{ |bm| bm.map{ |_| "%.3f" % _ } },
+    bm3.map{ |_| "%.3f" % _ }
+  ].transpose).transpose, spacings: [1.5, 0], alignment: :right
+  puts "(lower numbers are better)"
 end
