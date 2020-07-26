@@ -1,9 +1,9 @@
 Gem::Specification.new do |spec|
   spec.name          = "dhash-vips"
-  spec.version       = "0.1.0.3"
+  spec.version       = "0.1.1.0"
   spec.author        = "Victor Maslov"
   spec.email         = "nakilon@gmail.com"
-  spec.summary       = "dHash and IDHash powered by Vips"
+  spec.summary       = "dHash and IDHash perceptual image hashing/fingerprinting"
   spec.homepage      = "https://github.com/nakilon/dhash-vips"
   spec.license       = "MIT"
 
@@ -20,11 +20,12 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "rake"
   spec.add_development_dependency "minitest"
-  spec.add_development_dependency "get_process_mem"
 
   spec.add_development_dependency "rmagick", "~>2.16"
   spec.add_development_dependency "phamilie"
   spec.add_development_dependency "dhash"
+
+  spec.add_development_dependency "get_process_mem"
 
   spec.add_development_dependency "mll"
   spec.add_development_dependency "byebug"

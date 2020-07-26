@@ -20,8 +20,20 @@ ss = s.repeated_permutation(4).map do |s1, s2, s3, s4|
   end
 end
 fail unless :distance3 == DHashVips::IDHash.method(:distance3).original_name
+if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.4")
+  check = lambda do |s1, s2|
+    s1.is_a?(Bignum) && s2.is_a?(Bignum)
+  end
+else
+  require "rbconfig/sizeof"
+  check = lambda do |s1, s2|
+    # https://github.com/ruby/ruby/commit/de2f7416d2deb4166d78638a41037cb550d64484#diff-16b196bc6bfe8fba63951420f843cfb4R10
+    _FIXNUM_MAX = (1 << (8 * RbConfig::SIZEOF["long"] - 2)) - 1
+    s1 > _FIXNUM_MAX && s2 > _FIXNUM_MAX
+  end
+end
 ss.product ss do |s1, s2|
-  next unless s1.is_a?(Bignum) && s2.is_a?(Bignum)
+  next unless check.call s1, s2
   unless f[s1, s2] == DHashVips::IDHash.distance3_c(s1, s2)
     p [s1, s2]
     p [s1.to_s(16).rjust(64,?0)].pack("H*").unpack("N*").map{ |_| _.to_s(2).rjust(32, ?0) }

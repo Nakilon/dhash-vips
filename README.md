@@ -93,10 +93,6 @@ end
 
 * The above `15` and `25` constants are found empirically and just work enough well for 8-byte hashes. To find these thresholds we can run a rake task with hardcoded test cases (pairs of photos from the same photosession are not the same but are considered to be enough 'similar' for the purpose of this benchmark):
 
-      $ vips -v
-      vips-8.9.2-Tue Apr 21 09:26:11 UTC 2020
-      $ identify -version | head -1
-      Version: ImageMagick 6.9.11-24 Q16 x86_64 2020-07-18 https://imagemagick.org
       $ rake compare_quality
 
                             Dhash  Phamilie  DHashVips::DHash  DHashVips::IDHash  DHashVips::IDHash(4)
@@ -111,45 +107,9 @@ end
 
 * Methods were renamed from `#calculate` to `#fingerprint` and from `#hamming` to `#distance`.  
 * The `DHash#calculate` accepts `hash_size` optional parameter that is 8 by default. The `IDHash#fingerprint`'s optional parameter is called `power` and works in a bit different way: 3 means 8 and 4 means 16 -- other sizes are not supported because they don't seem to be useful (higher fingerprint resolution makes it vulnerable to image shifts and croppings, also `#distance` becomes much slower). Because IDHash's fingerprint is more complex than DHash's one it's not that straight forward to compare them so under the hood the `#distance` method have to check the size of fingerprint. If you are sure that fingerprints were made with power=3 then to skip the check you may use the `#distance3` method directly.  
-* The `#distance3` method will use Ruby C extension that is around 15 times faster than pure Ruby implementation -- native extension is currently hardcoded to be compiled only if it's macOS and rbenv Ruby 2.3.8 installed with `-k` flag but if you know how to make the gem gracefully fallback to native Ruby if `make` fails let me know or make a pull request. So the full benchmark:
+* The `#distance3` method will try to compile and use the Ruby C extension that is around 15 times faster than pure Ruby implementation -- native extension currently works on macOS rbenv Ruby from 2.3.8 to 2.4.9 installed with rbenv `-k` flag. So the full benchmark:
 
-  * Ruby 2.0.0
-
-        $ bundle exec rake compare_speed
-
-        load the image and calculate the fingerprint:
-                                  user     system      total        real
-        Dhash                12.400000   0.820000  13.220000 ( 13.329952)
-        DHashVips::DHash      1.330000   0.230000   1.560000 (  1.509826)
-        DHashVips::IDHash     1.060000   0.090000   1.150000 (  1.100332)
-        DHashVips::IDHash 4   1.030000   0.080000   1.110000 (  1.089148)
-
-        measure the distance (32*32*1000 times):
-                                            user     system      total        real
-        Dhash hamming                   3.140000   0.020000   3.160000 (  3.179392)
-        DHashVips::DHash hamming        3.040000   0.020000   3.060000 (  3.095190)
-        DHashVips::IDHash distance      8.170000   0.040000   8.210000 (  8.279950)
-        DHashVips::IDHash distance3     6.720000   0.030000   6.750000 (  6.790900)
-        DHashVips::IDHash distance 4   24.430000   0.130000  24.560000 ( 24.652625)
-
-  * Ruby 2.3.3 seems to have some bit arithmetics improvement compared to 2.0:
-
-        load the image and calculate the fingerprint:
-                                  user     system      total        real
-        Dhash                13.110000   0.950000  14.060000 ( 14.537057)
-        DHashVips::DHash      1.480000   0.310000   1.790000 (  1.808787)
-        DHashVips::IDHash     1.080000   0.100000   1.180000 (  1.156446)
-        DHashVips::IDHash 4   1.030000   0.090000   1.120000 (  1.076117)
-
-        measure the distance (32*32*1000 times):
-                                            user     system      total        real
-        Dhash hamming                   1.770000   0.010000   1.780000 (  1.815612)
-        DHashVips::DHash hamming        1.810000   0.010000   1.820000 (  1.875666)
-        DHashVips::IDHash distance      4.250000   0.020000   4.270000 (  4.350071)
-        DHashVips::IDHash distance3     3.430000   0.020000   3.450000 (  3.499031)
-        DHashVips::IDHash distance 4    8.210000   0.110000   8.320000 (  8.510735)
-
-  * Ruby 2.3.8p459 (2.4.6, 2.5.5 and 2.6.3 are all similar) with newer CPU (`sysctl -n machdep.cpu.brand_string #=> Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz`):
+  * Ruby 2.3.8p459:
 
         load the image and calculate the fingerprint:
                                   user     system      total        real
@@ -168,6 +128,19 @@ end
         DHashVips::IDHash distance3_ruby   3.320000   0.010000   3.330000 (  3.337920)
         DHashVips::IDHash distance3_c      0.210000   0.000000   0.210000 (  0.212864)
         DHashVips::IDHash distance 4       8.300000   0.120000   8.420000 (  8.499735)
+
+* There is now a benchmark that runs both speed and quality tests summing results to a single table where lower numbers are better:
+
+    ruby 2.3.8p459 (2018-10-18 revision 65136) [x86_64-darwin18]
+    vips-8.9.2-Tue Apr 21 09:26:11 UTC 2020
+    Version: ImageMagick 6.9.11-24 Q16 x86_64 2020-07-18
+    Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz
+    
+                Fingerprint  Compare  1/FMI^2
+      Phamilie        3.943    0.630    4.000
+         Dhash        4.969    1.097    1.375
+         DHash        0.434    1.089    1.556
+        IDHash        0.396    0.126    1.250
 
 * Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4 and 0.0.5 became incompatible, but you probably can convert them manually. Otherwise if we put the version or structure information inside fingerprint it would became slow to (de)serialize and store.
 

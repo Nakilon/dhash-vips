@@ -37,11 +37,25 @@ module DHashVips
     rescue LoadError
       alias_method :distance3, :distance3_ruby
     else
-      def distance3 a, b
-        if a.is_a?(Bignum) && b.is_a?(Bignum)
-          distance3_c a, b
-        else
-          distance3_ruby a, b
+      # we can't just do `defined? Bignum` because it's defined but deprecated (some internal CONST_DEPRECATED flag)
+      if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.4")
+        def distance3 a, b
+          if a.is_a?(Bignum) && b.is_a?(Bignum)
+            distance3_c a, b
+          else
+            distance3_ruby a, b
+          end
+        end
+      else
+        # https://github.com/ruby/ruby/commit/de2f7416d2deb4166d78638a41037cb550d64484#diff-16b196bc6bfe8fba63951420f843cfb4R10
+        require "rbconfig/sizeof"
+        FIXNUM_MAX = (1 << (8 * RbConfig::SIZEOF["long"] - 2)) - 1
+        def distance3 a, b
+          if a > FIXNUM_MAX && b > FIXNUM_MAX
+            distance3_c a, b
+          else
+            distance3_ruby a, b
+          end
         end
       end
     end

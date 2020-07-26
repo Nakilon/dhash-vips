@@ -1,7 +1,11 @@
-STDOUT.sync = true
-require "pp"
+begin
+  # for `rake release`
+  require "bundler/gem_tasks"
+rescue LoadError
+  puts "consider to `gem install bundler` to be able to `rake release`"
+end
 
-require "bundler/gem_tasks" # to push to rubygems
+require "pp"
 
 visualize_hash = lambda do |hash|
   puts hash.to_s(2).rjust(64, ?0).gsub(/(?<=.)/, '\0 ').scan(/.{16}/)
@@ -346,6 +350,10 @@ task :benchmark do
     fmi
   end
 
+  puts RUBY_DESCRIPTION
+  system "vips -v"
+  system "identify -version | /usr/bin/head -1"
+  system "sysctl -n machdep.cpu.brand_string"
   require "mll"
   puts MLL::grid.call %w{ \  Fingerprint Compare 1/FMI^2 }.zip(*[
     %w{ Phamilie Dhash DHash IDHash },
