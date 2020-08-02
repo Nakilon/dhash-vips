@@ -352,8 +352,10 @@ task :benchmark do
 
   puts RUBY_DESCRIPTION
   system "vips -v"
-  system "identify -version | /usr/bin/head -1"
-  system "sysctl -n machdep.cpu.brand_string"
+  system "identify -version 2>/dev/null | /usr/bin/head -1"
+  system "identify-6 -version 2>/dev/null | /usr/bin/head -1"
+  system "sysctl -n machdep.cpu.brand_string 2>/dev/null"
+  system "cat /proc/cpuinfo 2>/dev/null | grep 'model name' | uniq"
   require "mll"
   puts MLL::grid.call %w{ \  Fingerprint Compare 1/FMI^2 }.zip(*[
     %w{ Phamilie Dhash DHash IDHash },

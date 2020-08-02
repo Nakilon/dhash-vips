@@ -1,5 +1,7 @@
 ARG RUBY_ALPINE_VERSION
 FROM ruby:$RUBY_ALPINE_VERSION
+ARG RUBY_ALPINE_VERSION
+ENV RUBY_ALPINE_VERSION $RUBY_ALPINE_VERSION
 
 # docker build - -t vips-ruby2.3.8 --build-arg RUBY_ALPINE_VERSION=2.3.8-alpine3.8 --build-arg VIPS_VERSION=8.9.2 <vips.ruby.alpine.Dockerfile
 
@@ -8,6 +10,7 @@ FROM ruby:$RUBY_ALPINE_VERSION
 # we don't install from checkouted folder, because we want to test that the gem is available at Rubygems
 
 ARG VIPS_VERSION
+ENV VIPS_VERSION $VIPS_VERSION
 RUN set -ex -o pipefail && \
     wget -O- https://github.com/libvips/libvips/releases/download/v${VIPS_VERSION}/vips-${VIPS_VERSION}.tar.gz | tar xzC /tmp && \
     apk update && apk upgrade && apk add --no-cache \
