@@ -174,10 +174,6 @@ end
 
     The gem has been tested on macOS rbenv versions: 2.3.8, 2.4.9, 2.5.7, 2.6.5, 2.7.0-preview2
 
-* To build a docker image with vips:
-
-        docker build - -t vips-ruby2.3.8 --build-arg RUBY_ALPINE_VERSION=2.3.8-alpine3.8 --build-arg VIPS_VERSION=8.9.2 <vips.ruby.alpine.Dockerfile
-
 * To quickly find out what does the dhash-vips Docker image include (TODO: write in this README about the existing Docker images):
 
         docker run --rm <image_name> sh -c "cat /etc/alpine-release; ruby -v; vips -v"
