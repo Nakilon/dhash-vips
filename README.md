@@ -91,7 +91,7 @@ end
 
 ### Notes and benchmarks
 
-* The above `15` and `25` constants are found empirically and just work enough well for 8-byte hashes. To find these thresholds we can run a rake task with hardcoded test cases (pairs of photos from the same photosession are not the same but are considered to be enough 'similar' for the purpose of this benchmark):
+* The above `15` and `25` constants are found empirically and just work enough well for 8-byte hashes. To find these thresholds you can run a rake task with hardcoded test cases (pairs of photos from the same photosession are not the same but are considered to be enough 'similar' for the purpose of this benchmark):
 
       $ rake compare_quality
 
@@ -107,7 +107,7 @@ end
 
 * Methods were renamed from `#calculate` to `#fingerprint` and from `#hamming` to `#distance`.  
 * The `DHash#calculate` accepts `hash_size` optional parameter that is 8 by default. The `IDHash#fingerprint`'s optional parameter is called `power` and works in a bit different way: 3 means 8 and 4 means 16 -- other sizes are not supported because they don't seem to be useful (higher fingerprint resolution makes it vulnerable to image shifts and croppings, also `#distance` becomes much slower). Because IDHash's fingerprint is more complex than DHash's one it's not that straight forward to compare them so under the hood the `#distance` method have to check the size of fingerprint. If you are sure that fingerprints were made with power=3 then to skip the check you may use the `#distance3` method directly.  
-* The `#distance3` method will try to compile and use the Ruby C extension that is around 15 times faster than pure Ruby implementation -- native extension currently works on macOS rbenv Ruby from 2.3.8 to 2.4.9 installed with rbenv `-k` flag. So the full benchmark:
+* The `#distance3` method will try to compile and use the Ruby C extension that is around 15 times faster than pure Ruby implementation. Native extension currently works on macOS rbenv Ruby from 2.3.8 to at least 2.7.0-preview2 installed with rbenv `-k` flag. So the full benchmark:
 
   * Ruby 2.3.8p459:
 
@@ -131,11 +131,11 @@ end
 
 * There is now a benchmark that runs both speed and quality tests summing results to a single table where lower numbers are better:
 
-    ruby 2.3.8p459 (2018-10-18 revision 65136) [x86_64-darwin18]
-    vips-8.9.2-Tue Apr 21 09:26:11 UTC 2020
-    Version: ImageMagick 6.9.11-24 Q16 x86_64 2020-07-18
-    Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz
-    
+      ruby 2.3.8p459 (2018-10-18 revision 65136) [x86_64-darwin18]
+      vips-8.9.2-Tue Apr 21 09:26:11 UTC 2020
+      Version: ImageMagick 6.9.11-24 Q16 x86_64 2020-07-18
+      Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz
+
                 Fingerprint  Compare  1/FMI^2
       Phamilie        3.943    0.630    4.000
          Dhash        4.969    1.097    1.375
@@ -146,7 +146,7 @@ end
 
 ## Development notes
 
-    $ ruby test.rb
+    $ ruby -I./lib test.rb
 
 * You might need to prepend `bundle exec` to all the `rake` commands.
 
