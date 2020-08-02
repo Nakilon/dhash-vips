@@ -7,7 +7,7 @@ The **IDHash** is the new algorithm that has some improvements over dHash -- I'l
 
 You can read about the dHash and perceptual hashing in the article ["Kind of Like That" at "The Hacker Factor Blog"](http://www.hackerfactor.com/blog/index.php?/archives/529-Kind-of-Like-That.html) (21 January 2013). The idea is that you resize the otiginal image to 8x9 and then convert it to 8x8 array of bits -- each tells if the corresponding segment of the image is brighter or darker than the one on the right (or left). Then you apply the [Hamming distance](https://en.wikipedia.org/wiki/Hamming_distance) to such arrays to measure how much they are different.
 
-There were several Ruby implementations on Github already but they all depended on ImageMagick. My implementation takes an advantage of speed of the libvips (the `ruby-vips` gem) -- it fingerprints images much faster. For even more speed the fingerprint comparison function is made as native C extension.
+There were several Ruby implementations on Github already but they all depended on ImageMagick. My implementation takes an advantage of speed of the libvips (the `ruby-vips` gem) -- it fingerprints images much faster. For even more speed the fingerprint comparison function is implemented as native C extension.
 
 ## IDHash (the Important Difference Hash)
 
@@ -16,6 +16,14 @@ The main improvement over the dHash is what makes it insensitive to the resizing
 * The "Importance" is an array of extra 64 bits that tells the comparing function which half of 64 bits is important (when the difference between neighbors was enough significant) and which is not. So not every bit in a fingerprint is being compared but only half of them.  
 * It subtracts not only horizontally but also vertically -- that adds 128 more bits.  
 * Instead of resizing to 8x9 it resizes to 8x8 and puts the image on a torus so it subtracts the very left column from the very right one and the top from the bottom.
+
+So due to implementation and algorithm according to a benchmark the gem has the highest speed and quality compared to other gems (lower numbers are better):
+
+              Fingerprint  Compare  1/FMI^2
+    Phamilie        3.943    0.630    4.000
+       Dhash        4.969    1.097    1.375
+       DHash        0.434    1.089    1.556
+      IDHash        0.396    0.126    1.250
 
 ### Example
 
@@ -89,7 +97,7 @@ else
 end
 ```
 
-### Notes and benchmarks
+## Notes and benchmarks
 
 * The above `15` and `25` constants are found empirically and just work enough well for 8-byte hashes. To find these thresholds you can run a rake task with hardcoded test cases (pairs of photos from the same photosession are not the same but are considered to be enough 'similar' for the purpose of this benchmark):
 
@@ -129,7 +137,7 @@ end
         DHashVips::IDHash distance3_c      0.210000   0.000000   0.210000 (  0.212864)
         DHashVips::IDHash distance 4       8.300000   0.120000   8.420000 (  8.499735)
 
-* There is now a benchmark that runs both speed and quality tests summing results to a single table where lower numbers are better:
+* There is now a benchmark that runs both speed and quality tests summing results as a single table:
 
       ruby 2.3.8p459 (2018-10-18 revision 65136) [x86_64-darwin18]
       vips-8.9.2-Tue Apr 21 09:26:11 UTC 2020
@@ -148,7 +156,31 @@ end
 
     $ ruby -I./lib test.rb
 
-* You might need to prepend `bundle exec` to all the `rake` commands.
+* For all `rake` commands do the `bundle install` and prepend `bundle exec` when calling.
+
+* Current Ruby [packages](https://pkgs.alpinelinux.org/packages) for `apk add` (Alpine Linux) and existing official Ruby docker [images](https://hub.docker.com/_/ruby?tab=tags) per Alpine version:
+
+        packages     ruby docker hub
+        3.12 2.7.1                2.5.8 2.6.6 2.7.1
+        3.11 2.6.6         2.4.10 2.5.8 2.6.6 2.7.1
+        3.10 2.5.8         2.4.10 2.5.8 2.6.6 2.7.1
+        3.9  2.5.8         2.4.9  2.5.7 2.6.5 2.7.0p1
+        3.8  2.5.8   2.3.8 2.4.6  2.5.5 2.6.3
+        3.7  2.4.6   2.3.8 2.4.5  2.5.3 2.6.0
+        3.6  2.4.6         2.4.5  2.5rc
+        3.5  2.3.8
+        3.4  2.3.7   2.3.7 2.4.4
+        3.3  2.2.9
+
+    The gem has been tested on macOS rbenv versions: 2.3.8, 2.4.9, 2.5.7, 2.6.5, 2.7.0-preview2
+
+* To build a docker image with vips:
+
+        docker build - -t vips-ruby2.3.8 --build-arg RUBY_ALPINE_VERSION=2.3.8-alpine3.8 --build-arg VIPS_VERSION=8.9.2 <vips.ruby.alpine.Dockerfile
+
+* To quickly find out what does the dhash-vips Docker image include (TODO: write in this README about the existing Docker images):
+
+        docker run --rm <image_name> sh -c "cat /etc/alpine-release; ruby -v; vips -v"
 
 * You get this:
 
@@ -186,8 +218,6 @@ end
 * Execute the `rake compare_quality` at least once before executing other rake tasks because it's currently the only one that downloads the test images.
 
 * The tag `v0.0.0.4` is not semver and not real gem version -- it's only for Github Actions testing purposes.
-
-* To quickly find out what does the dhash-vips Docker image include: `docker run --rm <image_name> sh -c "cat /etc/alpine-release; ruby -v; vips -v; gem list dhash-vips` (TODO: write in this README about the existing Docker image).
 
 * Phamilie works with filenames instead of fingerprints and caches them but not distances.
 

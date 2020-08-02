@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "dhash-vips"
-  spec.version       = "0.1.1.1"
+  spec.version       = "0.1.1.2"
   spec.author        = "Victor Maslov"
   spec.email         = "nakilon@gmail.com"
   spec.summary       = "dHash and IDHash perceptual image hashing/fingerprinting"
@@ -10,11 +10,7 @@ Gem::Specification.new do |spec|
   spec.require_path  = "lib"
   spec.test_files    = %w{ test.rb }
   spec.extensions    = %w{ extconf.rb }
-  spec.files         = `git ls-files -z`.split("\x0") -
-                       spec.test_files -
-                       %w{ .gitignore Dockerfile } -
-                       Dir.glob("example_*/**/*") -
-                       Dir.glob(".github/**/*")
+  spec.files         = %w{ extconf.rb Gemfile LICENSE.txt common.rb dhash-vips.gemspec idhash.c lib/dhash-vips-post-install-test.rb lib/dhash-vips.rb }
 
   spec.add_dependency "ruby-vips", "~>2.0.16"
 
