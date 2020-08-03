@@ -1,5 +1,3 @@
-require "vips"
-
 module DHashVips
 
   module IDHash
