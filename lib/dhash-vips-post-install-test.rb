@@ -46,3 +46,5 @@ end
   s1, s2 = Array.new(2){ n = rand 256; ([?0] * n + [?1] * (256 - n)).shuffle.join.to_i 2 }
   fail unless DHashVips::IDHash.distance3(s1, s2) == DHashVips::IDHash.distance3_ruby(s1, s2)
 end
+
+puts "OK"
