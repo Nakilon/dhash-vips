@@ -1,26 +1,24 @@
 require "mkmf"
 
 File.write "Makefile", dummy_makefile(?.).join
-  unless Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.3.8")
-    if Gem::Platform.local.os == "darwin"
-    append_cppflags "-DRUBY_EXPORT" unless Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.4")
-    end
-    if ENV["RBENV_ROOT"] && ENV["RBENV_VERSION"]
+unless Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.3.8")
+  if ENV["RBENV_ROOT"] && ENV["RBENV_VERSION"]
     # https://github.com/rbenv/rbenv/issues/1199
     append_cppflags "-I#{Dir.glob("#{ENV["RBENV_ROOT"]}/sources/#{ENV["RBENV_VERSION"]}/ruby-*/").first}"
-    else
-      append_cppflags "-I/ruby/"
-    end
-    create_makefile "idhash"
-    # Why this hack?
-    # 1. Because I want to use Ruby and ./idhash.bundle for tests, not C.
-    # 2. Because I don't want to bother users with two gems instead of one.
-    File.write "Makefile", <<~HEREDOC + File.read("Makefile")
-      .PHONY: test
-      test: all
-      \t$(RUBY) -r./lib/dhash-vips.rb ./lib/dhash-vips-post-install-test.rb
-    HEREDOC
+  else
+    append_cppflags "-I/ruby/"
   end
+  append_cppflags "-DRUBY_EXPORT" unless Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.4")
+  create_makefile "idhash"
+  # Why this hack?
+  # 1. Because I want to use Ruby and ./idhash.bundle for tests, not C.
+  # 2. Because I don't want to bother users with two gems instead of one.
+  File.write "Makefile", <<~HEREDOC + File.read("Makefile")
+    .PHONY: test
+    test: all
+    \t$(RUBY) -r./lib/dhash-vips.rb ./lib/dhash-vips-post-install-test.rb
+  HEREDOC
+end
 
 # Cases to check:
 # 0. everything is ok
