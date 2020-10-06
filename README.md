@@ -174,10 +174,6 @@ end
 
     The gem has been tested on macOS rbenv versions: 2.3.8, 2.4.9, 2.5.7, 2.6.5, 2.7.0-preview2
 
-* To build a docker image with vips:
-
-        docker build - -t vips-ruby2.3.8 --build-arg RUBY_ALPINE_VERSION=2.3.8-alpine3.8 --build-arg VIPS_VERSION=8.9.2 <vips.ruby.alpine.Dockerfile
-
 * To quickly find out what does the dhash-vips Docker image include (TODO: write in this README about the existing Docker images):
 
         docker run --rm <image_name> sh -c "cat /etc/alpine-release; ruby -v; vips -v"
@@ -214,6 +210,13 @@ end
 * If you get `No package 'MagickCore' found` try:
 
         $ PKG_CONFIG_PATH="/usr/local/Cellar/imagemagick@6/6.9.10-74/lib/pkgconfig" bundle install
+
+* You might get:
+
+        NameError: uninitialized constant Magick::Rec601LumaColorspace
+        Did you mean?  Magick::Rec601YCbCrColorspace
+
+    if you call `rake` without `bundle install` and `bundle exec ...` and so it uses some old installed version of the gem instead of the local one.
 
 * Execute the `rake compare_quality` at least once before executing other rake tasks because it's currently the only one that downloads the test images.
 

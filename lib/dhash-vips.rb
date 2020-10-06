@@ -33,7 +33,7 @@ module DHashVips
       ((a ^ b) & (a | b) >> 128).to_s(2).count "1"
     end
     begin
-      require_relative "../idhash.bundle"
+      require_relative "../idhash.#{Gem::Platform.local.os == "darwin" ? "bundle" : "o"}"
     rescue LoadError
       alias_method :distance3, :distance3_ruby
     else
