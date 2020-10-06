@@ -211,6 +211,13 @@ end
 
         $ PKG_CONFIG_PATH="/usr/local/Cellar/imagemagick@6/6.9.10-74/lib/pkgconfig" bundle install
 
+* You might get:
+
+        NameError: uninitialized constant Magick::Rec601LumaColorspace
+        Did you mean?  Magick::Rec601YCbCrColorspace
+
+    if you call `rake` without `bundle install` and `bundle exec ...` and so it uses some old installed version of the gem instead of the local one.
+
 * Execute the `rake compare_quality` at least once before executing other rake tasks because it's currently the only one that downloads the test images.
 
 * The tag `v0.0.0.4` is not semver and not real gem version -- it's only for Github Actions testing purposes.

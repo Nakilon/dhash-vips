@@ -22,7 +22,7 @@ end
 
 # Cases to check:
 # 0. everything is ok
-# `rm -f idhash.o idhash.bundle idhash.so Makefile && ruby extconf.rb && make`
+# `ruby extconf.rb && make clean && make`
 # `bundle exec rake -rdhash-vips -e "p DHashVips::IDHash.method(:distance3).source_location"` # => # ["/Users/nakilon/_/dhash-vips/lib/dhash-vips.rb", 52] # or 42
 # 1. not macOS && rbenv
 # 2. fail during append_cppflags

@@ -46,6 +46,8 @@ task :compare_kernels do |_|
   end
 end
 
+require_relative "common"
+
 desc "Compare the quality of Dhash, Phamilie, DHashVips::DHash, DHashVips::IDHash"
 # in this test we want to know not that photos are the same but rather that they are from the same photosession
 task :compare_quality do
@@ -64,7 +66,6 @@ task :compare_quality do
       [DHashVips::IDHash, :fingerprint, :distance],
       [DHashVips::IDHash, :fingerprint, :distance, 4],
     ].map do |m, calc, dm, power, ii|
-      require_relative "common"
       hashes = %w{
         71662d4d4029a3b41d47d5baf681ab9a.jpg ad8a37f872956666c3077a3e9e737984.jpg
 
@@ -278,16 +279,33 @@ end
 
 desc "Benchmarks everything about Dhash, DHashVips::DHash, DHashVips::IDHash and Phamilie"
 task :benchmark do
-  abort "provide a folder with images grouped by similarity" unless 2 === ARGV.size
-  abort "invalid folder provided" unless Dir.exist?(dir = ARGV.last)
+  puts RUBY_DESCRIPTION
+  system "vips -v 2>/dev/null"
+  system "apt-cache show libvips42 2>/dev/null | grep Version"
+  system "identify -version 2>/dev/null | /usr/bin/head -1"
+  system "identify-6 -version 2>/dev/null | /usr/bin/head -1"
+  system "apt-cache show libmagickwand-dev 2>/dev/null | grep Version"
+  system "sysctl -n machdep.cpu.brand_string 2>/dev/null"
+  system "cat /proc/cpuinfo 2>/dev/null | grep 'model name' | uniq"
 
   require "dhash"
   require "phamilie"
   phamilie = Phamilie.new
   require_relative "lib/dhash-vips"
 
-  filenames = Dir.glob("#{dir}/*").map{ |_| Dir.glob "#{_}/*" }
-  puts "image groups sizes: #{filenames.map(&:size)}"
+  filenames = [
+     %w{ benchmark_images/0/6d97739b4a08f965dc9239dd24382e96.jpg },
+     %w{ benchmark_images/1/7a833d873f8d49f12882e86af1cc6b79.jpg benchmark_images/1/ac033cf01a3941dd1baa876082938bc9.jpg },
+     %w{ benchmark_images/2/9c2c240ec02356472fb532f404d28dde.jpg benchmark_images/2/fc762fa286489d8afc80adc8cdcb125e.jpg },
+     %w{ benchmark_images/3/21cd9a6986d98976b6b4655e1de7baf4.jpg benchmark_images/3/9b158c0d4953d47171a22ed84917f812.jpg },
+     %w{ benchmark_images/4/4b62e0eef58bfbc8d0d2fbf2b9d05483.jpg benchmark_images/4/b8eb0ca91855b657f12fb3d627d45c53.jpg },
+     %w{ benchmark_images/5/54192a3f65bd03163b04849e1577a40b.jpg benchmark_images/5/6d32f57459e5b79b5deca2a361eb8c6e.jpg },
+     %w{ benchmark_images/6/679634ff89a31279a39f03e278bc9a01.jpg benchmark_images/6/df0a3b93e9412536ee8a11255f974141.jpg },
+     %w{ benchmark_images/7/309666c7b45ecbf8f13e85a0bd6b0a4c.jpg benchmark_images/7/3f9f3db06db20d1d9f8188cd753f6ef4.jpg },
+     %w{ benchmark_images/8/1d468d064d2e26b5b5de9a0241ef2d4b.jpg benchmark_images/8/92d90b8977f813af803c78107e7f698e.jpg },
+     %w{ benchmark_images/9/1b1d4bde376084011d027bba1c047a4b.jpg },
+  ].each{ |g| g.each &method(:download_if_needed) }
+  puts "image groups sizes: #{filenames.map &:size}"
   require "benchmark"
 
   puts "step 1 / 3 (fingerprinting)"
@@ -305,7 +323,7 @@ task :benchmark do
 
   puts "step 2 / 3 (comparing fingerprints)"
   combs = filenames.flatten.size ** 2
-  n = 10_000_000_000_000 / Dir.glob("#{dir}/*/*").map(&File.method(:size)).inject(:+) / combs
+  n = 10_000_000_000_000 / filenames.flatten.map(&File.method(:size)).inject(:+) / combs
   bm2 = [
     [phamilie, :distance, nil, filenames.flatten],
     [Dhash, :hamming],
@@ -327,8 +345,7 @@ task :benchmark do
     [DHashVips::DHash, :calculate, :hamming],
     [DHashVips::IDHash, :fingerprint, :distance],
   ].map do |m, calc, dm, power, ii|
-    require_relative "common"
-    hashes = Dir.glob("#{dir}/*").flat_map{ |_| Dir.glob "#{_}/*" }.map{ |filename| [filename, m.public_send(calc, filename, *power)] }
+    hashes = filenames.flatten.map{ |filename| [filename, m.public_send(calc, filename, *power)] }
     report = Struct.new(:same, :sim, :not_sim).new [], [], []
     hashes.size.times.to_a.repeated_combination(2) do |i, j|
       report[
@@ -350,12 +367,6 @@ task :benchmark do
     fmi
   end
 
-  puts RUBY_DESCRIPTION
-  system "vips -v"
-  system "identify -version 2>/dev/null | /usr/bin/head -1"
-  system "identify-6 -version 2>/dev/null | /usr/bin/head -1"
-  system "sysctl -n machdep.cpu.brand_string 2>/dev/null"
-  system "cat /proc/cpuinfo 2>/dev/null | grep 'model name' | uniq"
   require "mll"
   puts MLL::grid.call %w{ \  Fingerprint Compare 1/FMI^2 }.zip(*[
     %w{ Phamilie Dhash DHash IDHash },

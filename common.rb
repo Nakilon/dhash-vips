@@ -9,3 +9,13 @@ def download_and_keep image   # returns path
     end unless File.exist?(path) && Digest::MD5.file(path) == File.basename(image, ".jpg")
   end
 end
+
+def download_if_needed path
+  require "open-uri"
+  require "digest"
+  FileUtils.mkdir_p File.dirname path
+  open("https://storage.googleapis.com/dhash-vips.nakilon.pro/#{File.basename path}") do |link|
+    File.open(path, "wb"){ |file| IO.copy_stream link, file }
+  end unless File.exist?(path) && Digest::MD5.file(path) == File.basename(path, File.extname(path))
+  path
+end
