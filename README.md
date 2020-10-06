@@ -5,7 +5,7 @@
 The **dHash** is the algorithm of image fingerprinting that can be used to measure the similarity of two images.  
 The **IDHash** is the new algorithm that has some improvements over dHash -- I'll describe it further.
 
-You can read about the dHash and perceptual hashing in the article ["Kind of Like That" at "The Hacker Factor Blog"](http://www.hackerfactor.com/blog/index.php?/archives/529-Kind-of-Like-That.html) (21 January 2013). The idea is that you resize the otiginal image to 8x9 and then convert it to 8x8 array of bits -- each tells if the corresponding segment of the image is brighter or darker than the one on the right (or left). Then you apply the [Hamming distance](https://en.wikipedia.org/wiki/Hamming_distance) to such arrays to measure how much they are different.
+You can read about the dHash and perceptual hashing in the article ["Kind of Like That" at "The Hacker Factor Blog"](http://www.hackerfactor.com/blog/index.php?/archives/529-Kind-of-Like-That.html) (21 January 2013). The idea is that you resize the original image to 8x9 and then convert it to 8x8 array of bits -- each tells if the corresponding segment of the image is brighter or darker than the one on the right (or left). Then you apply the [Hamming distance](https://en.wikipedia.org/wiki/Hamming_distance) to such arrays to measure how much they are different.
 
 There were several Ruby implementations on Github already but they all depended on ImageMagick. My implementation takes an advantage of speed of the libvips (the `ruby-vips` gem) -- it fingerprints images much faster. For even more speed the fingerprint comparison function is implemented as native C extension.
 
