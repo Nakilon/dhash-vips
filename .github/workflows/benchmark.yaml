@@ -7,5 +7,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - run: docker run --rm -ti -v $(pwd):/checkout ruby:2.3.8-slim sh -c "apt-get update && apt install -y cimg-dev libmagickwand-dev libvips42 && cd checkout && bundle install --no-cache && rake benchmark"
+    - run: docker run --rm -v $(pwd):/checkout ruby:2.3.8-slim sh -c "apt-get update && apt install -y cimg-dev libmagickwand-dev libvips42 && cd checkout && bundle install --no-cache && rake benchmark"
       timeout-minutes: 5
