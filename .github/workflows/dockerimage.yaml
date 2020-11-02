@@ -1,4 +1,4 @@
-name: Docker image
+name: Debian Slim Docker image
 on:
   push:
     tags:
@@ -8,10 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - run: echo ::set-env name=DHASH_VIPS_VERSION::$(echo "$GITHUB_REF" | rev | cut -dv -f1 | rev)
-    - run: docker build . -t nakilonishe/dhash-vips:$GITHUB_SHA --build-arg DHASH_VIPS_VERSION
-    - run: docker run --rm -v $(pwd):/test nakilonishe/dhash-vips:$GITHUB_SHA sh -c "cd /test && gem install mll && ruby test.rb"
+    - run: docker build -t image -f - . <slim.Dockerfile
+      timeout-minutes: 5
     - run: docker login -u dhashvips -p $DOCKERHUB_ACCESS_TOKEN
       env:
         DOCKERHUB_ACCESS_TOKEN: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
-    - run: docker push nakilonishe/dhash-vips:$GITHUB_SHA
+    - run: docker tag image nakilonishe/dhash-vips:slim && docker push nakilonishe/dhash-vips:slim
+    - run: docker tag image nakilonishe/dhash-vips:$GITHUB_SHA && docker push nakilonishe/dhash-vips:$GITHUB_SHA
+    - run: echo ::set-env name=DHASH_VIPS_VERSION::$(echo "$GITHUB_REF" | rev | cut -dv -f1 | rev)
+    - run: docker tag image nakilonishe/dhash-vips:$DHASH_VIPS_VERSION && docker push nakilonishe/dhash-vips:$DHASH_VIPS_VERSION

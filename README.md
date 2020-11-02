@@ -1,4 +1,5 @@
-[![Gem Version](https://badge.fury.io/rb/dhash-vips.svg)](http://badge.fury.io/rb/dhash-vips) [![Docker Image](https://github.com/nakilon/dhash-vips/workflows/Docker%20Image/badge.svg)](https://hub.docker.com/repository/docker/nakilonishe/dhash-vips/general)
+![Gem version](https://badge.fury.io/rb/dhash-vips.svg)
+[![Debian Slim Docker image](https://github.com/nakilon/dhash-vips/workflows/Debian%20Slim%20Docker%20image/badge.svg)](https://hub.docker.com/r/nakilonishe/dhash-vips/tags)
 
 # dHash and IDHash gem powered by ruby-vips
 
