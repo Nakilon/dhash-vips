@@ -23,12 +23,12 @@ unless Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.3.8")
     HEREDOC
 end
 
-# Cases to check:
-# 0. everything is ok
-# `ruby extconf.rb && make clean && make`
-# `bundle exec rake -rdhash-vips -e "p DHashVips::IDHash.method(:distance3).source_location"
-# => # ["/Users/nakilon/_/dhash-vips/lib/dhash-vips.rb", 52] # or 42 with Ruby<2.4
-# => # ["/Users/nakilon/_/dhash-vips/lib/dhash-vips.rb", 32] # if LoadError
+# How to test:
+# $ ruby extconf.rb && make clean && make
+# $ bundle exec rake -rdhash-vips -e "p DHashVips::IDHash.method(:distance3).source_location"
+# # ["/Users/nakilon/_/dhash-vips/lib/dhash-vips.rb", 52] # or 42 with Ruby<2.4
+# # ["/Users/nakilon/_/dhash-vips/lib/dhash-vips.rb", 32] # if LoadError
+# Other cases to check:
 # 1. not macOS && rbenv
 # 2. fail during append_cppflags
 # 3. failed compilation
