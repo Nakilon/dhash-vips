@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.extensions    = %w{ extconf.rb }
   spec.files         = %w{ extconf.rb Gemfile LICENSE.txt common.rb dhash-vips.gemspec idhash.c lib/dhash-vips-post-install-test.rb lib/dhash-vips.rb }
 
-  spec.add_dependency "ruby-vips", "~>2.0"
+  spec.add_dependency "ruby-vips", "~> 2.0", "!= 2.1.0", "!= 2.1.1"
 
   spec.add_development_dependency "rake"
   spec.add_development_dependency "minitest"
