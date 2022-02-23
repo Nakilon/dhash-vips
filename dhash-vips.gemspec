@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "dhash-vips"
-  spec.version       = "0.1.1.4"
+  spec.version       = "0.1.1.5"
   spec.summary       = "dHash and IDHash perceptual image hashing/fingerprinting"
   # spec.homepage      = "https://github.com/nakilon/dhash-vips"
 
