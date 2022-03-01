@@ -2,7 +2,7 @@ name: Debian Slim Docker image
 on:
   push:
     tags:
-    # - "v*.*.*.*"
+    - "v*.*.*.*"
 jobs:
   build:
     runs-on: ubuntu-latest

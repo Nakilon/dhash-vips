@@ -141,15 +141,17 @@ end
 * There is now a benchmark that runs both speed and quality tests summing results as a single table:
 
       ruby 2.3.8p459 (2018-10-18 revision 65136) [x86_64-darwin18]
-      vips-8.9.2-Tue Apr 21 09:26:11 UTC 2020
-      Version: ImageMagick 6.9.11-24 Q16 x86_64 2020-07-18
+      vips-8.11.3-Wed Aug 11 09:29:27 UTC 2021
+      Version: ImageMagick 6.9.12-23 Q16 x86_64 2021-09-18 https://imagemagick.org
       Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz
 
-                Fingerprint  Compare  1/FMI^2
-      Phamilie        3.943    0.630    4.000
-         Dhash        4.969    1.097    1.375
-         DHash        0.434    1.089    1.556
-        IDHash        0.396    0.126    1.250
+                Fingerprint  Compare  1/FMI^2 
+      Phamilie        4.473    0.674    4.000 
+         Dhash        5.142    1.162    1.375 
+         DHash        0.410    1.090    1.778 
+        IDHash        0.342    0.150    1.306 
+
+    (I believe the quality became lower than 1.250 due to some recent libvips resize interpolation changes)
 
 * Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4 and 0.0.5 became incompatible, but you probably can convert them manually. Otherwise if we put the version or structure information inside fingerprint it would became slow to (de)serialize and store.
 
@@ -217,7 +219,12 @@ end
         NameError: uninitialized constant Magick::Rec601LumaColorspace
         Did you mean?  Magick::Rec601YCbCrColorspace
 
-    if you call `rake` without `bundle install` and `bundle exec ...` and so it uses some old installed version of the gem instead of the local one.
+    try
+
+        $ brew unlink imagemagick
+        $ brew link imagemagick@6
+        $ gem uninstall rmagick   # select 2.x
+        $ bundle install
 
 * Execute the `rake compare_quality` at least once before executing other rake tasks because it's currently the only one that downloads the test images.
 
