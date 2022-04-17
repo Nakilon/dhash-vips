@@ -4,7 +4,7 @@ The IDHash is not designed for OCR in the first place but in specific cases it m
 
 The following image was rendered at https://www.fonts.com/font/monotype/arial/light:
 
-![](https://storage.googleapis.com/dhash-vips.nakilon.pro/monotype-arial.png)
+![](http://gems.nakilon.pro.storage.yandexcloud.net/dhash-vips/monotype-arial.png)
 
 The program renders 26 upper case chars of each font you want using your OS fonts and compares them with each char detected on the image.  
 This isn't made to break captchas so it assumes that chars are clearly whitespace separated, not rotated, black-on-white, etc. At the end it recognizes it as:

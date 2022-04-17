@@ -5,7 +5,7 @@ https://hub.docker.com/repository/docker/nakilonishe/dhash-vips-demo
 This is a sample Docker image that you can use to find duplicates in a folder you link.  
 So you don't need Ruby or even git to try the gem, just Docker:
 
-![](https://storage.googleapis.com/dhash-vips.nakilon.pro/example_dups.png)
+![](http://gems.nakilon.pro.storage.yandexcloud.net/dhash-vips/example_dups.png)
 
 ```none
 $ docker run --rm -v $(pwd)/good:/images nakilonishe/dhash-vips-demo

@@ -1,8 +1,8 @@
 source "https://rubygems.org"
 
 gem "rake"
-gem "rmagick", "~>2.16"
-gem "dhash"
+gem "rmagick"
+gem "dhash", github: "nakilon/dhash"
 gem "phamilie"
 gem "get_process_mem"
 gem "mll"

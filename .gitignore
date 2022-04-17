@@ -1,6 +1,4 @@
 /Gemfile.lock
-/images/
-/benchmark_images/
 /pkg/
 
 /Makefile
@@ -10,3 +8,5 @@
 
 /.byebug_history
 .DS_Store
+*.jpg
+*.png

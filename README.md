@@ -21,17 +21,17 @@ The main improvement over the dHash is what makes it insensitive to the resizing
 So due to implementation and algorithm according to a benchmark the gem has the highest speed and quality compared to other gems (lower numbers are better):
 
               Fingerprint  Compare  1/FMI^2
-    Phamilie        3.943    0.630    4.000
-       Dhash        4.969    1.097    1.375
-       DHash        0.434    1.089    1.556
-      IDHash        0.396    0.126    1.250
+    Phamilie        4.575    0.642    4.000
+       Dhash        4.785    1.147    1.250
+       DHash        0.392    1.075    1.633
+      IDHash        0.346    0.131    1.125
 
 ### Example
 
 Here are two photos (by Brian Lauer):  
-![](https://storage.googleapis.com/dhash-vips.nakilon.pro/idhash_example_in.png)  
+![](http://gems.nakilon.pro.storage.yandexcloud.net/dhash-vips/idhash_example_in.png)  
 and visualization of IDHash (`rake compare_images -- image1.jpg image2.jpg`):  
-![](https://storage.googleapis.com/dhash-vips.nakilon.pro/idhash_example_out.png)  
+![](http://gems.nakilon.pro.storage.yandexcloud.net/dhash-vips/idhash_example_out.png)  
 
 Here in each of 64 cells, there are two circles that color the difference between that cell and the neighbor one. If the difference is low the Importance bit is set to zero and the circle is invisible. So there are 128 pairs of corresponding circles and when you take one, if at least one circle is visible and is of different color the line is to be drawn. Here you see 15 lines and so the distance between fingerprints will be equal to 15 (that is pretty low and can be interpreted as "images look similar"). Also, you see here that floor on this photo matters -- classic dHash won't see that it's darker than wall because it's comparing only horizontal neighbors and if one photo had no floor the distance function won't notice that. Also, it sees the Important difference between the very right and left columns because the wall has a slow but visible gradient.
 
@@ -39,7 +39,7 @@ Here in each of 64 cells, there are two circles that color the difference betwee
 
 * Neither dHash nor IDHash can't automatically detect very shifted crops and rotated images but you can make a wrapper that would call the comparison function iteratively.  
 * These algorithms are color blind because of converting an image to grayscale. If you take a photo of something in your yard the sun will create lights and shadows, but if you compare photos of something green painted on a blue wall there is a possibility the machine would see nothing painted at all. The `dhash` gem had such image in specs and that made them pretty useless (this was supposed to be a face):  
-![](https://storage.googleapis.com/dhash-vips.nakilon.pro/colorblind.png)  
+![](http://gems.nakilon.pro.storage.yandexcloud.net/dhash-vips/colorblind.png)  
 * If you have a pile of 1000000 images comparing them with each other would take a month or two. To improve the process in case of dHash that uses Hamming distance you may want to read these threads on Stackexchange network:  
   * [How to find the closest pairs of a string of binary bins in Ruby without O^2 issues?](https://stackoverflow.com/q/8734034/322020)  
   * [Find all pairs of values that are close under Hamming distance](https://cstheory.stackexchange.com/q/18516/27420)  
@@ -106,11 +106,11 @@ end
 
                             Dhash  Phamilie  DHashVips::DHash  DHashVips::IDHash  DHashVips::IDHash(4)
           The same image:    0..0      0..0              0..0               0..0                  0..0
-      'Jordan Voth case':       2         2                 4                  0                     0
-          Similar images:   1..15    14..34             2..23              6..22               53..166
-        Different images:  10..54    22..42            10..50             17..65              120..233
-                1/FMI^2 =   1.375       4.0             1.556               1.25                 1.306
-                 FP, FN =  [3, 0]    [0, 6]            [1, 2]             [2, 0]                [1, 1]
+      'Jordan Voth case':       2         2                 5                  0                     0
+          Similar images:   1..15    14..34             0..24              7..22               61..152
+        Different images:  10..56    22..42             8..49             21..66              121..225
+                1/FMI^2 =    1.25       4.0             1.633              1.125                 1.306
+                 FP, FN =  [2, 0]    [0, 6]            [3, 1]             [1, 0]                [1, 1]
 
     The `FMI` line here is the "quality of algorithm", i.e. the best achievable function from the ["Fowlkes–Mallows index"](https://en.wikipedia.org/wiki/Fowlkes%E2%80%93Mallows_index) value if you take the "similar" and "different" test pairs and try to draw the threshold line. Smaller number is better. The last line shows number of false positives (`FP`) and false negatives (`FN`) in case of the best achieved FMI. Here I've added the [`phamilie` gem](https://github.com/toy/phamilie) that is DCT based (not a kind of dhash).
 
@@ -144,14 +144,14 @@ end
       vips-8.11.3-Wed Aug 11 09:29:27 UTC 2021
       Version: ImageMagick 6.9.12-23 Q16 x86_64 2021-09-18 https://imagemagick.org
       Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz
+      gem ruby-vips version 2.1.4
+      gem rmagick version 4.2.5
 
-                Fingerprint  Compare  1/FMI^2 
-      Phamilie        4.473    0.674    4.000 
-         Dhash        5.142    1.162    1.375 
-         DHash        0.410    1.090    1.778 
-        IDHash        0.342    0.150    1.306 
-
-    (I believe the quality became lower than 1.250 due to some recent libvips resize interpolation changes)
+                Fingerprint  Compare  1/FMI^2
+      Phamilie        4.575    0.642    4.000
+         Dhash        4.785    1.147    1.250
+         DHash        0.392    1.075    1.633
+        IDHash        0.346    0.131    1.125
 
 * Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4 and 0.0.5 became incompatible, but you probably can convert them manually. Otherwise if we put the version or structure information inside fingerprint it would became slow to (de)serialize and store.
 

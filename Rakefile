@@ -79,7 +79,9 @@ task :compare_quality do
         21cd9a6986d98976b6b4655e1de7baf4.jpg 9b158c0d4953d47171a22ed84917f812.jpg
         9c2c240ec02356472fb532f404d28dde.jpg fc762fa286489d8afc80adc8cdcb125e.jpg
         7a833d873f8d49f12882e86af1cc6b79.jpg ac033cf01a3941dd1baa876082938bc9.jpg
-      }.map(&method(:download_and_keep)).map{ |filename| [filename, m.public_send(calc, filename, *power)] }
+      }.map{ |_| "compare_quality_images/#{_}" }.
+        each(&method(:download_if_needed)).
+        map{ |_| [_, m.public_send(calc, _, *power)] }
       table = MLL::table[m.method(dm), [hashes.map{|_|_[ii||1]}], [hashes.map{|_|_[ii||1]}]]
       report = Struct.new(:same, :bw, :sim, :not_sim).new [], [], [], []
       hashes.size.times.to_a.repeated_combination(2) do |i, j|
@@ -280,18 +282,20 @@ end
 desc "Benchmarks everything about Dhash, DHashVips::DHash, DHashVips::IDHash and Phamilie"
 task :benchmark do
   puts RUBY_DESCRIPTION
-  system "vips -v 2>/dev/null"
   system "apt-cache show libvips42 2>/dev/null | grep Version"
+  system "vips -v 2>/dev/null"
+  system "apt-cache show libmagickwand-dev 2>/dev/null | grep Version"
   system "identify -version 2>/dev/null | /usr/bin/head -1"
   system "identify-6 -version 2>/dev/null | /usr/bin/head -1"
-  system "apt-cache show libmagickwand-dev 2>/dev/null | grep Version"
   system "sysctl -n machdep.cpu.brand_string 2>/dev/null"
   system "cat /proc/cpuinfo 2>/dev/null | grep 'model name' | uniq"
 
+  require_relative "lib/dhash-vips"
+  puts "gem ruby-vips version #{Gem.loaded_specs["ruby-vips"].version}"
   require "dhash"
+  puts "gem rmagick version #{Gem.loaded_specs["rmagick"].version}"
   require "phamilie"
   phamilie = Phamilie.new
-  require_relative "lib/dhash-vips"
 
   filenames = [
      %w{ benchmark_images/0/6d97739b4a08f965dc9239dd24382e96.jpg },

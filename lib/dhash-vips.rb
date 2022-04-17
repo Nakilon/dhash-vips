@@ -1,4 +1,5 @@
 require "vips"
+Vips.vector_set false
 
 module DHashVips
 

@@ -13,7 +13,7 @@ chars = %w{
 end
 unless File.exist? "monotype-arial.png"
   require "open-uri"
-  File.binwrite "monotype-arial.png", open("https://storage.googleapis.com/dhash-vips.nakilon.pro/monotype-arial.png", &:read)
+  File.binwrite "monotype-arial.png", open("http://gems.nakilon.pro.storage.yandexcloud.net/dhash-vips/monotype-arial.png", &:read)
 end
 
 split = lambda do |array|
