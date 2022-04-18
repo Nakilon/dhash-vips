@@ -317,8 +317,8 @@ task :benchmark do
   bm1 = [
     [phamilie, :fingerprint],
     [Dhash, :calculate],
-    [DHashVips::DHash, :calculate],
     [DHashVips::IDHash, :fingerprint],
+    [DHashVips::DHash, :calculate],
   ].map do |m, calc, power|
     Benchmark.realtime do
       hashes.push filenames.flatten.map{ |filename| m.send calc, filename, *power }
@@ -331,8 +331,8 @@ task :benchmark do
   bm2 = [
     [phamilie, :distance, nil, filenames.flatten],
     [Dhash, :hamming],
-    [DHashVips::DHash, :hamming],
     [DHashVips::IDHash, :distance3_c],
+    [DHashVips::DHash, :hamming],
   ].zip(hashes).map do |(m, dm, power, ii), hs|
     Benchmark.realtime do
       _ = ii || hs
@@ -346,8 +346,8 @@ task :benchmark do
   bm3 = [
     [phamilie, :fingerprint, :distance, nil, 0],
     [Dhash, :calculate, :hamming],
-    [DHashVips::DHash, :calculate, :hamming],
     [DHashVips::IDHash, :fingerprint, :distance],
+    [DHashVips::DHash, :calculate, :hamming],
   ].map do |m, calc, dm, power, ii|
     hashes = filenames.flatten.map{ |filename| [filename, m.public_send(calc, filename, *power)] }
     report = Struct.new(:same, :sim, :not_sim).new [], [], []
@@ -374,8 +374,7 @@ task :benchmark do
   require "mll"
   puts MLL::grid.call %w{ \  Fingerprint Compare 1/FMI^2 }.zip(*[
     %w{ Phamilie Dhash DHash IDHash },
-    *[bm1, bm2].map{ |bm| bm.map{ |_| "%.3f" % _ } },
-    bm3.map{ |_| "%.3f" % _ }
+    *[bm1, bm2, bm3].map{ |bm| bm[-1], bm[-2] = bm[-2], bm[-1]; bm.map{ |_| "%.3f" % _ } }
   ].transpose).transpose, spacings: [1.5, 0], alignment: :right
   puts "(lower numbers are better)"
 end
