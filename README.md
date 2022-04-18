@@ -155,8 +155,8 @@ end
          DHash        0.269    1.146    1.306
         IDHash        0.237    0.132    1.000
 
-* Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4 and 0.0.5 became incompatible, but you probably can convert them manually. Otherwise if we put the version or structure information inside fingerprint it would became slow to (de)serialize and store.  
-* 
+* Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4.1 and 0.0.5.0 became incompatible, but you probably can convert them manually. Otherwise if we put the version or structure information inside fingerprint it would became slow to (de)serialize and store.  
+* The version `0.1.2.0` will have another fingerprints breaking change, since they were improved, see https://github.com/Nakilon/dhash-vips/issues/16#issuecomment-1101386153.
 
 ## Development notes
 
