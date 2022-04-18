@@ -23,8 +23,8 @@ So due to implementation and algorithm according to a benchmark the gem has the 
               Fingerprint  Compare  1/FMI^2
     Phamilie        4.575    0.642    4.000
        Dhash        4.785    1.147    1.250
-       DHash        0.392    1.075    1.633
-      IDHash        0.204    0.131    1.125
+       DHash        0.269    1.146    1.306
+      IDHash        0.237    0.132    1.000
 
 ### Example
 
@@ -89,7 +89,7 @@ hash1 = DHashVips::IDHash.fingerprint "photo1.jpg"
 hash2 = DHashVips::IDHash.fingerprint "photo2.jpg"
 
 distance = DHashVips::IDHash.distance hash1, hash2
-if distance < 15
+if distance < 20
   puts "Images are very similar"
 elsif distance < 25
   puts "Images are slightly similar"
@@ -100,19 +100,21 @@ end
 
 ## Notes and benchmarks
 
-* The above `15` and `25` constants are found empirically and just work enough well for 8-byte hashes. To find these thresholds you can run a rake task with hardcoded test cases (pairs of photos from the same photosession are not the same but are considered to be enough 'similar' for the purpose of this benchmark):
+* The above `20` and `25` constants are found empirically and just work enough well for 8-byte hashes. To find these thresholds you can run a rake task with hardcoded test cases (pairs of photos from the same photosession are not the same but are considered to be enough 'similar' for the purpose of this benchmark):
 
       $ rake compare_quality
 
                             Dhash  Phamilie  DHashVips::DHash  DHashVips::IDHash  DHashVips::IDHash(4)
           The same image:    0..0      0..0              0..0               0..0                  0..0
-      'Jordan Voth case':       2         2                 5                  0                     0
-          Similar images:   1..15    14..34             0..24              7..22               61..152
-        Different images:  10..56    22..42             8..49             21..66              121..225
-                1/FMI^2 =    1.25       4.0             1.633              1.125                 1.306
-                 FP, FN =  [2, 0]    [0, 6]            [3, 1]             [1, 0]                [1, 1]
+      'Jordan Voth case':       2         2                 9                  0                     2
+          Similar images:   1..15    14..34             3..20              8..21               56..169
+        Different images:  10..56    22..42             9..53             23..72              111..236
+                1/FMI^2 =    1.25       4.0             1.306                1.0                 1.306
+                 FP, FN =  [2, 0]    [0, 6]            [1, 1]             [0, 0]                [1, 1]
 
-    The `FMI` line here is the "quality of algorithm", i.e. the best achievable function from the ["Fowlkes–Mallows index"](https://en.wikipedia.org/wiki/Fowlkes%E2%80%93Mallows_index) value if you take the "similar" and "different" test pairs and try to draw the threshold line. Smaller number is better. The last line shows number of false positives (`FP`) and false negatives (`FN`) in case of the best achieved FMI. Here I've added the [`phamilie` gem](https://github.com/toy/phamilie) that is DCT based (not a kind of dhash).
+    The `FMI` line (smaller number is better) here is the "quality of algorithm", i.e. the best achievable function for the ["Fowlkes–Mallows index"](https://en.wikipedia.org/wiki/Fowlkes%E2%80%93Mallows_index) value if you take the "similar" and "different" test pairs and try to draw the threshold line. For IDHash it's empirical value of 22 as you acn see above that means it's the only algorithm that allowed to separate "similar" from "different" comparisons for our test cases.  
+    The last line shows number of false positives (`FP`) and false negatives (`FN`) in case of the best achieved FMI.  
+    The [`phamilie` gem](https://github.com/toy/phamilie) is a DCT based fingerprinting tool (not a kind of dhash).
 
 * Methods were renamed from `#calculate` to `#fingerprint` and from `#hamming` to `#distance`.  
 * The `DHash#calculate` accepts `hash_size` optional parameter that is 8 by default. The `IDHash#fingerprint`'s optional parameter is called `power` and works in a bit different way: 3 means 8 and 4 means 16 -- other sizes are not supported because they don't seem to be useful (higher fingerprint resolution makes it vulnerable to image shifts and croppings, also `#distance` becomes much slower). Because IDHash's fingerprint is more complex than DHash's one it's not that straight forward to compare them so under the hood the `#distance` method have to check the size of fingerprint. If you are sure that fingerprints were made with power=3 then to skip the check you may use the `#distance3` method directly.  
@@ -150,14 +152,15 @@ end
                 Fingerprint  Compare  1/FMI^2
       Phamilie        4.575    0.642    4.000
          Dhash        4.785    1.147    1.250
-         DHash        0.392    1.075    1.633
-        IDHash        0.204    0.131    1.125
+         DHash        0.269    1.146    1.306
+        IDHash        0.237    0.132    1.000
 
-* Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4 and 0.0.5 became incompatible, but you probably can convert them manually. Otherwise if we put the version or structure information inside fingerprint it would became slow to (de)serialize and store.
+* Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4 and 0.0.5 became incompatible, but you probably can convert them manually. Otherwise if we put the version or structure information inside fingerprint it would became slow to (de)serialize and store.  
+* 
 
 ## Development notes
 
-    $ ruby -I./lib test.rb
+    $ bundle exec ruby test.rb
 
 * For all `rake` commands do the `bundle install` and prepend `bundle exec` when calling.
 
