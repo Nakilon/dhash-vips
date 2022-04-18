@@ -24,7 +24,7 @@ So due to implementation and algorithm according to a benchmark the gem has the 
     Phamilie        4.575    0.642    4.000
        Dhash        4.785    1.147    1.250
        DHash        0.392    1.075    1.633
-      IDHash        0.346    0.131    1.125
+      IDHash        0.204    0.131    1.125
 
 ### Example
 
@@ -151,7 +151,7 @@ end
       Phamilie        4.575    0.642    4.000
          Dhash        4.785    1.147    1.250
          DHash        0.392    1.075    1.633
-        IDHash        0.346    0.131    1.125
+        IDHash        0.204    0.131    1.125
 
 * Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4 and 0.0.5 became incompatible, but you probably can convert them manually. Otherwise if we put the version or structure information inside fingerprint it would became slow to (de)serialize and store.
 

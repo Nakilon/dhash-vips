@@ -93,10 +93,9 @@ module DHashVips
 
     def self.fingerprint filename, power = 3
       size = 2 ** power
-      image = Vips::Image.new_from_file filename, access: :sequential
-      image = image.resize(size.fdiv(image.width), vscale: size.fdiv(image.height)).colourspace("b-w").flatten
-
-      array = image.to_enum.map &:flatten
+      image = Vips::Image.thumbnail filename, size, height: size, size: :force
+      image = image.flatten background: [128, 128, 128] if image.has_alpha?
+      array = image.colourspace("b-w")[0].to_enum.map &:flatten
       d1, i1, d2, i2 = [array, array.transpose].flat_map do |a|
         d = a.zip(a.rotate(1)).flat_map{ |r1, r2| r1.zip(r2).map{ |i, j| i - j } }
         m = median d.map(&:abs).sort
