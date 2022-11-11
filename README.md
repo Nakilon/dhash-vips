@@ -237,4 +237,4 @@ end
 
 ## Credits
 
-[John Cupitt](https://github.com/jcupitt) (libvips and ruby-vips maintainer) helped me a lot.
+libvips maintainers [John Cupitt](https://github.com/jcupitt) and [Kleis Auke Wolthuizen](https://github.com/kleisauke) helped with this a lot.
