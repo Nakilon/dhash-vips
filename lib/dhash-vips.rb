@@ -10,8 +10,12 @@ module DHashVips
       (a ^ b).to_s(2).count "1"
     end
 
-    def pixelate filename, hash_size
-      Vips::Image.thumbnail(filename, hash_size + 1, height: hash_size, size: :force).flatten.colourspace("b-w")[0]
+    def pixelate input, hash_size
+      if input.is_a? Vips::Image
+        input.thumbnail_image(hash_size + 1, height: hash_size, size: :force).flatten.colourspace("b-w")[0]
+      else
+        Vips::Image.thumbnail(input, hash_size + 1, height: hash_size, size: :force).flatten.colourspace("b-w")[0]
+      end
     end
 
     def calculate file, hash_size = 8
@@ -75,6 +79,7 @@ module DHashVips
       return right.uniq[1] if left.count(left.last) > right.count(right.first)
       left.last
     end
+    private_class_method :median
     fail unless 2 == median([1, 2, 2, 2, 2, 2, 3])
     fail unless 3 == median([1, 2, 2, 2, 2, 3, 3])
     fail unless 3 == median([1, 1, 2, 2, 3, 3, 3])
@@ -84,11 +89,14 @@ module DHashVips
     fail unless 3 == median([1, 2, 2, 3, 3, 3])
     fail unless 1 == median([1, 1, 1])
     fail unless 1 == median([1, 1])
-    private_class_method :median
 
-    def self.fingerprint filename, power = 3
+    def self.fingerprint input, power = 3
       size = 2 ** power
-      image = Vips::Image.thumbnail(filename, size, height: size, size: :force).flatten.colourspace("b-w")[0]
+      image = if input.is_a? Vips::Image
+        input.thumbnail_image(size, height: size, size: :force).flatten.colourspace("b-w")[0]
+      else
+        Vips::Image.thumbnail(input, size, height: size, size: :force).flatten.colourspace("b-w")[0]
+      end
       array = image.to_enum.map &:flatten
       d1, i1, d2, i2 = [array, array.transpose].flat_map do |a|
         d = a.zip(a.rotate(1)).flat_map{ |r1, r2| r1.zip(r2).map{ |i, j| i - j } }

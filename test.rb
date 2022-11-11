@@ -172,6 +172,10 @@ require_relative "lib/dhash-vips"
 
     end
 
+    it "accepts Vips::Image" do
+      lib.public_send calc, Vips::Image.new_from_buffer("GIF89a\x01\x00\x01\x00\x80\x01\x00\xFF\xFF\xFF\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;", "")
+    end
+
   end
 
 end
