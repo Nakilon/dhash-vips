@@ -11,11 +11,12 @@ module DHashVips
     end
 
     def pixelate input, hash_size
-      if input.is_a? Vips::Image
-        input.thumbnail_image(hash_size + 1, height: hash_size, size: :force).flatten.colourspace("b-w")[0]
+      image = if input.is_a? Vips::Image
+        input.thumbnail_image(hash_size + 1, height: hash_size, size: :force)
       else
-        Vips::Image.thumbnail(input, hash_size + 1, height: hash_size, size: :force).flatten.colourspace("b-w")[0]
+        Vips::Image.thumbnail(input, hash_size + 1, height: hash_size, size: :force)
       end
+      (image.has_alpha? ? image.flatten : image).colourspace("b-w")[0]
     end
 
     def calculate file, hash_size = 8
@@ -93,11 +94,11 @@ module DHashVips
     def self.fingerprint input, power = 3
       size = 2 ** power
       image = if input.is_a? Vips::Image
-        input.thumbnail_image(size, height: size, size: :force).flatten.colourspace("b-w")[0]
+        input.thumbnail_image(size, height: size, size: :force)
       else
-        Vips::Image.thumbnail(input, size, height: size, size: :force).flatten.colourspace("b-w")[0]
+        Vips::Image.thumbnail(input, size, height: size, size: :force)
       end
-      array = image.to_enum.map &:flatten
+      array = (image.has_alpha? ? image.flatten : image).flatten.colourspace("b-w")[0].to_enum.map &:flatten
       d1, i1, d2, i2 = [array, array.transpose].flat_map do |a|
         d = a.zip(a.rotate(1)).flat_map{ |r1, r2| r1.zip(r2).map{ |i, j| i - j } }
         m = median d.map(&:abs).sort
