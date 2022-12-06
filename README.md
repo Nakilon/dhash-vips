@@ -158,13 +158,29 @@ end
 * Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4.1 and 0.0.5.0 became incompatible, but you probably can convert them manually. Otherwise if we put the version or structure information inside fingerprint it would became slow to (de)serialize and store.  
 * The version `0.2.0.0` has grayscaling bug fixed and some tweak. It made DHash a bit worse and IDHash a bit better. Fingerprints recalculation is recommended.
 
+## Possible issues
+
+* OS X El Captain and rbenv may cause environment issues that would make you do things like:
+
+        $ ./ruby `rbenv which rake` compare_matrixes
+
+    instead of just
+
+        $ rake compare_matrixes
+
+    For more information on that: https://github.com/jcupitt/ruby-vips/issues/141
+
 ## Development notes
 
-    $ bundle exec ruby test.rb
+* To run unit tests in current env
 
-* For all `rake` commands do the `bundle install` and prepend `bundle exec` when calling.
+      $ ruby extconf.rb && make clean && make && bundle exec ruby test.rb && bundle exec ruby test_LoadError.rb
 
-* Current Ruby [packages](https://pkgs.alpinelinux.org/packages) for `apk add` (Alpine Linux) and existing official Ruby docker [images](https://hub.docker.com/_/ruby?tab=tags) per Alpine version:
+* To run unit tests under all available latest major rbenv ruby versions
+
+      $ ruby test_rbenv.rb
+
+* Current (this is outdated) Ruby [packages](https://pkgs.alpinelinux.org/packages) for `apk add` (Alpine Linux) and existing official Ruby docker [images](https://hub.docker.com/_/ruby?tab=tags) per Alpine version:
 
         packages     ruby docker hub
         3.12 2.7.1                2.5.8 2.6.6 2.7.1
@@ -184,7 +200,7 @@ end
 
         docker run --rm <image_name> sh -c "cat /etc/alpine-release; ruby -v; vips -v"
 
-* You get this:
+* You may get this:
 
         Can't install RMagick 2.16.0. Can't find MagickWand.h.
 
@@ -193,16 +209,6 @@ end
         $ brew install imagemagick@6
         $ brew unlink imagemagick@7
         $ brew link imagemagick@6 --force
-
-* OS X El Captain and rbenv may cause environment issues that would make you do things like:
-
-        $ ./ruby `rbenv which rake` compare_matrixes
-
-    instead of just
-
-        $ rake compare_matrixes
-
-    For more information on that: https://github.com/jcupitt/ruby-vips/issues/141
 
 * On macOS, when you do `bundle install` it may fail to install `rmagick` gem (`dhash` gem dependency) saying:
 

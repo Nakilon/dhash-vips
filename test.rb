@@ -156,6 +156,9 @@ require_relative "lib/dhash-vips"
 ].each do |lib, dm, calc, min_similar, max_similar, min_not_similar, max_not_similar, bw_exceptional|
 
   describe lib do
+    require "fileutils"
+    require "digest"
+    require "mll"
 
     # these are false positive by idhash
     # 6d97739b4a08f965dc9239dd24382e96.jpg
@@ -176,20 +179,16 @@ require_relative "lib/dhash-vips"
       }, bw_exceptional, bw_exceptional], # these are the same photo but of different size and colorspace
     ].each do |_images, min, max|
 
-      require "fileutils"
-      require "digest"
-      require "mll"
-
       require_relative "common"
       images = _images.map{ |_| download_if_needed "test_images/#{_}" }
 
       hashes = images.map &lib.method(calc)
       table = MLL::table[lib.method(dm), [hashes], [hashes]]
 
-      require "pp"
-      STDERR.puts ""
-      PP.pp table, STDERR
-      STDERR.puts ""
+      # STDERR.puts ""
+      # require "pp"
+      # PP.pp table, STDERR
+      # STDERR.puts ""
 
       hashes.size.times.to_a.repeated_combination(2) do |i, j|
         it "#{_images[i]} #{_images[j]}" do
@@ -209,9 +208,18 @@ require_relative "lib/dhash-vips"
     end
 
     it "accepts Vips::Image" do
+      # https://github.com/libvips/ruby-vips/issues/349
       lib.public_send calc, Vips::Image.new_from_buffer("GIF89a\x01\x00\x01\x00\x80\x01\x00\xFF\xFF\xFF\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;", "")
     end
 
   end
 
+end
+
+describe DHashVips::IDHash do
+  it "does not call distance3_ruby" do
+    DHashVips::IDHash.stub :distance3_ruby, ->*{fail} do
+      assert_equal 0, DHashVips::IDHash.distance3((2<<256)-1, (2<<256)-1)
+    end
+  end
 end

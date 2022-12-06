@@ -34,7 +34,12 @@ module DHashVips
     begin
       require_relative "../idhash.#{Gem::Platform.local.os == "darwin" ? "bundle" : "o"}"
     rescue LoadError
-      alias_method :distance3, :distance3_ruby
+      class << self
+        # https://github.com/minitest/minitest/issues/939
+        def distance3 a, b
+          distance3_ruby a, b
+        end
+      end
     else
       # we can't just do `defined? Bignum` because it's defined but deprecated (some internal CONST_DEPRECATED flag)
       if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.4")
