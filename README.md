@@ -140,7 +140,7 @@ end
         DHashVips::IDHash distance3_c      0.210000   0.000000   0.210000 (  0.212864)
         DHashVips::IDHash distance 4       8.300000   0.120000   8.420000 (  8.499735)
 
-* There is now a benchmark that runs both speed and quality tests summing results as a single table:
+* There is a benchmark that runs both speed and quality tests summing results as a single table (observe that results may depend on the libvips version):
 
       ruby 2.3.8p459 (2018-10-18 revision 65136) [x86_64-darwin18]
       vips-8.11.3-Wed Aug 11 09:29:27 UTC 2021
@@ -154,6 +154,26 @@ end
          Dhash        4.785    1.147    1.222
         IDHash        0.221    0.112    1.111
          DHash        0.283    0.903    1.688
+
+      ruby 2.7.2p137 (2020-10-01 revision 5445e04352) [x86_64-linux]
+      Version: 8.7.4-1+deb10u1
+      Version: 8:6.9.10.23+dfsg-2.1+deb10u1
+
+                Fingerprint  Compare  1/FMI^2
+      Phamilie       19.630    1.302    3.000
+         Dhash        6.713    1.373    1.222
+        IDHash        2.177    0.210    1.111
+         DHash        1.063    1.318    1.444
+
+      ruby 3.1.3p185 (2022-11-24 revision 1a6b16756e) [x86_64-linux]
+      Version: 8.10.5-2
+      Version: 8:6.9.11.60+dfsg-1.3
+
+                Fingerprint  Compare  1/FMI^2
+      Phamilie       55.735    0.823    3.000
+         Dhash        7.215    1.005    1.222
+        IDHash        0.922    0.129    1.111
+         DHash        1.116    1.049    1.688
 
 * Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4.1 and 0.0.5.0 became incompatible, but you probably can convert them manually. Otherwise if we put the version or structure information inside fingerprint it would became slow to (de)serialize and store.  
 * The version `0.2.0.0` has grayscaling bug fixed and some tweak. It made DHash a bit worse and IDHash a bit better. Fingerprints recalculation is recommended.

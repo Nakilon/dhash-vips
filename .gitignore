@@ -5,6 +5,7 @@
 /mkmf.log
 /idhash.bundle
 /idhash.o
+/idhash.so
 
 /.byebug_history
 .DS_Store
