@@ -24,7 +24,7 @@ So due to implementation and algorithm according to a benchmark the gem has the 
     Phamilie        4.575    0.642    4.000
        Dhash        4.785    1.147    1.250
        DHash        0.269    1.146    1.796
-      IDHash        0.237    0.132    1.000
+      IDHash        0.237    0.132    1.125
 
 ### Example
 
@@ -153,10 +153,11 @@ end
       Phamilie        4.575    0.642    4.000
          Dhash        4.785    1.147    1.250
          DHash        0.269    1.146    1.796
-        IDHash        0.237    0.132    1.000
+        IDHash        0.237    0.132    1.125
 
 * Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4.1 and 0.0.5.0 became incompatible, but you probably can convert them manually. Otherwise if we put the version or structure information inside fingerprint it would became slow to (de)serialize and store.  
 * The version `0.2.0.0` has grayscaling bug fixed and some tweak. It made DHash a bit worse and IDHash a bit better. Fingerprints recalculation is recommended.
+* The version `0.2.2.0` has an important alpha layer transparency bug fix. Fingerprints recalculation is recommended.
 
 ## Possible issues
 
@@ -174,7 +175,8 @@ end
 
 * To run unit tests in current env
 
-      $ ruby extconf.rb && make clean && make && bundle exec ruby test.rb && bundle exec ruby test_LoadError.rb
+      $ ruby extconf.rb && make clean && make   # otherwise you might get silenced LoadError due to switching between rubies
+      $ bundle exec ruby test.rb && bundle exec ruby test_LoadError.rb
 
 * To run unit tests under all available latest major rbenv ruby versions
 

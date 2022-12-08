@@ -7,5 +7,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - run: docker run --rm -v $(pwd):/checkout ruby:2.7.2-slim sh -c "apt-get update && apt install -y cimg-dev libmagickwand-dev libvips42 wget build-essential && mkdir /ruby && wget -O- https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.2.tar.gz | tar xzC /ruby --strip-components=1 && cd checkout && bundle install --no-cache && ruby extconf.rb && make && rake benchmark"
+    - run: |
+        docker run --rm -v $(pwd):/checkout ruby:2.7.2-slim sh -c "\
+          apt-get update && \
+          apt install -y cimg-dev libmagickwand-dev libvips42 wget build-essential git && \
+          mkdir /ruby && \
+          wget -O- https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.2.tar.gz | \
+          tar xzC /ruby --strip-components=1 && \
+          cd checkout && \
+          bundle install --no-cache && \
+          ruby extconf.rb && \
+          make && \
+          rake benchmark"
       timeout-minutes: 5

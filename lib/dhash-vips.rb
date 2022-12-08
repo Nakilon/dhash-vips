@@ -16,7 +16,7 @@ module DHashVips
       else
         Vips::Image.thumbnail(input, hash_size + 1, height: hash_size, size: :force)
       end
-      (image.has_alpha? ? image.flatten : image).colourspace("b-w")[0]
+      (image.has_alpha? ? image.composite(image.bandsplit[3], :screen).flatten : image).colourspace("b-w")[0]
     end
 
     def calculate file, hash_size = 8
@@ -35,10 +35,7 @@ module DHashVips
       require_relative "../idhash.#{Gem::Platform.local.os == "darwin" ? "bundle" : "o"}"
     rescue LoadError
       class << self
-        # https://github.com/minitest/minitest/issues/939
-        def distance3 a, b
-          distance3_ruby a, b
-        end
+        alias distance3 distance3_ruby
       end
     else
       # we can't just do `defined? Bignum` because it's defined but deprecated (some internal CONST_DEPRECATED flag)
@@ -103,7 +100,7 @@ module DHashVips
       else
         Vips::Image.thumbnail(input, size, height: size, size: :force)
       end
-      array = (image.has_alpha? ? image.flatten : image).flatten.colourspace("b-w")[0].to_enum.map &:flatten
+      array = (image.has_alpha? ? image.composite(image.bandsplit[3], :screen).flatten : image).colourspace("b-w")[0].to_enum.map &:flatten
       d1, i1, d2, i2 = [array, array.transpose].flat_map do |a|
         d = a.zip(a.rotate(1)).flat_map{ |r1, r2| r1.zip(r2).map{ |i, j| i - j } }
         m = median d.map(&:abs).sort
