@@ -21,10 +21,10 @@ The main improvement over the dHash is what makes it insensitive to the resizing
 So due to implementation and algorithm according to a benchmark the gem has the highest speed and quality compared to other gems (lower numbers are better):
 
               Fingerprint  Compare  1/FMI^2
-    Phamilie        4.575    0.642    4.000
-       Dhash        4.785    1.147    1.250
-       DHash        0.269    1.146    1.796
-      IDHash        0.237    0.132    1.125
+    Phamilie        4.575    0.642    3.000
+       Dhash        4.785    1.147    1.222
+      IDHash        0.221    0.112    1.111
+       DHash        0.283    0.903    1.688
 
 ### Example
 
@@ -106,11 +106,11 @@ end
 
                             Dhash  Phamilie  DHashVips::DHash  DHashVips::IDHash  DHashVips::IDHash(4)
           The same image:    0..0      0..0              0..0               0..0                  0..0
-      'Jordan Voth case':       2         2                 7                  0                     2
-          Similar images:   1..15    14..34             2..23              8..21               56..169
-        Different images:  10..56    22..42             9..50             23..72              111..236
-                1/FMI^2 =    1.25       4.0             1.796                1.0                 1.306
-                 FP, FN =  [2, 0]    [0, 6]            [4, 1]             [0, 0]                [1, 1]
+      'Jordan Voth case':       2         2                 7                  0                     0
+          Similar images:   1..15    14..34             2..23              8..22               56..166
+        Different images:  10..56    22..42             9..50             22..70              116..230
+                1/FMI^2 =   1.222       3.0             1.688              1.111                 1.266
+                 FP, FN =  [2, 0]    [0, 6]            [4, 1]             [1, 0]                [1, 1]
 
     The `FMI` line (smaller number is better) here is the "quality of algorithm", i.e. the best achievable function for the ["Fowlkes–Mallows index"](https://en.wikipedia.org/wiki/Fowlkes%E2%80%93Mallows_index) value if you take the "similar" and "different" test pairs and try to draw the threshold line. For IDHash it's empirical value of 22 as you acn see above that means it's the only algorithm that allowed to separate "similar" from "different" comparisons for our test cases.  
     The last line shows number of false positives (`FP`) and false negatives (`FN`) in case of the best achieved FMI.  
@@ -150,10 +150,10 @@ end
       gem rmagick version 4.2.5
 
                 Fingerprint  Compare  1/FMI^2
-      Phamilie        4.575    0.642    4.000
-         Dhash        4.785    1.147    1.250
-         DHash        0.269    1.146    1.796
-        IDHash        0.237    0.132    1.125
+      Phamilie        4.575    0.642    3.000
+         Dhash        4.785    1.147    1.222
+        IDHash        0.221    0.112    1.111
+         DHash        0.283    0.903    1.688
 
 * Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4.1 and 0.0.5.0 became incompatible, but you probably can convert them manually. Otherwise if we put the version or structure information inside fingerprint it would became slow to (de)serialize and store.  
 * The version `0.2.0.0` has grayscaling bug fixed and some tweak. It made DHash a bit worse and IDHash a bit better. Fingerprints recalculation is recommended.

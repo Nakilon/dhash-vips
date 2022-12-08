@@ -94,12 +94,13 @@ task :compare_quality do
           end
         ].push table[i][j]
       end
+      p report
       min, max = [*report.sim, *report.not_sim].minmax
-      fmi, fp, fn = (min..max+1).map do |b|
+      fmi, fp, fn = (0..max+1).map do |b|
         fp = report.not_sim.count{ |_| _ < b }
-        tp = report.sim.count{ |_| _ < b }
-        fn = report.sim.count{ |_| _ >= b }
-        [((tp + fp) * (tp + fn)).fdiv(tp * tp), fp, fn]
+        tp = (report.sim + report.bw).count{ |_| _ < b }
+        fn = (report.sim + report.bw).count{ |_| _ >= b }
+        [((tp + fp) * (tp + fn)).fdiv(tp * tp), fp, fn]#.tap{ |_| p [m, _] }
       end.reject{ |_,| _.nan? }.min_by(&:first)
       [
         "#{m.is_a?(Module) ? m : m.class}#{"(#{power})" if power}",
@@ -116,13 +117,13 @@ end
 
 # ruby -c Rakefile && rm -f ab.png && rake compare_images -- fc762fa286489d8afc80adc8cdcb125e.jpg 9c2c240ec02356472fb532f404d28dde.jpg 2>/dev/null && ql ab.png
 # rm -f ab.png && ./ruby `rbenv which rake` compare_images -- 6d97739b4a08f965dc9239dd24382e96.jpg 1b1d4bde376084011d027bba1c047a4b.jpg 2>/dev/null && ql ab.png
+# bundle exec rake compare_images[1b1d4bde376084011d027bba1c047a4b.jpg,6d97739b4a08f965dc9239dd24382e96.jpg]
 desc "Visualizes the IDHash difference measurement between two images"
-task :compare_images do |_|
-  abort "there should be two image filenames passed as arguments (and optionally the `power`)" unless (3..4) === ARGV.size
-  abort "the optional argument should be either 3 or 4" unless [3, 4].include?(power = (ARGV[3] || 3).to_i)
-  task ARGV.last do ; end
+task :compare_images do |_, args|
+  abort "there should be two image filenames passed as arguments (and optionally the `power`)" unless (2..3) === args.extras.size
+  abort "the optional argument should be either 3 or 4" unless [3, 4].include?(power = (args.extras[2] || 3).to_i)
   require_relative "lib/dhash-vips"
-  ha, hb = ARGV[1, 2].map{ |filename| DHashVips::IDHash.fingerprint(filename, power) }
+  ha, hb = args.extras.map{ |filename| DHashVips::IDHash.fingerprint(filename, power) }
   puts "distance: #{DHashVips::IDHash.distance ha, hb}"
   size = 2 ** power
   shift = 2 * size * size
@@ -131,7 +132,7 @@ task :compare_images do |_|
   bi = hb >> shift
   bd = hb - (bi << shift)
 
-  a, b = ARGV[1, 2].map do |filename|
+  a, b = args.extras.map do |filename|
     image = Vips::Image.new_from_file filename
     image = image.resize(size.fdiv(image.width), vscale: size.fdiv(image.height)).colourspace("b-w").
                   resize(100, vscale: 100, kernel: :nearest).colourspace("srgb")
@@ -206,6 +207,7 @@ task :compare_images do |_|
   puts "(above should be equal if raketask works correcly)"
 
   a.join(b, :horizontal, shim: 15).write_to_file "ab.png"
+  puts "the ab.png is ready"
 end
 
 desc "Benchmark speed of Dhash, DHashVips::DHash, DHashVips::IDHash and Phamilie"
@@ -308,6 +310,7 @@ task :benchmark do
      %w{ benchmark_images/7/309666c7b45ecbf8f13e85a0bd6b0a4c.jpg benchmark_images/7/3f9f3db06db20d1d9f8188cd753f6ef4.jpg },
      %w{ benchmark_images/8/1d468d064d2e26b5b5de9a0241ef2d4b.jpg benchmark_images/8/92d90b8977f813af803c78107e7f698e.jpg },
      %w{ benchmark_images/9/1b1d4bde376084011d027bba1c047a4b.jpg },
+     %w{ benchmark_images/10/71662d4d4029a3b41d47d5baf681ab9a.jpg benchmark_images/10/ad8a37f872956666c3077a3e9e737984.jpg }
   ].each{ |g| g.each &method(:download_if_needed) }
   puts "image groups sizes: #{filenames.map &:size}"
   require "benchmark"
@@ -344,11 +347,11 @@ task :benchmark do
 
   puts "step 3 / 3 (looking for the best threshold)"
   bm3 = [
-    [phamilie, :fingerprint, :distance, nil, 0],
-    [Dhash, :calculate, :hamming],
-    [DHashVips::IDHash, :fingerprint, :distance],
-    [DHashVips::DHash, :calculate, :hamming],
-  ].map do |m, calc, dm, power, ii|
+    ["Phamilie", phamilie, :fingerprint, :distance, nil, 0],
+    ["Dhash", Dhash, :calculate, :hamming],
+    ["IDHash", DHashVips::IDHash, :fingerprint, :distance],
+    ["DHash", DHashVips::DHash, :calculate, :hamming],
+  ].map do |name, m, calc, dm, power, ii|
     hashes = filenames.flatten.map{ |filename| [filename, m.public_send(calc, filename, *power)] }
     report = Struct.new(:same, :sim, :not_sim).new [], [], []
     hashes.size.times.to_a.repeated_combination(2) do |i, j|
@@ -361,20 +364,21 @@ task :benchmark do
         end
       ].push m.method(dm).call hashes[i][ii||1], hashes[j][ii||1]
     end
+    p report
     min, max = [*report.sim, *report.not_sim].minmax
     fmi, fp, fn = (min..max+1).map do |b|
       fp = report.not_sim.count{ |_| _ < b }
       tp = report.sim.count{ |_| _ < b }
       fn = report.sim.count{ |_| _ >= b }
-      [((tp + fp) * (tp + fn)).fdiv(tp * tp), fp, fn]
+      [((tp + fp) * (tp + fn)).fdiv(tp * tp), fp, fn]#.tap{ |_| p [m, tp, _] }
     end.reject{ |_,| _.nan? }.min_by(&:first)
-    fmi
+    [name, fmi]
   end
 
   require "mll"
   puts MLL::grid.call %w{ \  Fingerprint Compare 1/FMI^2 }.zip(*[
-    %w{ Phamilie Dhash DHash IDHash },
-    *[bm1, bm2, bm3].map{ |bm| bm[-1], bm[-2] = bm[-2], bm[-1]; bm.map{ |_| "%.3f" % _ } }
+    bm3.map(&:first),
+    *[bm1, bm2, bm3.map(&:last)].map{ |bm| bm.map{ |_| "%.3f" % _ } }
   ].transpose).transpose, spacings: [1.5, 0], alignment: :right
   puts "(lower numbers are better)"
 end
