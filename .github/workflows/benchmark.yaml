@@ -12,7 +12,7 @@ jobs:
           apt-get update && \
           apt install -y cimg-dev libmagickwand-dev libvips42 wget build-essential git && \
           mkdir /ruby && \
-          wget -O- https://cache.ruby-lang.org/pub/ruby/$RUBY_MAJOR/ruby-$RUBY_VERSION.tar.gz | tar xzC /ruby --strip-components=1 && \
+          wget -O- https://cache.ruby-lang.org/pub/ruby/\$RUBY_MAJOR/ruby-\$RUBY_VERSION.tar.gz | tar xzC /ruby --strip-components=1 && \
           cd checkout && \
           bundle install --no-cache && \
           ruby extconf.rb && \
