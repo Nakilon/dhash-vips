@@ -24,11 +24,12 @@ end
 
 __END__
 
-to test: $ rake clean && rake install
-
 # this unlike using rake is building to current directory
 #   that is vital to be able to require the native extention for benchmarking, etc.
 $ ruby extconf.rb && make clean && make
+
+# to test: $ rake clean && rake install
+
 $ ruby -e "require 'dhash-vips'; p DHashVips::IDHash.method(:distance3).source_location"  # using -r makes bundler mad
 # [".../dhash-vips.rb", 32] # if LoadError
 # [".../dhash-vips.rb", 52] # if native (or 42 with Ruby<2.4)

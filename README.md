@@ -170,14 +170,14 @@ end
       Version: 8:6.9.11.60+dfsg-1.3
 
                 Fingerprint  Compare  1/FMI^2
-      Phamilie       55.735    0.823    3.000
-         Dhash        7.215    1.005    1.222
-        IDHash        0.922    0.129    1.111
-         DHash        1.116    1.049    1.688
+      Phamilie       50.953    0.793    3.000
+         Dhash        7.228    1.129    1.222
+        IDHash        0.655    0.131    1.111
+         DHash        1.850    1.035    1.688
 
 * Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4.1 and 0.0.5.0 became incompatible, but you probably can convert them manually. Otherwise if we put the version or structure information inside fingerprint it would became slow to (de)serialize and store.  
 * The version `0.2.0.0` has grayscaling bug fixed and some tweak. It made DHash a bit worse and IDHash a bit better. Fingerprints recalculation is recommended.
-* The version `0.2.2.0` has an important alpha layer transparency bug fix. Fingerprints recalculation is recommended.
+* The version `0.2.3.0` has an important alpha layer transparency bug fix. Fingerprints recalculation is recommended.
 
 ## Possible issues
 

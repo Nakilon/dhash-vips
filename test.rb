@@ -5,9 +5,9 @@ require_relative "lib/dhash-vips"
 # TODO tests about `fingerprint(4)`
 
 [
-  [DHashVips::DHash, :hamming, :calculate, 2, 23, 16, 50, 7, 0x86c6c6a686e686c6],
+  [DHashVips::DHash, :hamming, :calculate, 2, 23, 16, 50, 7, 0x7919395919191919],
 
-    # v0.2.2.0
+    # v0.2.3.0
     # [[0, 18, 26, 28, 28, 24, 35, 31, 42, 42, 32, 34, 33, 29, 35, 40],
     #  [18, 0, 30, 24, 38, 34, 33, 33, 44, 42, 38, 42, 41, 37, 37, 50],
     #  [26, 30, 0, 16, 34, 38, 29, 35, 42, 40, 36, 38, 31, 31, 31, 36],
@@ -25,9 +25,9 @@ require_relative "lib/dhash-vips"
     #  [35, 37, 31, 27, 35, 29, 28, 28, 31, 31, 25, 25, 24, 22, 0, 23],
     #  [40, 50, 36, 34, 28, 28, 31, 33, 28, 28, 18, 16, 19, 27, 23, 0]]
 
-  [DHashVips::IDHash, :distance, :fingerprint, 8, 22, 25, 70, 0, 0x1d5cdc0d1d0c1d9f5720a6fff2fe020180df0000df81c03f0080ffff0000ff7f],
+  [DHashVips::IDHash, :distance, :fingerprint, 8, 22, 25, 70, 0, 0x1d5cdc0d1d0c1d9f5720a6fff2fe02013f00df9f005e1dc0ff670000ffff0080],
 
-    # v0.2.2.0
+    # v0.2.3.0
     # [[0, 19, 34, 38, 57, 47, 50, 49, 45, 42, 55, 45, 60, 49, 51, 53],
     #  [19, 0, 34, 33, 55, 47, 52, 49, 46, 49, 59, 46, 62, 54, 50, 57],
     #  [34, 34, 0, 8, 48, 55, 46, 42, 55, 57, 45, 35, 51, 45, 46, 47],
@@ -112,7 +112,7 @@ require_relative "lib/dhash-vips"
     it "correct calculation" do
       download_if_needed "alpha_only.png"
       t = lib.public_send calc, "alpha_only.png"
-      assert_equal hash, t, ->{ "0x#{t.to_s 16}" }
+      assert_equal hash, t, ->{ "0x#{hash.to_s 16} != 0x#{t.to_s 16}" }
     end
 
   end

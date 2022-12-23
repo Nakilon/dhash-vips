@@ -3,6 +3,10 @@ Vips.vector_set false
 
 module DHashVips
 
+  def self.bw image
+    (image.has_alpha? ? image.flatten(background: 255) : image).colourspace("b-w")[0]
+  end
+
   module DHash
     extend self
 
@@ -11,12 +15,11 @@ module DHashVips
     end
 
     def pixelate input, hash_size
-      image = if input.is_a? Vips::Image
+      DHashVips.bw( if input.is_a? Vips::Image
         input.thumbnail_image(hash_size + 1, height: hash_size, size: :force)
       else
         Vips::Image.thumbnail(input, hash_size + 1, height: hash_size, size: :force)
-      end
-      (image.has_alpha? ? image.composite(image.bandsplit[3], :screen).flatten : image).colourspace("b-w")[0]
+      end )
     end
 
     def calculate file, hash_size = 8
@@ -100,7 +103,7 @@ module DHashVips
       else
         Vips::Image.thumbnail(input, size, height: size, size: :force)
       end
-      array = (image.has_alpha? ? image.composite(image.bandsplit[3], :screen).flatten : image).colourspace("b-w")[0].to_enum.map &:flatten
+      array = DHashVips.bw(image).to_enum.map &:flatten
       d1, i1, d2, i2 = [array, array.transpose].flat_map do |a|
         d = a.zip(a.rotate(1)).flat_map{ |r1, r2| r1.zip(r2).map{ |i, j| i - j } }
         m = median d.map(&:abs).sort
