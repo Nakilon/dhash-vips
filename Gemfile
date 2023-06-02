@@ -1,9 +1,13 @@
 source "https://rubygems.org"
 
 gem "rake"
+
 gem "rmagick"
 gem "dhash", github: "nakilon/dhash"
 gem "phamilie"
+gem "mini_magick"
+gem "dhashy"
+
 gem "get_process_mem"
 gem "mll"
 gem "minitest"

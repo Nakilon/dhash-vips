@@ -6,25 +6,28 @@
 The **dHash** is the algorithm of image fingerprinting that can be used to measure the similarity of two images.  
 The **IDHash** is the new algorithm that has some improvements over dHash -- I'll describe it further.
 
-The idea of these algorithms is that you resize the original image to 8x9 and then convert it to 8x8 array of bits -- each tells if the corresponding segment of the image is brighter or darker than the one on the right (or left). Then you apply the [Hamming distance](https://en.wikipedia.org/wiki/Hamming_distance) to such arrays to measure how much they are different.
+All existing Ruby implementations on GitHub depended on ImageMagick. My implementation takes an advantage of speed of the libvips (the `ruby-vips` gem). For even more speed the fingerprint comparison function is also implemented as a native C extension.
 
-There were several Ruby implementations on Github already but they all depended on ImageMagick. My implementation takes an advantage of speed of the libvips (the `ruby-vips` gem) -- it fingerprints images much faster. For even more speed the fingerprint comparison function is implemented as native C extension.
+## dHash
+
+The idea of dHash is that you resize the original image to 8x9 and then convert it to 8x8 array of bits -- each tells if the corresponding pixel is brighter or darker than the one on the right (or left). Then you apply the [Hamming distance](https://en.wikipedia.org/wiki/Hamming_distance) to such arrays to measure how much they are different.
 
 ## IDHash (the Important Difference Hash)
 
-The main improvement over the dHash is what makes it insensitive to the resizing algorithm and possible errors due to color scheme conversion.
+The main improvement over the dHash is the "Importance" data that makes it insensitive to the resizing algorithm and possible errors due to color scheme conversion. It is an array of extra 64 bits that tells the comparing function which half of 64 bits is important (when the difference between neighbors was enough significant) and which is not. So not every bit in a fingerprint is being compared but only half of them. 
 
-* The "Importance" is an array of extra 64 bits that tells the comparing function which half of 64 bits is important (when the difference between neighbors was enough significant) and which is not. So not every bit in a fingerprint is being compared but only half of them.  
+Other improvements are:  
 * It subtracts not only horizontally but also vertically -- that adds 128 more bits.  
-* Instead of resizing to 8x9 it resizes to 8x8 and puts the image on a torus so it subtracts the very left column from the very right one and the top from the bottom.
+* Instead of resizing to 8x9 it resizes to 8x8 and puts the image on a torus.
 
-So due to implementation and algorithm according to a benchmark the gem has the highest speed and quality compared to other gems (lower numbers are better):
+According to a benchmark the gem has the highest speed and quality compared to other gems (lower numbers are better):
 
-              Fingerprint  Compare  1/FMI^2
-    Phamilie        4.575    0.642    3.000
-       Dhash        4.785    1.147    1.222
-      IDHash        0.221    0.112    1.111
-       DHash        0.283    0.903    1.688
+              Fingerprint  Compare  1/FMI^2 
+       Dhash        6.680    0.849    1.222 
+    Phamilie        5.361    0.468    3.000 
+      Dhashy        2.438   32.095    1.406 
+      IDHash        0.234    0.083    1.111 
+       DHash        0.319    0.779    1.688 
 
 ### Example
 

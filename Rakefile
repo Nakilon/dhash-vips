@@ -283,7 +283,11 @@ end
 
 desc "Benchmarks everything about Dhash, DHashVips::DHash, DHashVips::IDHash and Phamilie"
 task :benchmark do
+  # TODO: better handling the need of: ruby extconf.rb && make clean && make
   puts RUBY_DESCRIPTION
+  fail "Dhashy gem needs Ruby 2.4 for Array#sum" if RUBY_VERSION < "2.4"
+  puts ""
+
   system "apt-cache show libvips42 2>/dev/null | grep Version"
   system "vips -v 2>/dev/null"
   system "apt-cache show libmagickwand-dev 2>/dev/null | grep Version"
@@ -291,13 +295,21 @@ task :benchmark do
   system "identify-6 -version 2>/dev/null | /usr/bin/head -1"
   system "sysctl -n machdep.cpu.brand_string 2>/dev/null"
   system "cat /proc/cpuinfo 2>/dev/null | grep 'model name' | uniq"
+  puts ""
 
   require_relative "lib/dhash-vips"
-  puts "gem ruby-vips version #{Gem.loaded_specs["ruby-vips"].version}"
+  puts "gem ruby-vips: #{Gem.loaded_specs["ruby-vips"].version}"
+  puts "gem rmagick: #{Gem.loaded_specs["rmagick"].version}"
+  puts ""
+
   require "dhash"
-  puts "gem rmagick version #{Gem.loaded_specs["rmagick"].version}"
+  puts "gem dhash: #{Gem.loaded_specs["dhash"].source}"
   require "phamilie"
+  puts "gem phamilie: #{Gem.loaded_specs["phamilie"].version}"
   phamilie = Phamilie.new
+  require "mini_magick"
+  require "dhashy"
+  puts ""
 
   filenames = [
      %w{ benchmark_images/0/6d97739b4a08f965dc9239dd24382e96.jpg },
@@ -318,43 +330,34 @@ task :benchmark do
   puts "step 1 / 3 (fingerprinting)"
   hashes = []
   bm1 = [
-    [phamilie, :fingerprint],
-    [Dhash, :calculate],
-    [DHashVips::IDHash, :fingerprint],
-    [DHashVips::DHash, :calculate],
-  ].map do |m, calc, power|
-    Benchmark.realtime do
-      hashes.push filenames.flatten.map{ |filename| m.send calc, filename, *power }
-    end
-  end
+    Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| Dhash.calculate filename } },
+    Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| phamilie.fingerprint filename; filename } },
+    Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| Dhashy.new MiniMagick::Image.open filename } },
+    Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| DHashVips::IDHash.fingerprint filename } },
+    Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| DHashVips::DHash.calculate filename } },
+  ]
 
   puts "step 2 / 3 (comparing fingerprints)"
   combs = filenames.flatten.size ** 2
-  n = 10_000_000_000_000 / filenames.flatten.map(&File.method(:size)).inject(:+) / combs
+  n = 10_000_000_000_000 / combs / filenames.flatten.map(&File.method(:size)).inject(:+)
   bm2 = [
-    [phamilie, :distance, nil, filenames.flatten],
-    [Dhash, :hamming],
-    [DHashVips::IDHash, :distance3_c],
-    [DHashVips::DHash, :hamming],
-  ].zip(hashes).map do |(m, dm, power, ii), hs|
-    Benchmark.realtime do
-      _ = ii || hs
-      _.product _ do |h1, h2|
-        n.times{ m.public_send dm, h1, h2 }
-      end
-    end
-  end
+    Benchmark.realtime{ hashes[0].product(hashes[0]){ |h1, h2| n.times{ Dhash.hamming h1, h2 } } },
+    Benchmark.realtime{ hashes[1].product(hashes[1]){ |p1, p2| n.times{ phamilie.distance p1, p2 } } },
+    Benchmark.realtime{ hashes[2].product(hashes[2]){ |h1, h2| n.times{ h1 - h2 } } },
+    Benchmark.realtime{ hashes[3].product(hashes[3]){ |h1, h2| n.times{ DHashVips::IDHash.distance3_c h1, h2 } } },
+    Benchmark.realtime{ hashes[4].product(hashes[4]){ |h1, h2| n.times{ DHashVips::DHash.hamming h1, h2 } } },
+  ]
 
   puts "step 3 / 3 (looking for the best threshold)"
   bm3 = [
-    ["Phamilie", phamilie, :fingerprint, :distance, nil, 0],
-    ["Dhash", Dhash, :calculate, :hamming],
-    ["IDHash", DHashVips::IDHash, :fingerprint, :distance],
-    ["DHash", DHashVips::DHash, :calculate, :hamming],
-  ].map do |name, m, calc, dm, power, ii|
-    hashes = filenames.flatten.map{ |filename| [filename, m.public_send(calc, filename, *power)] }
+    ["Dhash", ->a,b{ Dhash.hamming a, b }],
+    ["Phamilie", ->a,b{ phamilie.distance a, b }],
+    ["Dhashy", ->a,b{ a - b }],
+    ["IDHash", ->a,b{ DHashVips::IDHash.distance a, b }],
+    ["DHash", ->a,b{ DHashVips::DHash.hamming a, b }],
+  ].zip(hashes).map do |(name, f), hs|
     report = Struct.new(:same, :sim, :not_sim).new [], [], []
-    hashes.size.times.to_a.repeated_combination(2) do |i, j|
+    hs.size.times.to_a.repeated_combination(2) do |i, j|
       report[
         case
         when i == j                                                   ; :same
@@ -362,9 +365,9 @@ task :benchmark do
              File.split(File.split(hashes[j][0]).first).last && i < j ; :sim
         else                                                          ; :not_sim
         end
-      ].push m.method(dm).call hashes[i][ii||1], hashes[j][ii||1]
+      ].push f[hs[i], hs[j]]
     end
-    p report
+    # p report
     min, max = [*report.sim, *report.not_sim].minmax
     fmi, fp, fn = (min..max+1).map do |b|
       fp = report.not_sim.count{ |_| _ < b }
