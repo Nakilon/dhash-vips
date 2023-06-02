@@ -23,11 +23,12 @@ Other improvements are:
 According to a benchmark the gem has the highest speed and quality compared to other gems (lower numbers are better):
 
               Fingerprint  Compare  1/FMI^2 
-       Dhash        6.680    0.849    1.222 
-    Phamilie        5.361    0.468    3.000 
-      Dhashy        2.438   32.095    1.406 
-      IDHash        0.234    0.083    1.111 
-       DHash        0.319    0.779    1.688 
+       Dhash        6.149    0.815    1.222 
+    Phashion        2.450    0.195    3.000 
+    Phamilie        5.342    0.454    3.000 
+      Dhashy        2.457   34.668    1.406 
+      IDHash        0.247    0.089    1.111 
+       DHash        0.313    0.880    1.688 
 
 ### Example
 

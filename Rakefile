@@ -304,11 +304,11 @@ task :benchmark do
 
   require "dhash"
   puts "gem dhash: #{Gem.loaded_specs["dhash"].source}"
-  require "phamilie"
-  puts "gem phamilie: #{Gem.loaded_specs["phamilie"].version}"
+  require "phamilie"; puts "gem phamilie: #{Gem.loaded_specs["phamilie"].version}"
   phamilie = Phamilie.new
+  require "phashion"; puts "gem phashion: #{Gem.loaded_specs["phashion"].version}"
   require "mini_magick"
-  require "dhashy"
+  require "dhashy"; puts "gem dhashy: #{Gem.loaded_specs["dhashy"].version}"
   puts ""
 
   filenames = [
@@ -331,6 +331,7 @@ task :benchmark do
   hashes = []
   bm1 = [
     Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| Dhash.calculate filename } },
+    Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| Phashion::Image.new(filename).tap &:fingerprint } },
     Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| phamilie.fingerprint filename; filename } },
     Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| Dhashy.new MiniMagick::Image.open filename } },
     Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| DHashVips::IDHash.fingerprint filename } },
@@ -342,15 +343,17 @@ task :benchmark do
   n = 10_000_000_000_000 / combs / filenames.flatten.map(&File.method(:size)).inject(:+)
   bm2 = [
     Benchmark.realtime{ hashes[0].product(hashes[0]){ |h1, h2| n.times{ Dhash.hamming h1, h2 } } },
-    Benchmark.realtime{ hashes[1].product(hashes[1]){ |p1, p2| n.times{ phamilie.distance p1, p2 } } },
-    Benchmark.realtime{ hashes[2].product(hashes[2]){ |h1, h2| n.times{ h1 - h2 } } },
-    Benchmark.realtime{ hashes[3].product(hashes[3]){ |h1, h2| n.times{ DHashVips::IDHash.distance3_c h1, h2 } } },
-    Benchmark.realtime{ hashes[4].product(hashes[4]){ |h1, h2| n.times{ DHashVips::DHash.hamming h1, h2 } } },
+    Benchmark.realtime{ hashes[1].product(hashes[1]){ |h1, h2| n.times{ h1.distance_from h2 } } },
+    Benchmark.realtime{ hashes[2].product(hashes[2]){ |p1, p2| n.times{ phamilie.distance p1, p2 } } },
+    Benchmark.realtime{ hashes[3].product(hashes[3]){ |h1, h2| n.times{ h1 - h2 } } },
+    Benchmark.realtime{ hashes[4].product(hashes[4]){ |h1, h2| n.times{ DHashVips::IDHash.distance3_c h1, h2 } } },
+    Benchmark.realtime{ hashes[5].product(hashes[5]){ |h1, h2| n.times{ DHashVips::DHash.hamming h1, h2 } } },
   ]
 
   puts "step 3 / 3 (looking for the best threshold)"
   bm3 = [
     ["Dhash", ->a,b{ Dhash.hamming a, b }],
+    ["Phashion", ->a,b{ a.distance_from b }],
     ["Phamilie", ->a,b{ phamilie.distance a, b }],
     ["Dhashy", ->a,b{ a - b }],
     ["IDHash", ->a,b{ DHashVips::IDHash.distance a, b }],
@@ -360,10 +363,10 @@ task :benchmark do
     hs.size.times.to_a.repeated_combination(2) do |i, j|
       report[
         case
-        when i == j                                                   ; :same
-        when File.split(File.split(hashes[i][0]).first).last ==
-             File.split(File.split(hashes[j][0]).first).last && i < j ; :sim
-        else                                                          ; :not_sim
+        when i == j                                                           ; :same
+        when File.split(File.split(filenames.flatten[i]).first).last ==
+             File.split(File.split(filenames.flatten[j]).first).last && i < j ; :sim
+        else                                                                  ; :not_sim
         end
       ].push f[hs[i], hs[j]]
     end
