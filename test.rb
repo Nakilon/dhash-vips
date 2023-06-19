@@ -67,7 +67,7 @@ require_relative "lib/dhash-vips"
         21cd9a6986d98976b6b4655e1de7baf4.jpg 9b158c0d4953d47171a22ed84917f812.jpg
         9c2c240ec02356472fb532f404d28dde.jpg fc762fa286489d8afc80adc8cdcb125e.jpg
         7a833d873f8d49f12882e86af1cc6b79.jpg ac033cf01a3941dd1baa876082938bc9.jpg
-      }, min_similar, max_similar, min_not_similar, max_not_similar], # slightly silimar images
+      }, min_similar, max_similar, min_not_similar, max_not_similar], # slightly similar images
       [:bw_exceptional, %w{
         71662d4d4029a3b41d47d5baf681ab9a.jpg ad8a37f872956666c3077a3e9e737984.jpg
       }, bw_exceptional, bw_exceptional], # these are the same photo but of different size and colorspace
