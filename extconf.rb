@@ -25,7 +25,7 @@ end
 __END__
 
 # this unlike using rake is building to current directory
-#   that is vital to be able to require the native extention for benchmarking, etc.
+#   that is vital to be able to require the native extension for benchmarking, etc.
 $ ruby extconf.rb && make clean && make
 
 # to test: $ rake clean && rake install
