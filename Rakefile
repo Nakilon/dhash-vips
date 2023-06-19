@@ -204,7 +204,7 @@ task :compare_images do |_, args|
     image
   end
   puts "distance: #{n / 10}"
-  puts "(above should be equal if raketask works correcly)"
+  puts "(above should be equal if raketask works correctly)"
 
   a.join(b, :horizontal, shim: 15).write_to_file "ab.png"
   puts "the ab.png is ready"
