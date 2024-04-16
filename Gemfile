@@ -7,6 +7,7 @@ gem "dhash", github: "nakilon/dhash"
 gem "phamilie"
 gem "mini_magick"
 gem "dhashy"
+gem "phashion"
 
 gem "get_process_mem"
 gem "mll"

@@ -39,6 +39,14 @@ and visualization of IDHash (`rake compare_images -- image1.jpg image2.jpg`):
 
 Here in each of 64 cells, there are two circles that color the difference between that cell and the neighbor one. If the difference is low the Importance bit is set to zero and the circle is invisible. So there are 128 pairs of corresponding circles and when you take one, if at least one circle is visible and is of different color the line is to be drawn. Here you see 15 lines and so the distance between fingerprints will be equal to 15 (that is pretty low and can be interpreted as "images look similar"). Also, you see here that floor on this photo matters -- classic dHash won't see that it's darker than wall because it's comparing only horizontal neighbors and if one photo had no floor the distance function won't notice that. Also, it sees the Important difference between the very right and left columns because the wall has a slow but visible gradient.
 
+As of version 0.2.4.0 the gem includes a binary that you can call to get similar visualisation in terminal:
+
+```bash
+idhash test_images/3f9....jpg test_images/309....jpg
+```
+
+![screenshot](doc_bin.png)
+
 ### Remaining problems
 
 * Neither dHash nor IDHash can't automatically detect very shifted crops and rotated images but you can make a wrapper that would call the comparison function iteratively.  

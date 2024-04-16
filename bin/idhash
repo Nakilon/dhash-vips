@@ -1,0 +1,57 @@
+#!/usr/bin/env ruby
+Signal.trap(:INT){ abort "\n(interrupted by SIGINT)" }
+
+unless 2 == ARGV.size
+  puts "this command is to compare two images"
+  puts "usage: #{__FILE__} <path to image1> <path to image2>"
+  exit
+end
+
+require_relative "../lib/dhash-vips"
+ha, hb = ARGV.map{ |filename| DHashVips::IDHash.fingerprint filename }
+puts "distance: #{d1 = DHashVips::IDHash.distance ha, hb}"
+size = 2 ** 3
+shift = 2 * size * size
+ai = ha >> shift
+ad = ha - (ai << shift)
+bi = hb >> shift
+bd = hb - (bi << shift)
+
+_127 = shift - 1
+_63 = size * size - 1
+# width = 800
+# height = 800
+
+d2 = 0
+a, b = [[ad, ai, ARGV[0]], [bd, bi, ARGV[1]]].map do |xd, xi, path|
+  puts File.basename path
+  hor = Array.new(size){Array.new(size){" "}}
+  ver = Array.new(size){Array.new(size){" "}}
+  _127.downto(0).each_with_index do |i, ii|
+    if i > _63
+      y, x = (_127 - i).divmod size
+    else
+      x, y = (_63 - i).divmod size
+    end
+    if xi[i] > 0
+      target, c = if i > _63
+        [ver, %w{ v ^ }[xd[i]]]
+      else
+        [hor, %w{ > < }[xd[i]]]
+      end
+      target[y][x] = c
+    end
+    if ai[i] + bi[i] > 0 && ad[i] != bd[i]
+      d2 += 1
+      target = if i > _63
+        ver
+      else
+        hor
+      end
+      target[y][x] = "\e[7m#{target[y][x]}\e[27m"
+    end
+  end
+  hor.zip(ver).each{ |_| puts _.join " " }
+end
+abort "something went wrong" unless d1 * 2 == d2
+puts "OK"
