@@ -8,14 +8,23 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: |
-        docker run -v $(pwd):/checkout -w /checkout ruby:slim sh -c "\
-          apt-get update && \
-          apt install -y cimg-dev libmagickwand-dev libvips42 wget build-essential git && \
-          mkdir /ruby && \
-          wget -O- https://cache.ruby-lang.org/pub/ruby/\$RUBY_MAJOR/ruby-\$RUBY_VERSION.tar.gz | tar xzC /ruby --strip-components=1 && \
+        docker run --rm -v $(pwd):/checkout -w /checkout ruby:alpine sh -c "\
+          wget -O /usr/local/include/CImg.h https://raw.githubusercontent.com/GreycLab/CImg/3d1fc212ffe933cb2bc841e504920e5a67e676b8/CImg.h && \
+          apk add --no-cache git build-base imagemagick-dev vips && \
           bundle install --no-cache && \
-          ruby extconf.rb && \
-          make clean && \
-          make && \
+          ruby extconf.rb && make clean && make && \
+          bundle exec rake benchmark"
+      timeout-minutes: 5
+    - run: |
+        docker run --rm -v $(pwd):/checkout -w /checkout ruby:slim sh -c "\
+          apt-get update && \
+          apt install -y --no-install-recommends wget && \
+          wget -O /usr/local/include/CImg.h https://raw.githubusercontent.com/GreycLab/CImg/3d1fc212ffe933cb2bc841e504920e5a67e676b8/CImg.h && \
+          ( \
+            apt install -y --no-install-recommends git build-essential libmagickcore-dev libvips libjpeg-dev ; \
+            apt install -y --no-install-recommends git build-essential libmagickcore-dev libvips libjpeg-dev --fix-missing \
+          ) && \
+          bundle install --no-cache && \
+          ruby extconf.rb && make clean && make && \
           bundle exec rake benchmark"
       timeout-minutes: 5
