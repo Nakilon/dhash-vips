@@ -20,15 +20,30 @@ Other improvements are:
 * It subtracts not only horizontally but also vertically -- that adds 128 more bits.  
 * Instead of resizing to 8x9 it resizes to 8x8 and puts the image on a torus.
 
-According to a benchmark the gem has the highest speed and quality compared to other gems (lower numbers are better):
+According to a benchmark the gem has the highest quality and speed compared to other gems (lower numbers are better):
 
-              Fingerprint  Compare  1/FMI^2 
-       Dhash        6.149    0.815    1.222 
-    Phashion        2.450    0.195    3.000 
-    Phamilie        5.342    0.454    3.000 
-      Dhashy        2.457   34.668    1.406 
-      IDHash        0.247    0.089    1.111 
-       DHash        0.313    0.880    1.688 
+                    Fingerprint  Compare  1/FMI^2
+        this gem:
+    IDHash default        0.087    0.111    1.111
+       IDHash Ruby        0.087    0.416    1.111
+             DHash        0.105    0.188    1.444
+
+      other gems:
+          Phamilie        1.328    0.161    3.000
+             Dhash        2.337    0.196    1.222
+            Dhashy        1.329   10.954    1.406
+             Phash        1.566    0.220    3.000
+
+    ruby 2.7.8p225 (2023-03-30 revision 1f4d455848) [arm64-darwin24]
+    vips-8.16.1
+    Version: ImageMagick 7.1.1-47 Q16-HDRI aarch64 22763 https://imagemagick.org
+    Apple M4
+    gem ruby-vips v2.2.3
+    gem rmagick: 5.5.0
+    gem dhash: https://github.com/nakilon/dhash.git (at master@4c49533)
+    gem phamilie: 0.1.0
+    gem dhashy: 1.0.7
+    gem phash-rb: https://github.com/nakilon/phash-rb.git (at main@e4068f3)
 
 ### Example
 
@@ -116,13 +131,14 @@ end
 
       $ rake compare_quality
 
-                            Dhash  Phamilie  DHashVips::DHash  DHashVips::IDHash  DHashVips::IDHash(4)
-          The same image:    0..0      0..0              0..0               0..0                  0..0
-      'Jordan Voth case':       2         2                 7                  0                     0
-          Similar images:   1..15    14..34             2..23              8..22               56..166
-        Different images:  10..56    22..42             9..50             22..70              116..230
-                1/FMI^2 =   1.222       3.0             1.688              1.111                 1.266
-                 FP, FN =  [2, 0]    [0, 6]            [4, 1]             [1, 0]                [1, 1]
+                            Dhash  Phamilie   DHash  IDHash  IDHash(4)
+          The same image:    0..0      0..0    0..0    0..0       0..0
+      'Jordan Voth case':       2         2       3       0          0
+          Similar images:   1..15    14..34   1..21   7..23    52..166
+        Different images:  10..56    22..42  10..51  22..65   117..227
+                1/FMI^2 =   1.222       3.0   1.444   1.111      1.266
+                 FP, FN =  [2, 0]    [0, 6]  [4, 0]  [1, 0]     [1, 1]
+        optimal threshold      16        21      22      24        128
 
     The `FMI` line (smaller number is better) here is the "quality of algorithm", i.e. the best achievable function for the ["Fowlkes–Mallows index"](https://en.wikipedia.org/wiki/Fowlkes%E2%80%93Mallows_index) value if you take the "similar" and "different" test pairs and try to draw the threshold line. For IDHash it's empirical value of 22 as you acn see above that means it's the only algorithm that allowed to separate "similar" from "different" comparisons for our test cases.  
     The last line shows number of false positives (`FP`) and false negatives (`FN`) in case of the best achieved FMI.  
@@ -151,41 +167,6 @@ end
         DHashVips::IDHash distance3_ruby   3.320000   0.010000   3.330000 (  3.337920)
         DHashVips::IDHash distance3_c      0.210000   0.000000   0.210000 (  0.212864)
         DHashVips::IDHash distance 4       8.300000   0.120000   8.420000 (  8.499735)
-
-* There is a benchmark that runs both speed and quality tests summing results as a single table (observe that results may depend on the libvips version):
-
-      ruby 2.3.8p459 (2018-10-18 revision 65136) [x86_64-darwin18]
-      vips-8.11.3-Wed Aug 11 09:29:27 UTC 2021
-      Version: ImageMagick 6.9.12-23 Q16 x86_64 2021-09-18 https://imagemagick.org
-      Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz
-      gem ruby-vips version 2.1.4
-      gem rmagick version 4.2.5
-
-                Fingerprint  Compare  1/FMI^2
-      Phamilie        4.575    0.642    3.000
-         Dhash        4.785    1.147    1.222
-        IDHash        0.221    0.112    1.111
-         DHash        0.283    0.903    1.688
-
-      ruby 2.7.2p137 (2020-10-01 revision 5445e04352) [x86_64-linux]
-      Version: 8.7.4-1+deb10u1
-      Version: 8:6.9.10.23+dfsg-2.1+deb10u1
-
-                Fingerprint  Compare  1/FMI^2
-      Phamilie       19.630    1.302    3.000
-         Dhash        6.713    1.373    1.222
-        IDHash        2.177    0.210    1.111
-         DHash        1.063    1.318    1.444
-
-      ruby 3.1.3p185 (2022-11-24 revision 1a6b16756e) [x86_64-linux]
-      Version: 8.10.5-2
-      Version: 8:6.9.11.60+dfsg-1.3
-
-                Fingerprint  Compare  1/FMI^2
-      Phamilie       50.953    0.793    3.000
-         Dhash        7.228    1.129    1.222
-        IDHash        0.655    0.131    1.111
-         DHash        1.850    1.035    1.688
 
 * Also note that to make `#distance` able to assume the fingerprint resolution from the size of Integer that represents it, the change in its structure was needed (left half of bits was swapped with right one), so fingerprints between versions 0.0.4.1 and 0.0.5.0 became incompatible, but you probably can convert them manually. Otherwise if we put the version or structure information inside fingerprint it would became slow to (de)serialize and store.  
 * The version `0.2.0.0` has grayscaling bug fixed and some tweak. It made DHash a bit worse and IDHash a bit better. Fingerprints recalculation is recommended.
@@ -269,11 +250,33 @@ end
         $ gem uninstall rmagick   # select 2.x
         $ bundle install
 
-* Execute the `rake compare_quality` at least once before executing other rake tasks because it's currently the only one that downloads the test images.
-
-* The tag `v0.0.0.4` is not semver and not real gem version -- it's only for Github Actions testing purposes.
-
 * Phamilie works with filenames instead of fingerprints and caches them but not distances.
+
+* Phamilie error
+  ```
+  fingerprint.cpp:61:10: fatal error: 'CImg.h' file not found
+  ```
+  wants you to do
+  ```console
+  $ brew install cimg
+  $ gem install phamilie -- --with-cppflags="-I$(brew --prefix cimg)/include"
+  ```
+
+* Phashion errors:
+  * ```
+    checking for sqlite3ext.h... *** extconf.rb failed ***
+    ```
+    means you need my fork (`gem "phashion", github: "nakilon/phashion"`) until the https://github.com/westonplatter/phashion/pull/105 is accepted
+  * ```
+    sh: convert: command not found
+    sh: gm: command not found
+    ```
+    means you need to do
+    ```console
+    $ brew link imagemagick@6
+    ```
+
+* Phashion is being excluded from benchmarks because of installation difficulties
 
 ## Credits
 

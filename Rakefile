@@ -1,9 +1,4 @@
-begin
-  # for `rake release`
-  require "bundler/gem_tasks"
-rescue LoadError
-  puts "consider to `gem install bundler` to be able to `rake release`"
-end
+require "bundler/gem_tasks"
 
 require "pp"
 
@@ -40,15 +35,15 @@ task :compare_kernels do |_|
   %i{ nearest linear cubic lanczos2 lanczos3 }.each do |kernel|
     hashes = ARGV.drop(1).map do |arg|
       puts arg
-      DHashVips::DHash.calculate(arg, 8, kernel).tap &visualize_hash
+      DHashVips::DHash.calculate(arg, 8, kernel).tap(&visualize_hash)
     end
-    puts "kernel: #{kernel}, distance: #{DHashVips::DHash.hamming *hashes}"
+    puts "kernel: #{kernel}, distance: #{DHashVips::DHash.hamming(*hashes)}"
   end
 end
 
 require_relative "common"
 
-desc "Compare the quality of Dhash, Phamilie, DHashVips::DHash, DHashVips::IDHash"
+desc "Compare the quality of gems"
 # in this test we want to know not that photos are the same but rather that they are from the same photosession
 task :compare_quality do
   require "dhash"
@@ -58,7 +53,7 @@ task :compare_quality do
   require "mll"
 
   puts MLL::grid.call( [
-    ["", "The same image:", "'Jordan Voth case':", "Similar images:", "Different images:", "1/FMI^2 =", "FP, FN ="],
+    ["", "The same image:", "'Jordan Voth case':", "Similar images:", "Different images:", "1/FMI^2 =", "FP, FN =", "optimal threshold"],
     *[
       [Dhash, :calculate, :hamming],
       [phamilie, :fingerprint, :distance, nil, 0],
@@ -95,21 +90,22 @@ task :compare_quality do
         ].push table[i][j]
       end
       p report
-      min, max = [*report.sim, *report.not_sim].minmax
-      fmi, fp, fn = (0..max+1).map do |b|
+      _min, max = [*report.sim, *report.not_sim].minmax
+      fmi, fp, fn, tr = (0..max+1).map do |b|
         fp = report.not_sim.count{ |_| _ < b }
         tp = (report.sim + report.bw).count{ |_| _ < b }
         fn = (report.sim + report.bw).count{ |_| _ >= b }
-        [((tp + fp) * (tp + fn)).fdiv(tp * tp), fp, fn]#.tap{ |_| p [m, _] }
+        [((tp + fp) * (tp + fn)).fdiv(tp * tp), fp, fn, b]
       end.reject{ |_,| _.nan? }.min_by(&:first)
       [
-        "#{m.is_a?(Module) ? m : m.class}#{"(#{power})" if power}",
+        "#{m.is_a?(Module) ? m.name.split("::").last : m.class}#{"(#{power})" if power}",
         report.same.   minmax.join(".."),
         report.bw[0],
         report.sim.    minmax.join(".."),
         report.not_sim.minmax.join(".."),
         fmi.round(3),
-        [fp, fn]
+        [fp, fn],
+        tr,
       ]
     end,
   ].transpose, spacings: [1.5, 0], alignment: :right )
@@ -281,11 +277,10 @@ task :compare_speed do
 
 end
 
-desc "Benchmarks everything about Dhash, DHashVips::DHash, DHashVips::IDHash and Phamilie"
+desc "Benchmarks everything about gems"
 task :benchmark do
-  # TODO: better handling the need of: ruby extconf.rb && make clean && make
-  puts RUBY_DESCRIPTION
-  fail "Dhashy gem needs Ruby 2.4 for Array#sum" if RUBY_VERSION < "2.4"
+  # TODO: better handling of the need to `ruby extconf.rb && make clean && make`
+  system "ruby -v"
   puts ""
 
   system "apt-cache show libvips42 2>/dev/null | grep Version"
@@ -299,16 +294,14 @@ task :benchmark do
 
   require_relative "lib/dhash-vips"
   puts "gem ruby-vips: #{Gem.loaded_specs["ruby-vips"].version}"
-  puts "gem rmagick: #{Gem.loaded_specs["rmagick"].version}"
   puts ""
 
-  require "dhash"
-  puts "gem dhash: #{Gem.loaded_specs["dhash"].source}"
-  require "phamilie"; puts "gem phamilie: #{Gem.loaded_specs["phamilie"].version}"
+  puts "gem rmagick: #{Gem.loaded_specs["rmagick"].version}"
+  require "dhash"    ; puts "gem dhash: #{Gem.loaded_specs["dhash"].source}"
+  require "phamilie" ; puts "gem phamilie: #{Gem.loaded_specs["phamilie"].version}"
   phamilie = Phamilie.new
-  require "phashion"; puts "gem phashion: #{Gem.loaded_specs["phashion"].version}"
   require "mini_magick"
-  require "dhashy"; puts "gem dhashy: #{Gem.loaded_specs["dhashy"].version}"
+  require "phash"    ; puts "gem phash-rb: #{Gem.loaded_specs["phash-rb"].source}"
   puts ""
 
   filenames = [
@@ -323,41 +316,41 @@ task :benchmark do
      %w{ benchmark_images/8/1d468d064d2e26b5b5de9a0241ef2d4b.jpg benchmark_images/8/92d90b8977f813af803c78107e7f698e.jpg },
      %w{ benchmark_images/9/1b1d4bde376084011d027bba1c047a4b.jpg },
      %w{ benchmark_images/10/71662d4d4029a3b41d47d5baf681ab9a.jpg benchmark_images/10/ad8a37f872956666c3077a3e9e737984.jpg }
-  ].each{ |g| g.each &method(:download_if_needed) }
+  ].each{ |g| g.each(&method(:download_if_needed)) }
   puts "image groups sizes: #{filenames.map &:size}"
   require "benchmark"
 
   puts "step 1 / 3 (fingerprinting)"
   hashes = []
   bm1 = [
-    Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| Dhash.calculate filename } },
-    Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| Phashion::Image.new(filename).tap &:fingerprint } },
+    Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| ::Dhash.calculate filename } },
     Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| phamilie.fingerprint filename; filename } },
-    Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| Dhashy.new MiniMagick::Image.open filename } },
-    Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| DHashVips::IDHash.fingerprint filename } },
-    Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| DHashVips::DHash.calculate filename } },
+    Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| ::DHashVips::IDHash.fingerprint filename } },
+    Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| ::DHashVips::IDHash.fingerprint filename } },
+    Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| ::DHashVips::DHash.calculate filename } },
+    Benchmark.realtime{ hashes.push filenames.flatten.map{ |filename| ::Phash::Image.new(filename).tap &:fingerprint } },
   ]
 
   puts "step 2 / 3 (comparing fingerprints)"
   combs = filenames.flatten.size ** 2
   n = 10_000_000_000_000 / combs / filenames.flatten.map(&File.method(:size)).inject(:+)
   bm2 = [
-    Benchmark.realtime{ hashes[0].product(hashes[0]){ |h1, h2| n.times{ Dhash.hamming h1, h2 } } },
-    Benchmark.realtime{ hashes[1].product(hashes[1]){ |h1, h2| n.times{ h1.distance_from h2 } } },
-    Benchmark.realtime{ hashes[2].product(hashes[2]){ |p1, p2| n.times{ phamilie.distance p1, p2 } } },
-    Benchmark.realtime{ hashes[3].product(hashes[3]){ |h1, h2| n.times{ h1 - h2 } } },
-    Benchmark.realtime{ hashes[4].product(hashes[4]){ |h1, h2| n.times{ DHashVips::IDHash.distance3_c h1, h2 } } },
-    Benchmark.realtime{ hashes[5].product(hashes[5]){ |h1, h2| n.times{ DHashVips::DHash.hamming h1, h2 } } },
+    Benchmark.realtime{ hashes[0].product(hashes[0]){ |h1, h2| n.times{ ::Dhash.hamming h1, h2 } } },
+    Benchmark.realtime{ hashes[1].product(hashes[1]){ |p1, p2| n.times{ phamilie.distance p1, p2 } } },
+    Benchmark.realtime{ hashes[2].product(hashes[2]){ |h1, h2| n.times{ ::DHashVips::IDHash.distance3 h1, h2 } } },
+    Benchmark.realtime{ hashes[3].product(hashes[3]){ |h1, h2| n.times{ ::DHashVips::IDHash.distance3_ruby h1, h2 } } },
+    Benchmark.realtime{ hashes[4].product(hashes[4]){ |h1, h2| n.times{ ::DHashVips::DHash.hamming h1, h2 } } },
+    Benchmark.realtime{ hashes[5].product(hashes[5]){ |h1, h2| n.times{ h1.distance_from h2 } } },
   ]
 
   puts "step 3 / 3 (looking for the best threshold)"
   bm3 = [
-    ["Dhash", ->a,b{ Dhash.hamming a, b }],
-    ["Phashion", ->a,b{ a.distance_from b }],
+    ["Dhash", ->a,b{ ::Dhash.hamming a, b }],
     ["Phamilie", ->a,b{ phamilie.distance a, b }],
-    ["Dhashy", ->a,b{ a - b }],
-    ["IDHash", ->a,b{ DHashVips::IDHash.distance a, b }],
-    ["DHash", ->a,b{ DHashVips::DHash.hamming a, b }],
+    ["IDHash default", ->a,b{ ::DHashVips::IDHash.distance3 a, b }],
+    ["IDHash Ruby", ->a,b{ ::DHashVips::IDHash.distance3 a, b }],
+    ["DHash", ->a,b{ ::DHashVips::DHash.hamming a, b }],
+    ["Phash", ->a,b{ a.distance_from b }],
   ].zip(hashes).map do |(name, f), hs|
     report = Struct.new(:same, :sim, :not_sim).new [], [], []
     hs.size.times.to_a.repeated_combination(2) do |i, j|
@@ -372,11 +365,12 @@ task :benchmark do
     end
     # p report
     min, max = [*report.sim, *report.not_sim].minmax
+    p [name, min, max]
     fmi, fp, fn = (min..max+1).map do |b|
       fp = report.not_sim.count{ |_| _ < b }
       tp = report.sim.count{ |_| _ < b }
       fn = report.sim.count{ |_| _ >= b }
-      [((tp + fp) * (tp + fn)).fdiv(tp * tp), fp, fn]#.tap{ |_| p [m, tp, _] }
+      [((tp + fp) * (tp + fn)).fdiv(tp * tp), fp, fn]
     end.reject{ |_,| _.nan? }.min_by(&:first)
     [name, fmi]
   end

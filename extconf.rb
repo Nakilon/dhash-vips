@@ -21,7 +21,8 @@ __END__
 #   that is vital to be able to require the native extension for benchmarking, etc.
 $ ruby extconf.rb && make clean && make
 
-# to test: $ rake clean && rake install
+# to test the installation:
+$ rake clean && rake install
 
 $ ruby -e "require 'dhash-vips'; p DHashVips::IDHash.method(:distance3).source_location"  # using -r makes bundler mad
 # [".../dhash-vips.rb", 32] # if LoadError
