@@ -280,4 +280,6 @@ end
 
 ## Credits
 
-libvips maintainers [John Cupitt](https://github.com/jcupitt) and [Kleis Auke Wolthuizen](https://github.com/kleisauke) helped with this a lot.
+libvips maintainers [John Cupitt](https://github.com/jcupitt) and [Kleis Auke Wolthuizen](https://github.com/kleisauke) have helped a lot.
+
+[Dmitry Davydov](https://github.com/haukot) has revived the native extension after the `BDIGIT` deprecation.
