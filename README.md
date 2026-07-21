@@ -188,7 +188,7 @@ end
 
 * To run unit tests in current env
 
-      $ ruby extconf.rb && make clean && make   # otherwise you might get silenced LoadError due to switching between rubies
+      $ ruby extconf.rb && make clean && make post_install_test  # otherwise you might get silenced LoadError due to switching between rubies
       $ bundle exec ruby test.rb && bundle exec ruby test_LoadError.rb
 
 * To run unit tests under all available latest major rbenv ruby versions
