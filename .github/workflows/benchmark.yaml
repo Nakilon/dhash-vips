@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - run: |
+    - name: alpine
+      run: |
         docker run --rm -v $(pwd):/checkout -w /checkout ruby:alpine sh -c "\
           wget -O /usr/local/include/CImg.h https://raw.githubusercontent.com/GreycLab/CImg/3d1fc212ffe933cb2bc841e504920e5a67e676b8/CImg.h && \
           apk add --no-cache git build-base linux-headers imagemagick-dev vips vips-tools && \
@@ -18,16 +19,11 @@ jobs:
           ruby extconf.rb && make clean && make && \
           bundle exec rake benchmark"
       timeout-minutes: 5
-    - run: |
-        docker run --rm -v $(pwd):/checkout -w /checkout ruby:slim sh -c "\
-          apt-get update && \
-          apt install -y --no-install-recommends wget && \
-          wget -O /usr/local/include/CImg.h https://raw.githubusercontent.com/GreycLab/CImg/3d1fc212ffe933cb2bc841e504920e5a67e676b8/CImg.h && \
-          ( \
-            apt install -y --no-install-recommends git build-essential libmagickcore-dev libvips libjpeg-dev ; \
-            apt install -y --no-install-recommends git build-essential libmagickcore-dev libvips libjpeg-dev --fix-missing \
-          ) && \
-          bundle install --no-cache && \
-          ruby extconf.rb && make clean && make && \
-          bundle exec rake benchmark"
+    - name: slim provision the container
+      run: docker build -t dhash-vips-benchmark-slim -f benchmark.slim.Dockerfile .
+      timeout-minutes: 5
+    - name: slim prepare and run rake
+      run: |
+        docker run --rm -v $(pwd):/checkout -w /checkout dhash-vips-benchmark-slim \
+          sh -c "bundle install --no-cache && ruby extconf.rb && make clean && make && bundle exec rake benchmark"
       timeout-minutes: 5

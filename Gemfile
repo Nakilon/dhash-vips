@@ -15,5 +15,6 @@ gem "get_process_mem"
 gem "mll"
 gem "minitest"
 gem "byebug", *("<11.1.0" if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.4"))
+gem "nakicommon", github: "nakilon/nakicommon"
 
 gemspec

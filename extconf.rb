@@ -1,8 +1,6 @@
-require "mkmf"
-
-File.write "Makefile", dummy_makefile(?.).join
-
 unless Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.3.8")
+  require "mkmf"
+  File.write "Makefile", dummy_makefile(?.).join
   append_cppflags "-DRUBY_EXPORT" unless Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.4")
   create_makefile "idhash"
   File.write "Makefile", File.read("Makefile") + <<~HEREDOC

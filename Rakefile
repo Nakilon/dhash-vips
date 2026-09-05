@@ -1,6 +1,6 @@
 abort "prepend 'bundle exec'" unless ENV.include? "BUNDLE_GEMFILE"
 task :default do
-  sh "rake -T"
+  sh "rake -D"
 end
 
 require "pp"
@@ -9,7 +9,7 @@ visualize_hash = lambda do |hash|
   puts hash.to_s(2).rjust(64, ?0).gsub(/(?<=.)/, '\0 ').scan(/.{16}/)
 end
 
-desc "Compare how Vips and ImageMagick resize images to 9x8"
+desc "compare how Vips and ImageMagick resize images to 9x8"
 task :compare_pixelation do |_|
   require_relative "lib/dhash-vips"
   require "dhash"
@@ -30,7 +30,7 @@ task :compare_pixelation do |_|
   end
 end
 
-desc "Compare how Vips resizes image to 9x8 with different kernels"
+desc "compare how Vips resizes image to 9x8 with different kernels"
 task :compare_kernels do |_|
   require_relative "lib/dhash-vips"
   # require "dhash"
@@ -46,7 +46,7 @@ end
 
 require_relative "common"
 
-desc "Compare the quality of gems"
+desc "compare the quality of gems"
 # in this test we want to know not that photos are the same but rather that they are from the same photosession
 task :compare_quality do
   require "dhash"
@@ -117,7 +117,7 @@ end
 # ruby -c Rakefile && rm -f ab.png && rake compare_images -- fc762fa286489d8afc80adc8cdcb125e.jpg 9c2c240ec02356472fb532f404d28dde.jpg 2>/dev/null && ql ab.png
 # rm -f ab.png && ./ruby `rbenv which rake` compare_images -- 6d97739b4a08f965dc9239dd24382e96.jpg 1b1d4bde376084011d027bba1c047a4b.jpg 2>/dev/null && ql ab.png
 # bundle exec rake compare_images[1b1d4bde376084011d027bba1c047a4b.jpg,6d97739b4a08f965dc9239dd24382e96.jpg]
-desc "Visualizes the IDHash difference measurement between two images"
+desc "visualizes the IDHash difference measurement between two images"
 task :compare_images do |_, args|
   abort "there should be two image filenames passed as arguments (and optionally the `power`)" unless (2..3) === args.extras.size
   abort "the optional argument should be either 3 or 4" unless [3, 4].include?(power = (args.extras[2] || 3).to_i)
@@ -209,7 +209,7 @@ task :compare_images do |_, args|
   puts "the ab.png is ready"
 end
 
-desc "Benchmark speed of Dhash, DHashVips::DHash, DHashVips::IDHash and Phamilie"
+desc "benchmark speed of Dhash, DHashVips::DHash, DHashVips::IDHash and Phamilie"
 task :compare_speed do
   require "dhash"
   require "phamilie"
@@ -280,7 +280,7 @@ task :compare_speed do
 
 end
 
-desc "Benchmarks everything about gems"
+desc "benchmarks everything about gems"
 task :benchmark do
   # TODO: better handling of the need to `ruby extconf.rb && make clean && make`
   system "ruby -v"
@@ -383,4 +383,24 @@ task :benchmark do
     *[bm1, bm2, bm3.map(&:last)].map{ |bm| bm.map{ |_| "%.3f" % _ } }
   ].transpose).transpose, spacings: [1.5, 0], alignment: :right
   puts "(lower numbers are better)"
+end
+
+require "nakicommon/refinements"
+using ::Nakicommon::RefinementArray
+desc <<~HEREDOC
+  run each specific distro benchmark GitHub Action in local docker
+  note: cached named layers are being created
+  examples:
+    rake benchmark_in_docker'[alpine]'
+    rake benchmark_in_docker'[slim]'
+HEREDOC
+task :benchmark_in_docker do |_, args|
+  require "yaml"
+  YAML.load_file(".github/workflows/benchmark.yaml")["jobs"]["build"]["steps"].each do |step|
+    next unless (args.to_a.assert_one || fail) == step["name"]&.split&.first
+    sh(step["run"]) do |ok, status|
+      next if ok
+      puts "exitstatus: #{status.exitstatus}"
+    end
+  end
 end

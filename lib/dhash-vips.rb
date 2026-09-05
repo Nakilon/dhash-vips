@@ -1,5 +1,5 @@
 require "vips"
-Vips.vector_set false
+::Vips.vector_set false   # TODO: document why?
 
 module DHashVips
 
@@ -15,10 +15,10 @@ module DHashVips
     end
 
     def pixelate input, hash_size
-      DHashVips.bw( if input.is_a? Vips::Image
+      ::DHashVips.bw( if input.is_a? ::Vips::Image
         input.thumbnail_image(hash_size + 1, height: hash_size, size: :force)
       else
-        Vips::Image.thumbnail(input, hash_size + 1, height: hash_size, size: :force)
+        ::Vips::Image.thumbnail(input, hash_size + 1, height: hash_size, size: :force)
       end )
     end
 
@@ -35,16 +35,18 @@ module DHashVips
       ((a ^ b) & (a | b) >> 128).to_s(2).count "1"
     end
     begin
-      require_relative "../idhash.#{Gem::Platform.local.os == "darwin" ? "bundle" : "o"}"
-    rescue LoadError
+      require_relative "../idhash.#{::Gem::Platform.local.os == "darwin" ? "bundle" : "so"}"
+    rescue ::LoadError
+      warn "C extension for IDHash is not available, using Ruby fallback"
       class << self
         alias distance3 distance3_ruby
       end
     else
+
       # we can't just do `defined? Bignum` because it's defined but deprecated (some internal CONST_DEPRECATED flag)
-      if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.4")
+      if ::Gem::Version.new(RUBY_VERSION) < ::Gem::Version.new("2.4")
         def self.distance3 a, b
-          if a.is_a?(Bignum) && b.is_a?(Bignum)
+          if a.is_a?(::Bignum) && b.is_a?(::Bignum)
             distance3_c a, b
           else
             distance3_ruby a, b
@@ -53,16 +55,19 @@ module DHashVips
       else
         # https://github.com/ruby/ruby/commit/de2f7416d2deb4166d78638a41037cb550d64484#diff-16b196bc6bfe8fba63951420f843cfb4R10
         require "rbconfig/sizeof"
-        FIXNUM_MAX = (1 << (8 * RbConfig::SIZEOF["long"] - 2)) - 1
+        ::FIXNUM_MAX = (1 << (8 * ::RbConfig::SIZEOF["long"] - 2)) - 1
         def self.distance3 a, b
-          if a > FIXNUM_MAX && b > FIXNUM_MAX
+          if a > ::FIXNUM_MAX && b > ::FIXNUM_MAX
             distance3_c a, b
           else
             distance3_ruby a, b
           end
         end
       end
+      # TODO: maybe avoiding Ruby-level if-else would make it faster if we manage to call `#distance3_ruby` from C
+
     end
+
     def self.distance a, b
       size_a, size_b = [a, b].map do |x|
         # TODO write a test about possible hash sizes
@@ -98,12 +103,12 @@ module DHashVips
 
     def self.fingerprint input, power = 3
       size = 2 ** power
-      image = if input.is_a? Vips::Image
+      image = if input.is_a? ::Vips::Image
         input.thumbnail_image(size, height: size, size: :force)
       else
-        Vips::Image.thumbnail(input, size, height: size, size: :force)
+        ::Vips::Image.thumbnail(input, size, height: size, size: :force)
       end
-      array = DHashVips.bw(image).to_enum.map &:flatten
+      array = ::DHashVips.bw(image).to_enum.map &:flatten
       d1, i1, d2, i2 = [array, array.transpose].flat_map do |a|
         d = a.zip(a.rotate(1)).flat_map{ |r1, r2| r1.zip(r2).map{ |i, j| i - j } }
         m = median d.map(&:abs).sort
