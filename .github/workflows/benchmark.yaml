@@ -1,3 +1,6 @@
+# this isn't a "recommended minimal setup"
+#   it includes stuff needed for the benchmark (for example, CImg for phamilie), i.e. for the competing gems
+#   also installing gcc and c++ might be slower due to the "linux-headers" package
 name: Benchmark
 on:
   push:
@@ -10,7 +13,7 @@ jobs:
     - run: |
         docker run --rm -v $(pwd):/checkout -w /checkout ruby:alpine sh -c "\
           wget -O /usr/local/include/CImg.h https://raw.githubusercontent.com/GreycLab/CImg/3d1fc212ffe933cb2bc841e504920e5a67e676b8/CImg.h && \
-          apk add --no-cache git build-base imagemagick-dev vips && \
+          apk add --no-cache git build-base linux-headers imagemagick-dev vips vips-tools && \
           bundle install --no-cache && \
           ruby extconf.rb && make clean && make && \
           bundle exec rake benchmark"

@@ -22,6 +22,17 @@ Other improvements are:
 
 According to a benchmark the gem has the highest quality and speed compared to other gems (lower numbers are better):
 
+    gem ruby-vips: 2.2.3
+    gem rmagick: 5.5.0
+    gem dhash: https://github.com/nakilon/dhash.git (at master@4c49533)
+    gem phamilie: 0.1.0
+    gem phash-rb: https://github.com/nakilon/phash-rb.git (at main@e4068f3)
+
+    ruby 2.7.8p225 (2023-03-30 revision 1f4d455848) [arm64-darwin24]
+    vips-8.16.1
+    Version: ImageMagick 7.1.1-47 Q16-HDRI aarch64 22763 https://imagemagick.org
+    gem dhashy: 1.0.7
+
                     Fingerprint  Compare  1/FMI^2
         this gem:
     IDHash default        0.087    0.111    1.111
@@ -29,21 +40,25 @@ According to a benchmark the gem has the highest quality and speed compared to o
              DHash        0.105    0.188    1.444
 
       other gems:
-          Phamilie        1.328    0.161    3.000
              Dhash        2.337    0.196    1.222
             Dhashy        1.329   10.954    1.406
+          Phamilie        1.328    0.161    3.000
              Phash        1.566    0.220    3.000
 
-    ruby 2.7.8p225 (2023-03-30 revision 1f4d455848) [arm64-darwin24]
-    vips-8.16.1
-    Version: ImageMagick 7.1.1-47 Q16-HDRI aarch64 22763 https://imagemagick.org
-    Apple M4
-    gem ruby-vips v2.2.3
-    gem rmagick: 5.5.0
-    gem dhash: https://github.com/nakilon/dhash.git (at master@4c49533)
-    gem phamilie: 0.1.0
-    gem dhashy: 1.0.7
-    gem phash-rb: https://github.com/nakilon/phash-rb.git (at main@e4068f3)
+    ruby 4.0.6 (2026-07-14 revision 03b6d3f889) +PRISM [aarch64-linux-musl]
+    vips-8.18.2
+    Version: ImageMagick 7.1.2-30 Q16-HDRI aarch64 24546 https://imagemagick.org
+
+                    Fingerprint  Compare  1/FMI^2
+        this gem:
+    IDHash default        0.135    0.091    1.111
+       IDHash Ruby        0.134    0.518    1.111
+             DHash        0.152    0.279    1.469
+
+             Dhash        2.334    0.317    1.222
+          Phamilie        7.286    0.225    3.000
+             Phash        2.464    0.286    3.000
+
 
 ### Example
 
@@ -185,6 +200,12 @@ end
     For more information on that: https://github.com/jcupitt/ruby-vips/issues/141
 
 ## Development notes
+
+* To release a new version
+
+    ```console
+    $ rake -rbundler/gem_tasks release
+    ```
 
 * To run unit tests in current env
 

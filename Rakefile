@@ -1,4 +1,7 @@
-require "bundler/gem_tasks"
+abort "prepend 'bundle exec'" unless ENV.include? "BUNDLE_GEMFILE"
+task :default do
+  sh "rake -T"
+end
 
 require "pp"
 
@@ -281,10 +284,9 @@ desc "Benchmarks everything about gems"
 task :benchmark do
   # TODO: better handling of the need to `ruby extconf.rb && make clean && make`
   system "ruby -v"
-  puts ""
-
   system "apt-cache show libvips42 2>/dev/null | grep Version"
-  system "vips -v 2>/dev/null"
+  system "vips -v"
+  system "ruby -rvips -e 'puts \"vips-\#{Vips::LIBRARY_VERSION}\"'"
   system "apt-cache show libmagickwand-dev 2>/dev/null | grep Version"
   system "identify -version 2>/dev/null | /usr/bin/head -1"
   system "identify-6 -version 2>/dev/null | /usr/bin/head -1"

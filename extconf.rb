@@ -5,9 +5,6 @@ File.write "Makefile", dummy_makefile(?.).join
 unless Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.3.8")
   append_cppflags "-DRUBY_EXPORT" unless Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.4")
   create_makefile "idhash"
-  # Why this hack?
-  # 1. Because I want to use Ruby and ./idhash.bundle for tests, not C.
-  # 2. Because I don't want to bother users with two gems instead of one.
   File.write "Makefile", File.read("Makefile") + <<~HEREDOC
     .PHONY: post_install_test
     post_install_test: all
@@ -17,12 +14,12 @@ end
 
 __END__
 
-# this unlike using rake is building to current directory
+# this unlike using `rake -rbundler/gem_tasks` is building to current directory
 #   that is vital to be able to require the native extension for benchmarking, etc.
 $ ruby extconf.rb && make clean && make
 
 # to test the installation:
-$ rake clean && rake install
+$ rake -rbundler/gem_tasks clean && rake -rbundler/gem_tasks install
 
 $ ruby -e "require 'dhash-vips'; p DHashVips::IDHash.method(:distance3).source_location"  # using -r makes bundler mad
 # [".../dhash-vips.rb", 32] # if LoadError

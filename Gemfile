@@ -2,12 +2,14 @@ source "https://rubygems.org"
 
 gem "rake"
 
+# for benchmark
 gem "rmagick"
 gem "dhash", github: "nakilon/dhash"
 gem "phamilie"
 gem "mini_magick"
 gem "dhashy"
 gem "phash-rb", github: "nakilon/phash-rb"
+gem "benchmark"   # since Ruby 4
 
 gem "get_process_mem"
 gem "mll"
