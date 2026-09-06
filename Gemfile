@@ -8,7 +8,7 @@ gem "dhash", github: "nakilon/dhash"
 gem "phamilie"
 gem "mini_magick"
 gem "dhashy"
-gem "phash-rb", github: "nakilon/phash-rb"
+gem "phash-rb"
 gem "benchmark"   # since Ruby 4
 
 gem "get_process_mem"

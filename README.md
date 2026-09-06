@@ -22,15 +22,15 @@ Other improvements are:
 
 According to a benchmark the gem has the highest quality and speed compared to other gems (lower numbers are better):
 
+    ruby 2.7.8p225 (2023-03-30 revision 1f4d455848) [arm64-darwin24]
+    arm64-darwin-24
+    vips-8.16.1
+    Version: ImageMagick 7.1.1-47 Q16-HDRI aarch64 22763 https://imagemagick.org
     gem ruby-vips: 2.2.3
     gem rmagick: 5.5.0
     gem dhash: https://github.com/nakilon/dhash.git (at master@4c49533)
     gem phamilie: 0.1.0
     gem phash-rb: https://github.com/nakilon/phash-rb.git (at main@e4068f3)
-
-    ruby 2.7.8p225 (2023-03-30 revision 1f4d455848) [arm64-darwin24]
-    vips-8.16.1
-    Version: ImageMagick 7.1.1-47 Q16-HDRI aarch64 22763 https://imagemagick.org
     gem dhashy: 1.0.7
 
                     Fingerprint  Compare  1/FMI^2
@@ -39,26 +39,48 @@ According to a benchmark the gem has the highest quality and speed compared to o
        IDHash Ruby        0.087    0.416    1.111
              DHash        0.105    0.188    1.444
 
-      other gems:
+     competitors:
              Dhash        2.337    0.196    1.222
             Dhashy        1.329   10.954    1.406
           Phamilie        1.328    0.161    3.000
              Phash        1.566    0.220    3.000
 
-    ruby 4.0.6 (2026-07-14 revision 03b6d3f889) +PRISM [aarch64-linux-musl]
+    vips-8.18.0
+    Version: ImageMagick 7.1.2-1 Q16-HDRI aarch64 23308 https://imagemagick.org
+    gem phash-rb: 0.3.1
+
+    IDHash default        0.096    0.117    1.111
+       IDHash Ruby        0.086    0.443    1.111
+             DHash        0.105    0.225    1.469
+
+             Dhash        2.382    0.229    1.222
+          Phamilie        1.396    0.174    3.000
+             Phash        4.588    0.284    3.000
+
+    ruby 4.0.6 (2026-07-14 revision 03b6d3f889) +PRISM
+    docker aarch64-linux-musl
     vips-8.18.2
     Version: ImageMagick 7.1.2-30 Q16-HDRI aarch64 24546 https://imagemagick.org
 
-                    Fingerprint  Compare  1/FMI^2
-        this gem:
-    IDHash default        0.135    0.091    1.111
-       IDHash Ruby        0.134    0.518    1.111
-             DHash        0.152    0.279    1.469
+    IDHash default        0.137    0.091    1.111
+       IDHash Ruby        0.133    0.446    1.111
+             DHash        0.150    0.237    1.469
 
-             Dhash        2.334    0.317    1.222
-          Phamilie        7.286    0.225    3.000
-             Phash        2.464    0.286    3.000
+             Dhash        2.293    0.245    1.222
+          Phamilie        7.262    0.222    3.000
+             Phash        5.473    0.252    3.000
 
+    docker aarch64-linux
+    vips-8.16.1
+    ImageMagick Version: 8:7.1.1.43+dfsg1-1+deb13u11
+
+    IDHash default        0.160    0.094    1.111
+       IDHash Ruby        0.147    0.407    1.111
+             DHash        0.167    0.228    1.444
+
+             Dhash        2.538    0.249    1.222
+          Phamilie        7.086    0.189    3.000
+             Phash       10.293    0.247    3.000
 
 ### Example
 
@@ -149,11 +171,11 @@ end
                             Dhash  Phamilie   DHash  IDHash  IDHash(4)
           The same image:    0..0      0..0    0..0    0..0       0..0
       'Jordan Voth case':       2         2       3       0          0
-          Similar images:   1..15    14..34   1..21   7..23    52..166
-        Different images:  10..56    22..42  10..51  22..65   117..227
-                1/FMI^2 =   1.222       3.0   1.444   1.111      1.266
-                 FP, FN =  [2, 0]    [0, 6]  [4, 0]  [1, 0]     [1, 1]
-        optimal threshold      16        21      22      24        128
+          Similar images:   1..15    14..34   1..22   7..22    52..167
+        Different images:  10..56    22..42  10..50  22..67   117..226
+                1/FMI^2 =   1.222       3.0   1.469   1.111      1.266
+                 FP, FN =  [2, 0]    [0, 6]  [1, 2]  [1, 0]     [1, 1]
+        optimal threshold      16        21      16      23        128
 
     The `FMI` line (smaller number is better) here is the "quality of algorithm", i.e. the best achievable function for the ["Fowlkes–Mallows index"](https://en.wikipedia.org/wiki/Fowlkes%E2%80%93Mallows_index) value if you take the "similar" and "different" test pairs and try to draw the threshold line. For IDHash it's empirical value of 22 as you acn see above that means it's the only algorithm that allowed to separate "similar" from "different" comparisons for our test cases.  
     The last line shows number of false positives (`FP`) and false negatives (`FN`) in case of the best achieved FMI.  

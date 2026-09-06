@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "dhash-vips"
-  spec.version       = "0.2.4.0"
+  spec.version       = "0.2.5.0"
   spec.summary       = "dHash and IDHash perceptual image hashing/fingerprinting"
 
   spec.author        = "Victor Maslov aka Nakilon"

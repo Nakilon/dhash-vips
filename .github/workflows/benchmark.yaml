@@ -1,6 +1,7 @@
 # this isn't a "recommended minimal setup"
 #   it includes stuff needed for the benchmark (for example, CImg for phamilie), i.e. for the competing gems
 #   also installing gcc and c++ might be slower due to the "linux-headers" package
+
 name: Benchmark
 on:
   push:
@@ -10,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+
     - name: alpine
       run: |
         docker run --rm -v $(pwd):/checkout -w /checkout ruby:alpine sh -c "\
@@ -19,6 +21,7 @@ jobs:
           ruby extconf.rb && make clean && make && \
           bundle exec rake benchmark"
       timeout-minutes: 5
+
     - name: slim provision the container
       run: docker build -t dhash-vips-benchmark-slim -f benchmark.slim.Dockerfile .
       timeout-minutes: 5

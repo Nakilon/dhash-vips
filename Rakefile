@@ -280,18 +280,19 @@ task :compare_speed do
 
 end
 
-desc "benchmarks everything about gems"
+desc "benchmarks against other gems"
 task :benchmark do
   # TODO: better handling of the need to `ruby extconf.rb && make clean && make`
   system "ruby -v"
+  system "sysctl -n machdep.cpu.brand_string 2>/dev/null"
+  system "cat /proc/cpuinfo 2>/dev/null | grep 'model name' | uniq"
+  puts Gem::Platform.local.to_s
   system "apt-cache show libvips42 2>/dev/null | grep Version"
   system "vips -v"
-  system "ruby -rvips -e 'puts \"vips-\#{Vips::LIBRARY_VERSION}\"'"
+  system "ruby -e 'require \"vips\"; puts \"vips-\#{Vips::LIBRARY_VERSION}\"'"
   system "apt-cache show libmagickwand-dev 2>/dev/null | grep Version"
   system "identify -version 2>/dev/null | /usr/bin/head -1"
   system "identify-6 -version 2>/dev/null | /usr/bin/head -1"
-  system "sysctl -n machdep.cpu.brand_string 2>/dev/null"
-  system "cat /proc/cpuinfo 2>/dev/null | grep 'model name' | uniq"
   puts ""
 
   require_relative "lib/dhash-vips"
@@ -303,7 +304,7 @@ task :benchmark do
   require "phamilie" ; puts "gem phamilie: #{Gem.loaded_specs["phamilie"].version}"
   phamilie = Phamilie.new
   require "mini_magick"
-  require "phash"    ; puts "gem phash-rb: #{Gem.loaded_specs["phash-rb"].source}"
+  require "phash"    ; puts "gem phash-rb: #{Gem.loaded_specs["phash-rb"].version}"
   puts ""
 
   filenames = [
@@ -390,6 +391,7 @@ using ::Nakicommon::RefinementArray
 desc <<~HEREDOC
   run each specific distro benchmark GitHub Action in local docker
   note: cached named layers are being created
+  caution: assuming that the workflow does not do anything bad to host OS, but only operates docker
   examples:
     rake benchmark_in_docker'[alpine]'
     rake benchmark_in_docker'[slim]'
