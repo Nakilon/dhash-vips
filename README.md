@@ -20,7 +20,9 @@ Other improvements are:
 * It subtracts not only horizontally but also vertically -- that adds 128 more bits.  
 * Instead of resizing to 8x9 it resizes to 8x8 and puts the image on a torus.
 
-According to a benchmark the gem has the highest quality and speed compared to other gems (lower numbers are better):
+Proof of novelty: https://chat.qwen.ai/s/t_b3b4d94d-7b07-4353-8704-91172b04d589
+
+According to the benchmark the gem has the highest quality and speed compared to other gems (lower numbers are better):
 
     ruby 2.7.8p225 (2023-03-30 revision 1f4d455848)
     arm64-darwin-24
