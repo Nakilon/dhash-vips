@@ -16,12 +16,13 @@ __END__
 #   that is vital to be able to require the native extension for benchmarking, etc.
 $ ruby extconf.rb && make clean && make
 
+# to test native extension
+$ bundle exec ruby -e "require_relative 'lib/dhash-vips'; puts Gem.loaded_specs['dhash-vips'].version; p DHashVips::IDHash.method(:distance3).source_location"
+# [".../dhash-vips.rb", 42] # if LoadError
+# [".../dhash-vips.rb", 59] # if native
+
 # to test the installation:
 $ rake -rbundler/gem_tasks clean && rake -rbundler/gem_tasks install
-
-$ ruby -e "require 'dhash-vips'; p DHashVips::IDHash.method(:distance3).source_location"  # using -r makes bundler mad
-# [".../dhash-vips.rb", 32] # if LoadError
-# [".../dhash-vips.rb", 52] # if native (or 42 with Ruby<2.4)
 
 Other cases to check:
 1. not macOS && rbenv

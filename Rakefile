@@ -280,7 +280,7 @@ task :compare_speed do
 
 end
 
-desc "benchmarks against other gems"
+desc "benchmarks against other gems (might need: ruby extconf.rb && make clean && make)"
 task :benchmark do
   # TODO: better handling of the need to `ruby extconf.rb && make clean && make`
   system "ruby -v"
@@ -398,7 +398,7 @@ desc <<~HEREDOC
 HEREDOC
 task :benchmark_in_docker do |_, args|
   require "yaml"
-  YAML.load_file(".github/workflows/benchmark.yaml")["jobs"]["build"]["steps"].each do |step|
+  YAML.load_file(".github/workflows/benchmark.yaml")["jobs"]["benchmark"]["steps"].each do |step|
     next unless (args.to_a.assert_one || fail) == step["name"]&.split&.first
     sh(step["run"]) do |ok, status|
       next if ok

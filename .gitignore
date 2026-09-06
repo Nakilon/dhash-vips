@@ -1,15 +1,16 @@
-/Gemfile.lock
-/pkg/
-
 /Makefile
 /mkmf.log
 /idhash.bundle
 /idhash.o
 /idhash.so
+/test_images/*.png
+*.jpg
+/idhash.bundle.dSYM/
+
+/Gemfile.lock
+/pkg/
 
 /.byebug_history
 .DS_Store
-*.jpg
-/test_images/*.png
 
 /temp.*

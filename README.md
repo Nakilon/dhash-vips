@@ -22,53 +22,59 @@ Other improvements are:
 
 According to a benchmark the gem has the highest quality and speed compared to other gems (lower numbers are better):
 
-    ruby 2.7.8p225 (2023-03-30 revision 1f4d455848) [arm64-darwin24]
+    ruby 2.7.8p225 (2023-03-30 revision 1f4d455848)
     arm64-darwin-24
-    vips-8.16.1
-    Version: ImageMagick 7.1.1-47 Q16-HDRI aarch64 22763 https://imagemagick.org
-    gem ruby-vips: 2.2.3
+    vips-8.18.6
+    Version: ImageMagick 7.1.2-31 Q16-HDRI aarch64 8309dc92a:20260903
+    gem ruby-vips: 2.3.0
     gem rmagick: 5.5.0
     gem dhash: https://github.com/nakilon/dhash.git (at master@4c49533)
     gem phamilie: 0.1.0
-    gem phash-rb: https://github.com/nakilon/phash-rb.git (at main@e4068f3)
-    gem dhashy: 1.0.7
+    gem phash-rb: 0.3.1
 
                     Fingerprint  Compare  1/FMI^2
         this gem:
-    IDHash default        0.087    0.111    1.111
-       IDHash Ruby        0.087    0.416    1.111
-             DHash        0.105    0.188    1.444
+    IDHash default        0.090    0.117    1.111
+       IDHash Ruby        0.087    0.438    1.111
+             DHash        0.106    0.196    1.469
 
      competitors:
-             Dhash        2.337    0.196    1.222
-            Dhashy        1.329   10.954    1.406
-          Phamilie        1.328    0.161    3.000
-             Phash        1.566    0.220    3.000
+             Dhash        2.362    0.197    1.222
+          Phamilie        1.319    0.164    3.000
+             Phash        4.324    0.223    3.000
 
-    vips-8.18.0
-    Version: ImageMagick 7.1.2-1 Q16-HDRI aarch64 23308 https://imagemagick.org
-    gem phash-rb: 0.3.1
+    ruby 4.0.6 (2026-07-14 revision 03b6d3f889) +PRISM
 
-    IDHash default        0.096    0.117    1.111
-       IDHash Ruby        0.086    0.443    1.111
-             DHash        0.105    0.225    1.469
+    IDHash default        0.100    0.080    1.111
+       IDHash Ruby        0.088    0.368    1.111
+             DHash        0.104    0.196    1.469
 
-             Dhash        2.382    0.229    1.222
-          Phamilie        1.396    0.174    3.000
-             Phash        4.588    0.284    3.000
+             Dhash        3.860    0.201    1.222
+          Phamilie        9.331    0.175    3.000
+             Phash        4.201    0.221    3.000
+
+    ruby 4.0.6 (2026-07-14 revision 03b6d3f889) +YJIT +PRISM
+
+    IDHash default        0.107    0.041    1.111
+       IDHash Ruby        0.093    0.322    1.111
+             DHash        0.115    0.155    1.469
+
+             Dhash        3.852    0.164    1.222
+          Phamilie        9.385    0.072    3.000
+             Phash        3.913    0.151    3.000
 
     ruby 4.0.6 (2026-07-14 revision 03b6d3f889) +PRISM
     docker aarch64-linux-musl
     vips-8.18.2
     Version: ImageMagick 7.1.2-30 Q16-HDRI aarch64 24546 https://imagemagick.org
 
-    IDHash default        0.137    0.091    1.111
-       IDHash Ruby        0.133    0.446    1.111
-             DHash        0.150    0.237    1.469
+    IDHash default        0.137    0.090    1.111
+       IDHash Ruby        0.140    0.456    1.111
+             DHash        0.151    0.246    1.469
 
-             Dhash        2.293    0.245    1.222
-          Phamilie        7.262    0.222    3.000
-             Phash        5.473    0.252    3.000
+             Dhash        2.350    0.260    1.222
+          Phamilie        7.251    0.220    3.000
+             Phash        5.569    0.256    3.000
 
     docker aarch64-linux
     vips-8.16.1
